@@ -1,0 +1,15 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RevEx.Desktop.ViewModels.Contents"
+             x:Class="RevEx.Desktop.Views.Contents.ContentDetailsView"
+             x:DataType="vm:ContentDetailsViewModel">
+    <ScrollViewer>
+        <StackPanel Margin="24" Spacing="16">
+            <TextBlock FontSize="24"
+                       FontWeight="SemiBold"
+                       Text="{Binding Title}" />
+            <TextBlock TextWrapping="Wrap"
+                       Text="{Binding Description}" />
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevEx.Desktop", "RevEx.Desktop\RevEx.Desktop.csproj", "{29C81B8B-2C95-4DC6-8F51-5D79A2A10139}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevEx.Desktop.Core", "RevEx.Desktop.Core\RevEx.Desktop.Core.csproj", "{784CC236-4167-40D6-BFBD-16D533AFFDC1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{29C81B8B-2C95-4DC6-8F51-5D79A2A10139}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29C81B8B-2C95-4DC6-8F51-5D79A2A10139}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29C81B8B-2C95-4DC6-8F51-5D79A2A10139}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29C81B8B-2C95-4DC6-8F51-5D79A2A10139}.Release|Any CPU.Build.0 = Release|Any CPU
+		{784CC236-4167-40D6-BFBD-16D533AFFDC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{784CC236-4167-40D6-BFBD-16D533AFFDC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{784CC236-4167-40D6-BFBD-16D533AFFDC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{784CC236-4167-40D6-BFBD-16D533AFFDC1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
