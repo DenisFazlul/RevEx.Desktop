@@ -1,0 +1,36 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RevEx.Desktop.ViewModels.Catalog"
+             xmlns:categoryVm="using:RevEx.Desktop.ViewModels.Categories"
+             xmlns:contentVm="using:RevEx.Desktop.ViewModels.Contents"
+             x:Class="RevEx.Desktop.Views.Catalog.CatalogTabView"
+             x:DataType="vm:CatalogTabViewModel">
+    <Grid ColumnDefinitions="240,*">
+        <Grid RowDefinitions="Auto,*">
+            <TextBox Margin="8" Watermark="Поиск по названию" Text="{Binding ContentNameQuery}" />
+            <ListBox Grid.Row="1" ItemsSource="{Binding Categories}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="categoryVm:CategoryItemViewModel">
+                        <CheckBox Margin="8" Content="{Binding Name}" IsChecked="{Binding IsSelected}" />
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Grid>
+
+        <Grid Grid.Column="1">
+            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
+                       IsVisible="{Binding IsContentLoading}" Text="Загрузка..." />
+            <ListBox ItemsSource="{Binding Contents}" IsVisible="{Binding !IsContentLoading}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="contentVm:ContentItemViewModel">
+                        <StackPanel Margin="12,8" DoubleTapped="OnContentDoubleTapped">
+                            <TextBlock FontWeight="SemiBold" Text="{Binding Name}" />
+                            <TextBlock Margin="0,4,0,0" MaxLines="2" TextTrimming="CharacterEllipsis"
+                                       TextWrapping="Wrap" Text="{Binding Description}" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Grid>
+    </Grid>
+</UserControl>

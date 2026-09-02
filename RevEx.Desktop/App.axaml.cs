@@ -30,7 +30,8 @@ public partial class App : Application
         {
             BaseAddress = new Uri("http://localhost:5023/")
         });
-        services.AddTransient<IRevExApiService, RevExApiService>();
+        //services.AddTransient<IRevExApiService, RevExApiService>();
+        services.AddTransient<IRevExApiService, MockRevExApiService>();
         services.AddTransient<MainViewModel>();
         services.AddTransient<MainWindow>();
 

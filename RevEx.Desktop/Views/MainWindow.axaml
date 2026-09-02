@@ -1,77 +1,31 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:RevEx.Desktop.ViewModels"
-        xmlns:categoryVm="using:RevEx.Desktop.ViewModels.Categories"
-        xmlns:contentVm="using:RevEx.Desktop.ViewModels.Contents"
-        xmlns:contentViews="using:RevEx.Desktop.Views.Contents"
+        xmlns:tabVm="using:RevEx.Desktop.ViewModels.Tabs"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="600"
         x:Class="RevEx.Desktop.Views.MainWindow"
         x:DataType="vm:MainViewModel"
         Icon="/Assets/avalonia-logo.ico"
         Title="RevEx.Desktop">
-
-    <Grid ColumnDefinitions="360,*">
-        <Grid RowDefinitions="Auto,180,*">
-            <TextBox Margin="8"
-                     Watermark="Поиск по названию"
-                     Text="{Binding ContentNameQuery}" />
-
-            <ListBox Grid.Row="1" ItemsSource="{Binding Categories}">
-                <ListBox.ItemTemplate>
-                    <DataTemplate x:DataType="categoryVm:CategoryItemViewModel">
-                        <CheckBox Margin="8"
-                                  Content="{Binding Name}"
-                                  IsChecked="{Binding IsSelected}" />
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-
-            <Grid Grid.Row="2">
-                <TextBlock HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       IsVisible="{Binding IsContentLoading}"
-                       Text="Загрузка..." />
-
-                <ListBox ItemsSource="{Binding Contents}"
-                         IsVisible="{Binding !IsContentLoading}">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate x:DataType="contentVm:ContentItemViewModel">
-                            <StackPanel Margin="12,8"
-                                        DoubleTapped="OnContentDoubleTapped">
-                                <TextBlock FontWeight="SemiBold" Text="{Binding Name}" />
-                                <TextBlock Margin="0,4,0,0"
-                                           MaxLines="2"
-                                           TextTrimming="CharacterEllipsis"
-                                           TextWrapping="Wrap"
-                                           Text="{Binding Description}" />
-                            </StackPanel>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-            </Grid>
-        </Grid>
-
-        <TabControl Grid.Column="1"
-                    ItemsSource="{Binding Tabs}"
-                    SelectedItem="{Binding SelectedTab}">
-            <TabControl.ItemTemplate>
-                <DataTemplate x:DataType="contentVm:ContentDetailsViewModel">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBlock VerticalAlignment="Center" Text="{Binding Title}" />
-                        <Button Padding="6,1"
-                                Click="OnCloseTabClick"
-                                Content="×" />
-                    </StackPanel>
-                </DataTemplate>
-            </TabControl.ItemTemplate>
-            <TabControl.ContentTemplate>
-                <DataTemplate x:DataType="contentVm:ContentDetailsViewModel">
-                    <contentViews:ContentDetailsView />
-                </DataTemplate>
-            </TabControl.ContentTemplate>
-        </TabControl>
-    </Grid>
-
+    <TabControl ItemsSource="{Binding Tabs}"
+                SelectedItem="{Binding SelectedTab}">
+        <TabControl.ItemTemplate>
+            <DataTemplate x:DataType="tabVm:WorkspaceTabViewModel">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock VerticalAlignment="Center" Text="{Binding Title}" />
+                    <Button Padding="6,1"
+                            IsVisible="{Binding CanClose}"
+                            Click="OnCloseTabClick"
+                            Content="×" />
+                </StackPanel>
+            </DataTemplate>
+        </TabControl.ItemTemplate>
+        <TabControl.ContentTemplate>
+            <DataTemplate x:DataType="tabVm:WorkspaceTabViewModel">
+                <ContentControl Content="{Binding}" />
+            </DataTemplate>
+        </TabControl.ContentTemplate>
+    </TabControl>
 </Window>
