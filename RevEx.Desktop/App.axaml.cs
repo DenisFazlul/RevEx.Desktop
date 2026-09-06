@@ -1,5 +1,7 @@
 using System;
+using System.Threading.Tasks;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.Configuration;
@@ -36,10 +38,34 @@ public partial class App : Application
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = Services.GetRequiredService<MainWindow>();
+            desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+            desktop.Startup += async (_, _) => await StartDesktopAsync(desktop);
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private static async Task StartDesktopAsync(IClassicDesktopStyleApplicationLifetime desktop)
+    {
+        try
+        {
+            var authenticationService = Services.GetRequiredService<IAuthenticationService>();
+            await authenticationService.GetAccessTokenAsync();
+
+            var mainWindow = Services.GetRequiredService<MainWindow>();
+            desktop.MainWindow = mainWindow;
+            desktop.ShutdownMode = ShutdownMode.OnLastWindowClose;
+            mainWindow.Show();
+        }
+        catch (Exception exception)
+        {
+            Console.Error.WriteLine($"Keycloak startup authentication failed: {exception}");
+
+            var errorWindow = new AuthenticationErrorWindow(exception.Message);
+            desktop.MainWindow = errorWindow;
+            errorWindow.Closed += (_, _) => desktop.Shutdown(1);
+            errorWindow.Show();
+        }
     }
 
     private IConfigurationRoot CreateConfig()

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using RevEx.Desktop.Navigation;
@@ -23,12 +24,15 @@ public sealed class BtnLink
 public sealed class MainMenuViewModel : WorkspaceTabViewModel
 {
     public ObservableCollection<BtnLink> BtnLinks { get; }
+    public IAsyncRelayCommand LogoutCommand { get; }
 
     public MainMenuViewModel(
         string title,
         bool canClose,
-        IEnumerable<BtnLink> links) : base(title, canClose)
+        IEnumerable<BtnLink> links,
+        Func<Task> logout) : base(title, canClose)
     {
         BtnLinks = new ObservableCollection<BtnLink>(links);
+        LogoutCommand = new AsyncRelayCommand(logout);
     }
 }

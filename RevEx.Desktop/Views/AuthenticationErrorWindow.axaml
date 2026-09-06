@@ -1,0 +1,24 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="RevEx.Desktop.Views.AuthenticationErrorWindow"
+        Title="Ошибка авторизации"
+        Width="480"
+        Height="220"
+        CanResize="False"
+        WindowStartupLocation="CenterScreen">
+    <Grid Margin="28" RowDefinitions="Auto,*,Auto">
+        <TextBlock Classes="h2" Text="Не удалось войти в RevEx" />
+
+        <TextBlock x:Name="MessageText"
+                   Grid.Row="1"
+                   Margin="0,16,0,20"
+                   Classes="caption"
+                   TextWrapping="Wrap" />
+
+        <Button Grid.Row="2"
+                HorizontalAlignment="Right"
+                Classes="primary"
+                Content="Закрыть"
+                Click="OnCloseClick" />
+    </Grid>
+</Window>

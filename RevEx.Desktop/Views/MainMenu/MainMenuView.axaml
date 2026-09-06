@@ -7,14 +7,22 @@
              x:Class="RevEx.Desktop.Views.MainMenu.MainMenuView" x:DataType="vm:MainMenuViewModel">
     <ScrollViewer HorizontalScrollBarVisibility="Disabled">
         <Grid Margin="48,42" RowDefinitions="Auto,32,Auto" MaxWidth="1040" HorizontalAlignment="Center">
-            <StackPanel Spacing="10">
-                <Border Classes="eyebrow" HorizontalAlignment="Left">
-                    <TextBlock Text="РАБОЧЕЕ ПРОСТРАНСТВО" />
-                </Border>
-                <TextBlock Classes="h1" Text="С чего начнём?" />
-                <TextBlock Classes="caption" FontSize="15"
-                           Text="Откройте нужный раздел — он появится в отдельной вкладке и останется под рукой." />
-            </StackPanel>
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Spacing="10">
+                    <Border Classes="eyebrow" HorizontalAlignment="Left">
+                        <TextBlock Text="РАБОЧЕЕ ПРОСТРАНСТВО" />
+                    </Border>
+                    <TextBlock Classes="h1" Text="С чего начнём?" />
+                    <TextBlock Classes="caption" FontSize="15"
+                               Text="Откройте нужный раздел — он появится в отдельной вкладке и останется под рукой." />
+                </StackPanel>
+
+                <Button Grid.Column="1"
+                        Classes="ghost"
+                        VerticalAlignment="Top"
+                        Content="Выйти из профиля"
+                        Command="{Binding LogoutCommand}" />
+            </Grid>
             <ItemsControl Grid.Row="2" ItemsSource="{Binding BtnLinks}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>

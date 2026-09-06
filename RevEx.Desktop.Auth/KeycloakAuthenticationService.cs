@@ -17,6 +17,7 @@ public sealed class KeycloakAuthenticationService : IAuthenticationService
     private readonly SemaphoreSlim _loginLock = new(1, 1);
     private string? _accessToken;
     private string? _refreshToken;
+    private string? _identityToken;
     private DateTimeOffset _accessTokenExpiration;
 
     public KeycloakAuthenticationService(IAppSettings settings)
@@ -56,6 +57,36 @@ public sealed class KeycloakAuthenticationService : IAuthenticationService
 
             _accessToken = await LoginAsync(cancellationToken);
             return _accessToken;
+        }
+        finally
+        {
+            _loginLock.Release();
+        }
+    }
+
+    public async Task LogoutAsync(CancellationToken cancellationToken = default)
+    {
+        await _loginLock.WaitAsync(cancellationToken);
+        try
+        {
+            var identityToken = _identityToken;
+
+            _accessToken = null;
+            _refreshToken = null;
+            _identityToken = null;
+            _accessTokenExpiration = default;
+
+            if (string.IsNullOrWhiteSpace(identityToken))
+                return;
+
+            var logoutUrl = await _oidcClient.PrepareLogoutAsync(
+                new LogoutRequest { IdTokenHint = identityToken },
+                cancellationToken);
+
+            if (string.IsNullOrWhiteSpace(logoutUrl))
+                throw new InvalidOperationException("Keycloak returned an empty logout URL.");
+
+            Process.Start(new ProcessStartInfo(logoutUrl) { UseShellExecute = true });
         }
         finally
         {
@@ -109,6 +140,7 @@ public sealed class KeycloakAuthenticationService : IAuthenticationService
             throw new InvalidOperationException($"Keycloak authentication failed: {result.Error}");
 
         _refreshToken = result.RefreshToken;
+        _identityToken = result.IdentityToken;
         _accessTokenExpiration = result.AccessTokenExpiration;
         return result.AccessToken;
     }
