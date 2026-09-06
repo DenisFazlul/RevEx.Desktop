@@ -1,8 +1,9 @@
-using System.Collections.Generic;
+using System;
+using RevEx.Desktop.ViewModels.MainMenu;
 
 namespace RevEx.Desktop.Navigation;
 
 public interface IMainMenuProvider
 {
-    IReadOnlyList<WorkspaceTabDescriptor> Items { get; }
+    MainMenuViewModel Create(Action<WorkspaceTabRequest> openTab);
 }

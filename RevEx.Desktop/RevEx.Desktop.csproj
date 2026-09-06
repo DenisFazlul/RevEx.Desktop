@@ -21,10 +21,19 @@
             <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
         </PackageReference>
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2"/>
+        <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.11" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.11" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.11" />
+        <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.11" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\RevEx.Desktop.Core\RevEx.Desktop.Core.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="appsettings.json"
+            CopyToOutputDirectory="PreserveNewest"
+            CopyToPublishDirectory="PreserveNewest" />
     </ItemGroup>
 </Project>

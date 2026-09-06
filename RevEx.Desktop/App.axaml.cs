@@ -1,14 +1,14 @@
 using System;
-using System.Net.Http;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RevEx.Desktop.Core.Interfaces;
 using RevEx.Desktop.Core.Services;
+using RevEx.Desktop.DI;
 using RevEx.Desktop.Navigation;
 using RevEx.Desktop.ViewModels;
-using RevEx.Desktop.ViewModels.MainMenu;
 using RevEx.Desktop.Views;
 using RevEx.Desktop.Views.MainMenu;
 
@@ -27,21 +27,10 @@ public partial class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
+        var configuration = CreateConfig();
         var services = new ServiceCollection();
-
-        services.AddSingleton(new HttpClient
-        {
-            BaseAddress = new Uri("http://localhost:5023/")
-        });
-        //services.AddTransient<IRevExApiService, RevExApiService>();
-        services.AddTransient<IRevExApiService, MockRevExApiService>();
-        services.AddSingleton<IMainMenuProvider, MainMenuProvider>();
-        services.AddTransient<IWorkspaceTabFactory, WorkspaceTabFactory>();
-
-        services.AddTransient<MainMenuViewModel>();
-        services.AddTransient<MainMenuView>();
-        services.AddTransient<MainViewModel>();
-        services.AddTransient<MainWindow>();
+        
+        services.AddServices(configuration);
 
         Services = services.BuildServiceProvider();
 
@@ -51,5 +40,14 @@ public partial class App : Application
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private IConfigurationRoot CreateConfig()
+    {
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(AppContext.BaseDirectory)
+            .AddJsonFile("appsettings.json", optional: false)
+            .Build();
+        return configuration;
     }
 }

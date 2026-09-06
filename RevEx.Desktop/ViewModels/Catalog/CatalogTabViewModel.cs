@@ -33,6 +33,9 @@ public partial class CatalogTabViewModel : WorkspaceTabViewModel
         _openContent = openContent;
     }
 
+    public override Task ActivateAsync() =>
+        Categories.Count == 0 ? LoadAsync() : Task.CompletedTask;
+
     public async Task LoadAsync()
     {
         try
