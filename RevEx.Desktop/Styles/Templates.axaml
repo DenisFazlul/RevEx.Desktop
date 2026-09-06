@@ -1,0 +1,120 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Composite components. Screens consume these through Theme={StaticResource ...}. -->
+    <Styles.Resources>
+        <ControlTheme x:Key="PageHeaderTheme" TargetType="HeaderedContentControl">
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <StackPanel Spacing="5">
+                        <TextBlock Classes="h1" Text="{TemplateBinding Header}" />
+                        <TextBlock Classes="caption" Text="{TemplateBinding Content}" />
+                    </StackPanel>
+                </ControlTemplate>
+            </Setter>
+        </ControlTheme>
+
+        <ControlTheme x:Key="EyebrowHeaderTheme" TargetType="HeaderedContentControl">
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <StackPanel Spacing="10">
+                        <Border Classes="eyebrow" HorizontalAlignment="Left">
+                            <TextBlock Text="МАТЕРИАЛ" />
+                        </Border>
+                        <TextBlock Classes="h1" Text="{TemplateBinding Header}" TextWrapping="Wrap" />
+                        <TextBlock Classes="caption" Text="{TemplateBinding Content}" />
+                    </StackPanel>
+                </ControlTemplate>
+            </Setter>
+        </ControlTheme>
+
+        <ControlTheme x:Key="ContentRowTheme" TargetType="HeaderedContentControl">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Classes="content-row">
+                        <Grid ColumnDefinitions="40,14,*,Auto">
+                            <Border Classes="icon-tile" Width="40" Height="40">
+                                <TextBlock Text="≡" FontSize="18" />
+                            </Border>
+                            <StackPanel Grid.Column="2" Spacing="4" VerticalAlignment="Center">
+                                <TextBlock FontWeight="SemiBold" FontSize="15" Text="{TemplateBinding Header}" />
+                                <TextBlock Classes="caption" MaxLines="2" TextTrimming="CharacterEllipsis"
+                                           TextWrapping="Wrap" Text="{TemplateBinding Content}" />
+                            </StackPanel>
+                            <TextBlock Grid.Column="3" Classes="row-arrow" Text="→" />
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+        </ControlTheme>
+
+        <ControlTheme x:Key="DetailsCardTheme" TargetType="HeaderedContentControl">
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Classes="card details-card">
+                        <Grid RowDefinitions="Auto,20,Auto">
+                            <Grid ColumnDefinitions="44,14,*">
+                                <Border Classes="icon-tile" Width="44" Height="44">
+                                    <TextBlock Text="≡" FontSize="20" />
+                                </Border>
+                                <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="3">
+                                    <TextBlock Classes="h2" Text="{TemplateBinding Header}" />
+                                    <TextBlock Classes="caption" Text="Основная информация" />
+                                </StackPanel>
+                            </Grid>
+                            <Border Grid.Row="2" Classes="section-separator" />
+                            <TextBlock Grid.Row="2" Classes="body-copy" Text="{TemplateBinding Content}" />
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+        </ControlTheme>
+
+        <ControlTheme x:Key="ApiSettingsCardTheme" TargetType="HeaderedContentControl">
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Classes="card settings-card">
+                        <Grid RowDefinitions="Auto,20,Auto" ColumnDefinitions="52,18,*">
+                            <Border Classes="icon-tile" Width="52" Height="52">
+                                <TextBlock Text="⌁" FontSize="25" />
+                            </Border>
+                            <StackPanel Grid.Column="2" Spacing="4" VerticalAlignment="Center">
+                                <TextBlock Classes="h2" Text="{TemplateBinding Header}" />
+                                <TextBlock Classes="caption" Text="Адрес, по которому приложение получает данные" />
+                            </StackPanel>
+                            <Border Grid.Row="2" Grid.ColumnSpan="3" Classes="value-box">
+                                <Grid ColumnDefinitions="Auto,16,*">
+                                    <Ellipse Classes="status-dot" />
+                                    <TextBlock Grid.Column="2" Text="{TemplateBinding Content}" FontFamily="monospace"
+                                               VerticalAlignment="Center" TextWrapping="Wrap" />
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+        </ControlTheme>
+    </Styles.Resources>
+
+    <Style Selector="Button.menu-card">
+        <Setter Property="Margin" Value="0,0,18,18" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Stretch" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Classes="card" Padding="22">
+                    <Grid RowDefinitions="Auto,*,Auto">
+                        <Border Classes="icon-tile" Width="42" Height="42" HorizontalAlignment="Left">
+                            <TextBlock Text="↗" FontSize="20" />
+                        </Border>
+                        <TextBlock Grid.Row="1" Classes="menu-card-title" Text="{TemplateBinding Content}" />
+                        <TextBlock Grid.Row="2" Classes="caption" Text="Открыть раздел  →" />
+                    </Grid>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+</Styles>

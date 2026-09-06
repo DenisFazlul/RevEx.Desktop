@@ -1,0 +1,56 @@
+<Styles xmlns="https://github.com/avaloniaui">
+    <!-- Card surfaces and small reusable visual primitives. -->
+    <Style Selector="Border.card">
+        <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="BoxShadow" Value="0 2 10 0 #0A000000" />
+    </Style>
+    <Style Selector="Border.section-card">
+        <Setter Property="Padding" Value="20" />
+    </Style>
+    <Style Selector="Border.details-card">
+        <Setter Property="Padding" Value="28" />
+    </Style>
+    <Style Selector="Border.settings-card">
+        <Setter Property="Padding" Value="24" />
+    </Style>
+    <Style Selector="Border.value-box">
+        <Setter Property="Padding" Value="16,14" />
+        <Setter Property="CornerRadius" Value="9" />
+        <Setter Property="Background" Value="{StaticResource CanvasBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="Border.content-row">
+        <Setter Property="Padding" Value="16" />
+        <Setter Property="Background" Value="{StaticResource CanvasBrush}" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="Border.icon-tile">
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Background" Value="{StaticResource AccentSoftBrush}" />
+    </Style>
+    <Style Selector="Border.icon-tile TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Border.eyebrow">
+        <Setter Property="Padding" Value="10,5" />
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="Background" Value="{StaticResource AccentSoftBrush}" />
+    </Style>
+    <Style Selector="Border.eyebrow TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+        <Setter Property="FontSize" Value="10" />
+        <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+    <Style Selector="Border.section-separator">
+        <Setter Property="Height" Value="1" />
+        <Setter Property="Background" Value="{StaticResource BorderBrush}" />
+    </Style>
+</Styles>
