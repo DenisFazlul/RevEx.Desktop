@@ -28,6 +28,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\RevEx.Desktop.Auth\RevEx.Desktop.Auth.csproj" />
       <ProjectReference Include="..\RevEx.Desktop.Core\RevEx.Desktop.Core.csproj" />
     </ItemGroup>
 

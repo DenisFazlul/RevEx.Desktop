@@ -2,6 +2,7 @@ using System;
 using System.Net.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using RevEx.Desktop.Auth;
 using RevEx.Desktop.Core.Interfaces;
 using RevEx.Desktop.Core.Services;
 using RevEx.Desktop.Navigation;
@@ -19,21 +20,18 @@ public static class ServiceExtensions
     {
         var appSettings = GetAppSettings(configuration);
 
-        
+        services.AddSingleton<AppSettings>(appSettings);
         services.AddSingleton<IAppSettings>(appSettings);
-        services.AddRevExHttpClient(appSettings);
+        services.AddRevExtApiConnection(appSettings);
 
-        services.AddMainServices();
         services.AddUIServices();
-        
-
         return services;
     }
 
     private static AppSettings GetAppSettings(IConfiguration configuration)
     {
         var settings = configuration
-            .GetRequiredSection("Api")
+            .GetRequiredSection("AppSettings")
             .Get<AppSettings>()
             ?? throw new InvalidOperationException("Не удалось загрузить настройки API.");
 
@@ -41,25 +39,42 @@ public static class ServiceExtensions
             (apiUri.Scheme != Uri.UriSchemeHttp && apiUri.Scheme != Uri.UriSchemeHttps))
         {
             throw new InvalidOperationException(
-                "Настройка Api:ApiPath должна содержать абсолютный HTTP(S)-адрес.");
+                "Настройка AppSettings:ApiPath должна содержать абсолютный HTTP(S)-адрес.");
         }
+
+        ValidateAuthenticationSettings(settings.Authentication);
 
         return settings;
     }
 
-    private static IHttpClientBuilder AddRevExHttpClient(
+    private static void ValidateAuthenticationSettings(AuthenticationSettings settings)
+    {
+        if (!Uri.TryCreate(settings.Authority, UriKind.Absolute, out var authorityUri) ||
+            (settings.RequireHttpsMetadata && authorityUri.Scheme != Uri.UriSchemeHttps))
+        {
+            throw new InvalidOperationException("AppSettings:Authentication:Authority is invalid.");
+        }
+        if (string.IsNullOrWhiteSpace(settings.ClientId))
+            throw new InvalidOperationException("AppSettings:Authentication:ClientId is required.");
+        if (string.IsNullOrWhiteSpace(settings.Scope))
+            throw new InvalidOperationException("AppSettings:Authentication:Scope is required.");
+        if (!Uri.TryCreate(settings.RedirectUri, UriKind.Absolute, out var redirectUri) ||
+            redirectUri.Host != "127.0.0.1")
+        {
+            throw new InvalidOperationException(
+                "AppSettings:Authentication:RedirectUri must use the 127.0.0.1 loopback address.");
+        }
+    }
+
+    private static IHttpClientBuilder AddRevExtApiConnection(
         this IServiceCollection services,
         AppSettings appSettings) =>
-        services.AddHttpClient<IRevExApiService, RevExApiService>(httpClient =>
-        {
-            httpClient.BaseAddress = new Uri(appSettings.ApiPath);
-        });
-
-    private static IServiceCollection AddMainServices(this IServiceCollection services)
-    {
-        services.AddTransient<IRevExApiService, MockRevExApiService>();
-        return services;
-    }
+        services
+            .AddHttpClient<IRevExApiService, RevExApiService>(httpClient =>
+            {
+                httpClient.BaseAddress = new Uri(appSettings.ApiPath);
+            })
+            .AddKeycloakAuthentication();
 
     private static IServiceCollection AddUIServices(this IServiceCollection services)
     {
@@ -72,4 +87,3 @@ public static class ServiceExtensions
         return services;
     }
 }
-

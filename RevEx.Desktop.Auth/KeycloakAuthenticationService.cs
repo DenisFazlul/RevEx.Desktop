@@ -1,0 +1,139 @@
+using System.Diagnostics;
+using System.Net;
+using System.Text;
+using Duende.IdentityModel.Client;
+using Duende.IdentityModel.OidcClient;
+using RevEx.Desktop.Core.Interfaces;
+
+namespace RevEx.Desktop.Auth;
+
+public sealed class KeycloakAuthenticationService : IAuthenticationService
+{
+    private const string AuthorizationPageResource =
+        "RevEx.Desktop.Auth.Assets.AuthorizationCompleted.html";
+
+    private readonly OidcClient _oidcClient;
+    private readonly string _redirectUri;
+    private readonly SemaphoreSlim _loginLock = new(1, 1);
+    private string? _accessToken;
+    private string? _refreshToken;
+    private DateTimeOffset _accessTokenExpiration;
+
+    public KeycloakAuthenticationService(IAppSettings settings)
+    {
+        var authentication = settings.Authentication;
+        _redirectUri = authentication.RedirectUri;
+        _oidcClient = new OidcClient(new OidcClientOptions
+        {
+            Authority = authentication.Authority,
+            ClientId = authentication.ClientId,
+            Scope = authentication.Scope,
+            RedirectUri = authentication.RedirectUri,
+            DisablePushedAuthorization = true,
+            Policy = new Policy
+            {
+                Discovery = new DiscoveryPolicy
+                {
+                    RequireHttps = authentication.RequireHttpsMetadata
+                }
+            }
+        });
+    }
+
+    public async Task<string> GetAccessTokenAsync(CancellationToken cancellationToken = default)
+    {
+        if (HasValidAccessToken())
+            return _accessToken!;
+
+        await _loginLock.WaitAsync(cancellationToken);
+        try
+        {
+            if (HasValidAccessToken())
+                return _accessToken!;
+
+            if (_refreshToken is not null && await TryRefreshTokenAsync(cancellationToken))
+                return _accessToken!;
+
+            _accessToken = await LoginAsync(cancellationToken);
+            return _accessToken;
+        }
+        finally
+        {
+            _loginLock.Release();
+        }
+    }
+
+    private bool HasValidAccessToken() =>
+        _accessToken is not null && _accessTokenExpiration > DateTimeOffset.UtcNow.AddMinutes(1);
+
+    private async Task<bool> TryRefreshTokenAsync(CancellationToken cancellationToken)
+    {
+        var result = await _oidcClient.RefreshTokenAsync(
+            _refreshToken!,
+            cancellationToken: cancellationToken);
+
+        if (result.IsError || string.IsNullOrWhiteSpace(result.AccessToken))
+        {
+            _accessToken = null;
+            _refreshToken = null;
+            return false;
+        }
+
+        _accessToken = result.AccessToken;
+        _refreshToken = result.RefreshToken ?? _refreshToken;
+        _accessTokenExpiration = result.AccessTokenExpiration;
+        return true;
+    }
+
+    private async Task<string> LoginAsync(CancellationToken cancellationToken)
+    {
+        using var listener = new HttpListener();
+        listener.Prefixes.Add(_redirectUri);
+        listener.Start();
+
+        var state = await _oidcClient.PrepareLoginAsync(cancellationToken: cancellationToken);
+        if (string.IsNullOrWhiteSpace(state.StartUrl))
+            throw new InvalidOperationException("Keycloak returned an empty authorization URL.");
+
+        Process.Start(new ProcessStartInfo(state.StartUrl) { UseShellExecute = true });
+
+        var context = await listener.GetContextAsync().WaitAsync(cancellationToken);
+        await WriteBrowserResponseAsync(context.Response, cancellationToken);
+
+        var result = await _oidcClient.ProcessResponseAsync(
+            context.Request.RawUrl,
+            state,
+            cancellationToken: cancellationToken);
+
+        if (result.IsError || string.IsNullOrWhiteSpace(result.AccessToken))
+            throw new InvalidOperationException($"Keycloak authentication failed: {result.Error}");
+
+        _refreshToken = result.RefreshToken;
+        _accessTokenExpiration = result.AccessTokenExpiration;
+        return result.AccessToken;
+    }
+
+    private static async Task WriteBrowserResponseAsync(
+        HttpListenerResponse response,
+        CancellationToken cancellationToken)
+    {
+        var html = LoadAuthorizationPage();
+        var content = Encoding.UTF8.GetBytes(html);
+
+        response.ContentType = "text/html; charset=utf-8";
+        response.ContentLength64 = content.Length;
+        await response.OutputStream.WriteAsync(content, cancellationToken);
+        response.Close();
+    }
+
+    private static string LoadAuthorizationPage()
+    {
+        using var stream = typeof(KeycloakAuthenticationService).Assembly
+            .GetManifestResourceStream(AuthorizationPageResource)
+            ?? throw new InvalidOperationException(
+                $"Embedded resource '{AuthorizationPageResource}' was not found.");
+        using var reader = new StreamReader(stream, Encoding.UTF8);
+
+        return reader.ReadToEnd();
+    }
+}

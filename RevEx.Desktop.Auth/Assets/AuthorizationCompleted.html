@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Авторизация завершена — RevEx</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: #0b1020;
+            color: #f8fafc;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+            background:
+                radial-gradient(circle at 15% 15%, rgba(99, 102, 241, .28), transparent 35%),
+                radial-gradient(circle at 85% 80%, rgba(14, 165, 233, .18), transparent 32%),
+                #0b1020;
+        }
+
+        .card {
+            width: min(100%, 480px);
+            padding: 40px;
+            border: 1px solid rgba(148, 163, 184, .18);
+            border-radius: 24px;
+            background: rgba(15, 23, 42, .82);
+            box-shadow: 0 28px 80px rgba(0, 0, 0, .38);
+            text-align: center;
+            backdrop-filter: blur(18px);
+        }
+
+        .status {
+            width: 72px;
+            height: 72px;
+            margin: 0 auto 24px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #22c55e, #14b8a6);
+            box-shadow: 0 12px 32px rgba(34, 197, 94, .28);
+            font-size: 36px;
+            font-weight: 700;
+        }
+
+        h1 {
+            margin: 0 0 12px;
+            font-size: clamp(26px, 5vw, 34px);
+            line-height: 1.15;
+        }
+
+        p {
+            margin: 0 0 28px;
+            color: #a8b3c7;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px 22px;
+            border: 0;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: white;
+            font: inherit;
+            font-weight: 650;
+            cursor: pointer;
+            box-shadow: 0 10px 24px rgba(79, 70, 229, .3);
+            transition: transform .15s ease, filter .15s ease;
+        }
+
+        button:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        button:active { transform: translateY(0); }
+        button:focus-visible { outline: 3px solid rgba(129, 140, 248, .55); outline-offset: 3px; }
+
+        .hint {
+            min-height: 20px;
+            margin-top: 16px;
+            color: #64748b;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+<main class="card">
+    <div class="status" aria-hidden="true">✓</div>
+    <h1>Авторизация завершена</h1>
+    <p>Вы успешно вошли в RevEx. Можно закрыть эту вкладку и вернуться в приложение.</p>
+    <button type="button" onclick="closePage()">Закрыть</button>
+    <div class="hint" id="hint" aria-live="polite"></div>
+</main>
+<script>
+    function closePage() {
+        window.close();
+        window.setTimeout(() => {
+            document.getElementById('hint').textContent =
+                'Если вкладка не закрылась автоматически, закройте её вручную.';
+        }, 300);
+    }
+</script>
+</body>
+</html>
