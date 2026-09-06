@@ -4,31 +4,10 @@
              x:Class="RevEx.Desktop.Views.Contents.ContentDetailsView" x:DataType="vm:ContentDetailsViewModel">
     <ScrollViewer HorizontalScrollBarVisibility="Disabled">
         <Grid Margin="40,36" RowDefinitions="Auto,24,Auto" MaxWidth="900" HorizontalAlignment="Center">
-            <StackPanel Spacing="10">
-                <Border Padding="10,5" CornerRadius="12" Background="{StaticResource AccentSoftBrush}"
-                        HorizontalAlignment="Left">
-                    <TextBlock Text="МАТЕРИАЛ" Foreground="{StaticResource AccentBrush}" FontSize="10" FontWeight="Bold" />
-                </Border>
-                <TextBlock Classes="h1" Text="{Binding Title}" TextWrapping="Wrap" />
-                <TextBlock Classes="caption" Text="Карточка материала из базы знаний" />
-            </StackPanel>
-            <Border Grid.Row="2" Classes="card" Padding="28">
-                <Grid RowDefinitions="Auto,20,Auto">
-                    <Grid ColumnDefinitions="44,14,*">
-                        <Border Width="44" Height="44" CornerRadius="10" Background="{StaticResource AccentSoftBrush}">
-                            <TextBlock Text="≡" Foreground="{StaticResource AccentBrush}" FontSize="20"
-                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
-                        </Border>
-                        <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="3">
-                            <TextBlock Classes="h2" Text="Описание" />
-                            <TextBlock Classes="caption" Text="Основная информация" />
-                        </StackPanel>
-                    </Grid>
-                    <Border Grid.Row="2" Height="1" Background="{StaticResource BorderBrush}" />
-                    <TextBlock Grid.Row="2" Margin="0,25,0,0" FontSize="15" LineHeight="24"
-                               TextWrapping="Wrap" Text="{Binding Description}" />
-                </Grid>
-            </Border>
+            <HeaderedContentControl Theme="{StaticResource EyebrowHeaderTheme}"
+                                    Header="{Binding Title}" Content="Карточка материала из базы знаний" />
+            <HeaderedContentControl Grid.Row="2" Theme="{StaticResource DetailsCardTheme}"
+                                    Header="Описание" Content="{Binding Description}" />
         </Grid>
     </ScrollViewer>
 </UserControl>

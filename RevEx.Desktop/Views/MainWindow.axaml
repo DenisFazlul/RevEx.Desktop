@@ -9,12 +9,11 @@
         Icon="/Assets/avalonia-logo.ico" Title="RevEx"
         Width="1180" Height="760" MinWidth="860" MinHeight="560">
     <Grid RowDefinitions="64,*">
-        <Border Background="{StaticResource SidebarBrush}" BorderBrush="#2A2A33" BorderThickness="0,0,0,1">
+        <Border Classes="app-toolbar">
             <Grid Margin="22,0" ColumnDefinitions="Auto,*,Auto">
                 <StackPanel Orientation="Horizontal" Spacing="11" VerticalAlignment="Center">
-                    <Border Width="34" Height="34" CornerRadius="9" Background="{StaticResource AccentBrush}">
-                        <TextBlock Text="R" Foreground="White" FontSize="17" FontWeight="Bold"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <Border Classes="brand-mark">
+                        <TextBlock Text="R" />
                     </Border>
                     <StackPanel VerticalAlignment="Center" Spacing="1">
                         <TextBlock Text="RevEx" Foreground="White" FontSize="16" FontWeight="SemiBold" />
@@ -26,22 +25,8 @@
                 </Border>
             </Grid>
         </Border>
-        <TabControl Grid.Row="1" ItemsSource="{Binding Tabs}" SelectedItem="{Binding SelectedTab}"
-                    Background="{StaticResource CanvasBrush}" BorderThickness="0" Padding="0">
-            <TabControl.Styles>
-                <Style Selector="TabItem">
-                    <Setter Property="MinHeight" Value="44" />
-                    <Setter Property="Padding" Value="16,0" />
-                    <Setter Property="Background" Value="Transparent" />
-                    <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
-                    <Setter Property="FontSize" Value="13" />
-                </Style>
-                <Style Selector="TabItem:selected">
-                    <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
-                    <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
-                    <Setter Property="FontWeight" Value="SemiBold" />
-                </Style>
-            </TabControl.Styles>
+        <TabControl Grid.Row="1" Classes="workspace-tabs"
+                    ItemsSource="{Binding Tabs}" SelectedItem="{Binding SelectedTab}">
             <TabControl.ItemTemplate>
                 <DataTemplate x:DataType="tabVm:WorkspaceTabViewModel">
                     <StackPanel Orientation="Horizontal" Spacing="9">

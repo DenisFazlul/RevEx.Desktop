@@ -8,9 +8,8 @@
     <ScrollViewer HorizontalScrollBarVisibility="Disabled">
         <Grid Margin="48,42" RowDefinitions="Auto,32,Auto" MaxWidth="1040" HorizontalAlignment="Center">
             <StackPanel Spacing="10">
-                <Border Padding="10,5" CornerRadius="12" Background="{StaticResource AccentSoftBrush}" HorizontalAlignment="Left">
-                    <TextBlock Text="РАБОЧЕЕ ПРОСТРАНСТВО" Foreground="{StaticResource AccentBrush}"
-                               FontSize="10" FontWeight="Bold" />
+                <Border Classes="eyebrow" HorizontalAlignment="Left">
+                    <TextBlock Text="РАБОЧЕЕ ПРОСТРАНСТВО" />
                 </Border>
                 <TextBlock Classes="h1" Text="С чего начнём?" />
                 <TextBlock Classes="caption" FontSize="15"
@@ -24,22 +23,7 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="vm:BtnLink">
-                        <Button Command="{Binding OpenCommand}" Margin="0,0,18,18" Padding="0"
-                                HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
-                                Background="Transparent" BorderThickness="0">
-                            <Border Classes="card" Padding="22">
-                                <Grid RowDefinitions="Auto,*,Auto">
-                                    <Border Width="42" Height="42" CornerRadius="10" Background="{StaticResource AccentSoftBrush}"
-                                            HorizontalAlignment="Left">
-                                        <TextBlock Text="↗" Foreground="{StaticResource AccentBrush}" FontSize="20"
-                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    </Border>
-                                    <TextBlock Grid.Row="1" Margin="0,15,0,0" Text="{Binding Name}"
-                                               FontSize="17" FontWeight="SemiBold" />
-                                    <TextBlock Grid.Row="2" Text="Открыть раздел  →" Classes="caption" />
-                                </Grid>
-                            </Border>
-                        </Button>
+                        <Button Classes="menu-card" Content="{Binding Name}" Command="{Binding OpenCommand}" />
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>

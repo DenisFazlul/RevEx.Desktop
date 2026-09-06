@@ -1,0 +1,305 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Styles.Resources>
+        <SolidColorBrush x:Key="CanvasBrush" Color="#F7F7FA" />
+        <SolidColorBrush x:Key="SurfaceBrush" Color="#FFFFFF" />
+        <SolidColorBrush x:Key="SurfaceMutedBrush" Color="#F1F1F6" />
+        <SolidColorBrush x:Key="SidebarBrush" Color="#17171D" />
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#202027" />
+        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#6F6F7B" />
+        <SolidColorBrush x:Key="BorderBrush" Color="#E4E4EA" />
+        <SolidColorBrush x:Key="AccentBrush" Color="#6657D9" />
+        <SolidColorBrush x:Key="AccentHoverBrush" Color="#5749C5" />
+        <SolidColorBrush x:Key="AccentSoftBrush" Color="#EEECFF" />
+
+        <ControlTheme x:Key="PageHeaderTheme" TargetType="HeaderedContentControl">
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <StackPanel Spacing="5">
+                        <TextBlock Classes="h1" Text="{TemplateBinding Header}" />
+                        <TextBlock Classes="caption" Text="{TemplateBinding Content}" />
+                    </StackPanel>
+                </ControlTemplate>
+            </Setter>
+        </ControlTheme>
+
+        <ControlTheme x:Key="EyebrowHeaderTheme" TargetType="HeaderedContentControl">
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <StackPanel Spacing="10">
+                        <Border Classes="eyebrow" HorizontalAlignment="Left">
+                            <TextBlock Text="МАТЕРИАЛ" />
+                        </Border>
+                        <TextBlock Classes="h1" Text="{TemplateBinding Header}" TextWrapping="Wrap" />
+                        <TextBlock Classes="caption" Text="{TemplateBinding Content}" />
+                    </StackPanel>
+                </ControlTemplate>
+            </Setter>
+        </ControlTheme>
+
+        <ControlTheme x:Key="ContentRowTheme" TargetType="HeaderedContentControl">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Classes="content-row">
+                        <Grid ColumnDefinitions="40,14,*,Auto">
+                            <Border Classes="icon-tile" Width="40" Height="40">
+                                <TextBlock Text="≡" FontSize="18" />
+                            </Border>
+                            <StackPanel Grid.Column="2" Spacing="4" VerticalAlignment="Center">
+                                <TextBlock FontWeight="SemiBold" FontSize="15" Text="{TemplateBinding Header}" />
+                                <TextBlock Classes="caption" MaxLines="2" TextTrimming="CharacterEllipsis"
+                                           TextWrapping="Wrap" Text="{TemplateBinding Content}" />
+                            </StackPanel>
+                            <TextBlock Grid.Column="3" Classes="row-arrow" Text="→" />
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+        </ControlTheme>
+
+        <ControlTheme x:Key="DetailsCardTheme" TargetType="HeaderedContentControl">
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Classes="card details-card">
+                        <Grid RowDefinitions="Auto,20,Auto">
+                            <Grid ColumnDefinitions="44,14,*">
+                                <Border Classes="icon-tile" Width="44" Height="44">
+                                    <TextBlock Text="≡" FontSize="20" />
+                                </Border>
+                                <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="3">
+                                    <TextBlock Classes="h2" Text="{TemplateBinding Header}" />
+                                    <TextBlock Classes="caption" Text="Основная информация" />
+                                </StackPanel>
+                            </Grid>
+                            <Border Grid.Row="2" Classes="section-separator" />
+                            <TextBlock Grid.Row="2" Classes="body-copy" Text="{TemplateBinding Content}" />
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+        </ControlTheme>
+
+        <ControlTheme x:Key="ApiSettingsCardTheme" TargetType="HeaderedContentControl">
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Classes="card settings-card">
+                        <Grid RowDefinitions="Auto,20,Auto" ColumnDefinitions="52,18,*">
+                            <Border Classes="icon-tile" Width="52" Height="52">
+                                <TextBlock Text="⌁" FontSize="25" />
+                            </Border>
+                            <StackPanel Grid.Column="2" Spacing="4" VerticalAlignment="Center">
+                                <TextBlock Classes="h2" Text="{TemplateBinding Header}" />
+                                <TextBlock Classes="caption" Text="Адрес, по которому приложение получает данные" />
+                            </StackPanel>
+                            <Border Grid.Row="2" Grid.ColumnSpan="3" Classes="value-box">
+                                <Grid ColumnDefinitions="Auto,16,*">
+                                    <Ellipse Classes="status-dot" />
+                                    <TextBlock Grid.Column="2" Text="{TemplateBinding Content}" FontFamily="monospace"
+                                               VerticalAlignment="Center" TextWrapping="Wrap" />
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+        </ControlTheme>
+    </Styles.Resources>
+
+    <Style Selector="Window">
+        <Setter Property="FontFamily" Value="Inter" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Background" Value="{StaticResource CanvasBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+    </Style>
+    <Style Selector="TextBlock.h1">
+        <Setter Property="FontSize" Value="30" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+    </Style>
+    <Style Selector="TextBlock.h2">
+        <Setter Property="FontSize" Value="19" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+    </Style>
+    <Style Selector="TextBlock.caption">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+    </Style>
+    <Style Selector="TextBlock.body-copy">
+        <Setter Property="Margin" Value="0,25,0,0" />
+        <Setter Property="FontSize" Value="15" />
+        <Setter Property="LineHeight" Value="24" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style Selector="TextBlock.row-arrow">
+        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="FontSize" Value="18" />
+        <Setter Property="Margin" Value="14,0,0,0" />
+    </Style>
+    <Style Selector="Button.primary">
+        <Setter Property="MinHeight" Value="40" />
+        <Setter Property="Padding" Value="18,9" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="Button.primary:pointerover">
+        <Setter Property="Background" Value="{StaticResource AccentHoverBrush}" />
+    </Style>
+    <Style Selector="Button.ghost">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="7" />
+        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+    </Style>
+    <Style Selector="Button.ghost:pointerover">
+        <Setter Property="Background" Value="{StaticResource SurfaceMutedBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+    </Style>
+    <Style Selector="Button.menu-card">
+        <Setter Property="Margin" Value="0,0,18,18" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Stretch" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Classes="card" Padding="22">
+                    <Grid RowDefinitions="Auto,*,Auto">
+                        <Border Classes="icon-tile" Width="42" Height="42" HorizontalAlignment="Left">
+                            <TextBlock Text="↗" FontSize="20" />
+                        </Border>
+                        <TextBlock Grid.Row="1" Classes="menu-card-title" Text="{TemplateBinding Content}" />
+                        <TextBlock Grid.Row="2" Classes="caption" Text="Открыть раздел  →" />
+                    </Grid>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="TextBlock.menu-card-title">
+        <Setter Property="Margin" Value="0,15,0,0" />
+        <Setter Property="FontSize" Value="17" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="TextBox.search">
+        <Setter Property="MinHeight" Value="42" />
+        <Setter Property="Padding" Value="14,10" />
+        <Setter Property="CornerRadius" Value="9" />
+        <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="Border.card">
+        <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="BoxShadow" Value="0 2 10 0 #0A000000" />
+    </Style>
+    <Style Selector="Border.section-card">
+        <Setter Property="Padding" Value="20" />
+    </Style>
+    <Style Selector="Border.details-card">
+        <Setter Property="Padding" Value="28" />
+    </Style>
+    <Style Selector="Border.settings-card">
+        <Setter Property="Padding" Value="24" />
+    </Style>
+    <Style Selector="Border.value-box">
+        <Setter Property="Padding" Value="16,14" />
+        <Setter Property="CornerRadius" Value="9" />
+        <Setter Property="Background" Value="{StaticResource CanvasBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="Border.content-row">
+        <Setter Property="Padding" Value="16" />
+        <Setter Property="Background" Value="{StaticResource CanvasBrush}" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="Border.icon-tile">
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Background" Value="{StaticResource AccentSoftBrush}" />
+    </Style>
+    <Style Selector="Border.icon-tile TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Border.eyebrow">
+        <Setter Property="Padding" Value="10,5" />
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="Background" Value="{StaticResource AccentSoftBrush}" />
+    </Style>
+    <Style Selector="Border.eyebrow TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+        <Setter Property="FontSize" Value="10" />
+        <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+    <Style Selector="Border.section-separator">
+        <Setter Property="Height" Value="1" />
+        <Setter Property="Background" Value="{StaticResource BorderBrush}" />
+    </Style>
+    <Style Selector="Ellipse.status-dot">
+        <Setter Property="Width" Value="8" />
+        <Setter Property="Height" Value="8" />
+        <Setter Property="Fill" Value="#34A66F" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Border.app-toolbar">
+        <Setter Property="Background" Value="{StaticResource SidebarBrush}" />
+        <Setter Property="BorderBrush" Value="#2A2A33" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+    </Style>
+    <Style Selector="Border.brand-mark">
+        <Setter Property="Width" Value="34" />
+        <Setter Property="Height" Value="34" />
+        <Setter Property="CornerRadius" Value="9" />
+        <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+    </Style>
+    <Style Selector="Border.brand-mark TextBlock">
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="FontSize" Value="17" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="TabControl.workspace-tabs">
+        <Setter Property="Background" Value="{StaticResource CanvasBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0" />
+    </Style>
+    <Style Selector="TabControl.workspace-tabs TabItem">
+        <Setter Property="MinHeight" Value="44" />
+        <Setter Property="Padding" Value="16,0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+        <Setter Property="FontSize" Value="13" />
+    </Style>
+    <Style Selector="TabControl.workspace-tabs TabItem:selected">
+        <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="ListBox.clean-list">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style Selector="ListBox.category-list ListBoxItem">
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Margin" Value="0,2" />
+        <Setter Property="CornerRadius" Value="8" />
+    </Style>
+    <Style Selector="ListBox.content-list ListBoxItem">
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Margin" Value="0,0,0,10" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    </Style>
+</Styles>
