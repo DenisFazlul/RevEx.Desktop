@@ -6,6 +6,7 @@ using RevEx.Desktop.Auth;
 using RevEx.Desktop.Core.Interfaces;
 using RevEx.Desktop.Core.Services;
 using RevEx.Desktop.Navigation;
+using RevEx.Desktop.Services;
 using RevEx.Desktop.ViewModels;
 using RevEx.Desktop.Views;
 using RevEx.Desktop.Views.MainMenu;
@@ -78,6 +79,7 @@ public static class ServiceExtensions
 
     private static IServiceCollection AddUIServices(this IServiceCollection services)
     {
+        services.AddSingleton<IApplicationShutdownService, ApplicationShutdownService>();
         services.AddSingleton<IMainMenuProvider, MainMenuProvider>();
         services.AddTransient<IWorkspaceTabFactory, WorkspaceTabFactory>();
 

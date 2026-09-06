@@ -13,16 +13,23 @@ public sealed class KeycloakAuthenticationService : IAuthenticationService
         "RevEx.Desktop.Auth.Assets.AuthorizationCompleted.html";
 
     private readonly OidcClient _oidcClient;
+    private readonly HttpClient _backchannelClient;
+    private readonly string _clientId;
+    private readonly string _logoutEndpoint;
     private readonly string _redirectUri;
     private readonly SemaphoreSlim _loginLock = new(1, 1);
     private string? _accessToken;
     private string? _refreshToken;
-    private string? _identityToken;
     private DateTimeOffset _accessTokenExpiration;
 
-    public KeycloakAuthenticationService(IAppSettings settings)
+    public KeycloakAuthenticationService(
+        IAppSettings settings,
+        IHttpClientFactory httpClientFactory)
     {
         var authentication = settings.Authentication;
+        _backchannelClient = httpClientFactory.CreateClient(nameof(KeycloakAuthenticationService));
+        _clientId = authentication.ClientId;
+        _logoutEndpoint = $"{authentication.Authority.TrimEnd('/')}/protocol/openid-connect/logout";
         _redirectUri = authentication.RedirectUri;
         _oidcClient = new OidcClient(new OidcClientOptions
         {
@@ -69,24 +76,32 @@ public sealed class KeycloakAuthenticationService : IAuthenticationService
         await _loginLock.WaitAsync(cancellationToken);
         try
         {
-            var identityToken = _identityToken;
+            var refreshToken = _refreshToken;
 
-            _accessToken = null;
-            _refreshToken = null;
-            _identityToken = null;
-            _accessTokenExpiration = default;
-
-            if (string.IsNullOrWhiteSpace(identityToken))
+            if (string.IsNullOrWhiteSpace(refreshToken))
+            {
+                ClearTokens();
                 return;
+            }
 
-            var logoutUrl = await _oidcClient.PrepareLogoutAsync(
-                new LogoutRequest { IdTokenHint = identityToken },
+            using var content = new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                ["client_id"] = _clientId,
+                ["refresh_token"] = refreshToken
+            });
+            using var response = await _backchannelClient.PostAsync(
+                _logoutEndpoint,
+                content,
                 cancellationToken);
 
-            if (string.IsNullOrWhiteSpace(logoutUrl))
-                throw new InvalidOperationException("Keycloak returned an empty logout URL.");
+            if (!response.IsSuccessStatusCode)
+            {
+                var details = await response.Content.ReadAsStringAsync(cancellationToken);
+                throw new InvalidOperationException(
+                    $"Keycloak logout failed ({(int)response.StatusCode}): {details}");
+            }
 
-            Process.Start(new ProcessStartInfo(logoutUrl) { UseShellExecute = true });
+            ClearTokens();
         }
         finally
         {
@@ -96,6 +111,13 @@ public sealed class KeycloakAuthenticationService : IAuthenticationService
 
     private bool HasValidAccessToken() =>
         _accessToken is not null && _accessTokenExpiration > DateTimeOffset.UtcNow.AddMinutes(1);
+
+    private void ClearTokens()
+    {
+        _accessToken = null;
+        _refreshToken = null;
+        _accessTokenExpiration = default;
+    }
 
     private async Task<bool> TryRefreshTokenAsync(CancellationToken cancellationToken)
     {
@@ -129,8 +151,6 @@ public sealed class KeycloakAuthenticationService : IAuthenticationService
         Process.Start(new ProcessStartInfo(state.StartUrl) { UseShellExecute = true });
 
         var context = await listener.GetContextAsync().WaitAsync(cancellationToken);
-        await WriteBrowserResponseAsync(context.Response, cancellationToken);
-
         var result = await _oidcClient.ProcessResponseAsync(
             context.Request.RawUrl,
             state,
@@ -139,8 +159,9 @@ public sealed class KeycloakAuthenticationService : IAuthenticationService
         if (result.IsError || string.IsNullOrWhiteSpace(result.AccessToken))
             throw new InvalidOperationException($"Keycloak authentication failed: {result.Error}");
 
+        await WriteBrowserResponseAsync(context.Response, cancellationToken);
+
         _refreshToken = result.RefreshToken;
-        _identityToken = result.IdentityToken;
         _accessTokenExpiration = result.AccessTokenExpiration;
         return result.AccessToken;
     }

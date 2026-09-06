@@ -93,8 +93,8 @@
 <main class="card">
     <div class="status" aria-hidden="true">✓</div>
     <h1>Авторизация завершена</h1>
-    <p>Вы успешно вошли в RevEx. Можно закрыть эту вкладку и вернуться в приложение.</p>
-    <button type="button" onclick="closePage()">Закрыть</button>
+    <p>Вы успешно вошли в RevEx. Закройте это окно и вернитесь в приложение.</p>
+    <button type="button" onclick="closePage()">Закрыть окно</button>
     <div class="hint" id="hint" aria-live="polite"></div>
 </main>
 <script>
@@ -102,7 +102,7 @@
         window.close();
         window.setTimeout(() => {
             document.getElementById('hint').textContent =
-                'Если вкладка не закрылась автоматически, закройте её вручную.';
+                'Если окно не закрылось, закройте его средствами браузера.';
         }, 300);
     }
 </script>
