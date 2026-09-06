@@ -3,34 +3,101 @@
              xmlns:vm="using:RevEx.Desktop.ViewModels.Catalog"
              xmlns:categoryVm="using:RevEx.Desktop.ViewModels.Categories"
              xmlns:contentVm="using:RevEx.Desktop.ViewModels.Contents"
-             x:Class="RevEx.Desktop.Views.Catalog.CatalogTabView"
-             x:DataType="vm:CatalogTabViewModel">
-    <Grid ColumnDefinitions="240,*">
-        <Grid RowDefinitions="Auto,*">
-            <TextBox Margin="8" Watermark="Поиск по названию" Text="{Binding ContentNameQuery}" />
-            <ListBox Grid.Row="1" ItemsSource="{Binding Categories}">
-                <ListBox.ItemTemplate>
-                    <DataTemplate x:DataType="categoryVm:CategoryItemViewModel">
-                        <CheckBox Margin="8" Content="{Binding Name}" IsChecked="{Binding IsSelected}" />
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+             x:Class="RevEx.Desktop.Views.Catalog.CatalogTabView" x:DataType="vm:CatalogTabViewModel">
+    <Grid Margin="32" RowDefinitions="Auto,24,*">
+        <Grid ColumnDefinitions="*,360">
+            <StackPanel Spacing="5">
+                <TextBlock Classes="h1" Text="Каталог" />
+                <TextBlock Classes="caption" Text="Материалы, инструкции и документы команды" />
+            </StackPanel>
+            <TextBox Grid.Column="1" Classes="search" Watermark="Поиск по названию…"
+                     Text="{Binding ContentNameQuery}" VerticalAlignment="Center" />
         </Grid>
 
-        <Grid Grid.Column="1">
-            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
-                       IsVisible="{Binding IsContentLoading}" Text="Загрузка..." />
-            <ListBox ItemsSource="{Binding Contents}" IsVisible="{Binding !IsContentLoading}">
-                <ListBox.ItemTemplate>
-                    <DataTemplate x:DataType="contentVm:ContentItemViewModel">
-                        <StackPanel Margin="12,8" DoubleTapped="OnContentDoubleTapped">
-                            <TextBlock FontWeight="SemiBold" Text="{Binding Name}" />
-                            <TextBlock Margin="0,4,0,0" MaxLines="2" TextTrimming="CharacterEllipsis"
-                                       TextWrapping="Wrap" Text="{Binding Description}" />
+        <Grid Grid.Row="2" ColumnDefinitions="260,20,*">
+            <Border Classes="card" Padding="20">
+                <Grid RowDefinitions="Auto,14,*">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Classes="h2" Text="Категории" />
+                        <Border Grid.Column="1" Width="28" Height="28" CornerRadius="8" Background="{StaticResource SurfaceMutedBrush}">
+                            <TextBlock Text="⌘" Classes="caption" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                    </Grid>
+                    <Grid Grid.Row="2">
+                        <ProgressBar IsVisible="{Binding IsLoading}" IsIndeterminate="True" VerticalAlignment="Top" />
+                        <ListBox ItemsSource="{Binding Categories}" Background="Transparent" BorderThickness="0"
+                                 IsVisible="{Binding !IsLoading}">
+                            <ListBox.Styles>
+                                <Style Selector="ListBoxItem">
+                                    <Setter Property="Padding" Value="0" />
+                                    <Setter Property="Margin" Value="0,2" />
+                                    <Setter Property="CornerRadius" Value="8" />
+                                </Style>
+                            </ListBox.Styles>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate x:DataType="categoryVm:CategoryItemViewModel">
+                                    <CheckBox Padding="8" Content="{Binding Name}" IsChecked="{Binding IsSelected}"
+                                              HorizontalAlignment="Stretch" />
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="2" Classes="card" Padding="20">
+                <Grid RowDefinitions="Auto,14,*">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel Spacing="3">
+                            <TextBlock Classes="h2" Text="Материалы" />
+                            <TextBlock Classes="caption" Text="Дважды нажмите, чтобы открыть" />
                         </StackPanel>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+                        <Border Grid.Column="1" Padding="10,5" CornerRadius="12" Background="{StaticResource AccentSoftBrush}">
+                            <TextBlock Text="БИБЛИОТЕКА" Foreground="{StaticResource AccentBrush}"
+                                       FontSize="10" FontWeight="Bold" />
+                        </Border>
+                    </Grid>
+                    <Grid Grid.Row="2">
+                        <StackPanel IsVisible="{Binding IsContentLoading}" HorizontalAlignment="Center"
+                                    VerticalAlignment="Center" Spacing="12">
+                            <ProgressBar Width="120" IsIndeterminate="True" />
+                            <TextBlock Classes="caption" Text="Загружаем материалы…" />
+                        </StackPanel>
+                        <ListBox ItemsSource="{Binding Contents}" IsVisible="{Binding !IsContentLoading}"
+                                 Background="Transparent" BorderThickness="0">
+                            <ListBox.Styles>
+                                <Style Selector="ListBoxItem">
+                                    <Setter Property="Padding" Value="0" />
+                                    <Setter Property="Margin" Value="0,0,0,10" />
+                                    <Setter Property="CornerRadius" Value="10" />
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                </Style>
+                            </ListBox.Styles>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate x:DataType="contentVm:ContentItemViewModel">
+                                    <Border Padding="16" Background="{StaticResource CanvasBrush}" CornerRadius="10"
+                                            BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                                            DoubleTapped="OnContentDoubleTapped">
+                                        <Grid ColumnDefinitions="40,14,*,Auto">
+                                            <Border Width="40" Height="40" CornerRadius="9" Background="{StaticResource AccentSoftBrush}">
+                                                <TextBlock Text="≡" Foreground="{StaticResource AccentBrush}" FontSize="18"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                            <StackPanel Grid.Column="2" Spacing="4" VerticalAlignment="Center">
+                                                <TextBlock FontWeight="SemiBold" FontSize="15" Text="{Binding Name}" />
+                                                <TextBlock Classes="caption" MaxLines="2" TextTrimming="CharacterEllipsis"
+                                                           TextWrapping="Wrap" Text="{Binding Description}" />
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="3" Text="→" Foreground="{StaticResource TextSecondaryBrush}"
+                                                       VerticalAlignment="Center" FontSize="18" Margin="14,0,0,0" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                </Grid>
+            </Border>
         </Grid>
     </Grid>
 </UserControl>

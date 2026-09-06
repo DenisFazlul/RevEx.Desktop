@@ -3,13 +3,35 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:RevEx.Desktop.ViewModels.Settings"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:DataType="vm:SettingsTabViewModel"
-             x:Class="RevEx.Desktop.Views.Settings.SettingsTabView">
-
-    <ScrollViewer>
-        <StackPanel>
-            <TextBlock Text="{Binding ApiPath}"></TextBlock>
-        </StackPanel>
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="650"
+             x:DataType="vm:SettingsTabViewModel" x:Class="RevEx.Desktop.Views.Settings.SettingsTabView">
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+        <Grid Margin="40,36" RowDefinitions="Auto,24,Auto" MaxWidth="900" HorizontalAlignment="Center">
+            <StackPanel Spacing="5">
+                <TextBlock Classes="h1" Text="Настройки" />
+                <TextBlock Classes="caption" Text="Подключение и параметры рабочего пространства" />
+            </StackPanel>
+            <Border Grid.Row="2" Classes="card" Padding="24">
+                <Grid RowDefinitions="Auto,20,Auto" ColumnDefinitions="52,18,*">
+                    <Border Width="52" Height="52" CornerRadius="12" Background="{StaticResource AccentSoftBrush}">
+                        <TextBlock Text="⌁" Foreground="{StaticResource AccentBrush}" FontSize="25"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel Grid.Column="2" Spacing="4" VerticalAlignment="Center">
+                        <TextBlock Classes="h2" Text="API-сервер" />
+                        <TextBlock Classes="caption" Text="Адрес, по которому приложение получает данные" />
+                    </StackPanel>
+                    <Border Grid.Row="2" Grid.ColumnSpan="3" Padding="16,14" CornerRadius="9"
+                            Background="{StaticResource CanvasBrush}" BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1">
+                        <Grid ColumnDefinitions="Auto,16,*">
+                            <Ellipse Width="8" Height="8" Fill="#34A66F" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="2" Text="{Binding ApiPath}" FontFamily="monospace"
+                                       VerticalAlignment="Center" TextWrapping="Wrap" />
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
     </ScrollViewer>
 </UserControl>

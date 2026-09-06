@@ -3,18 +3,46 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:RevEx.Desktop.ViewModels.MainMenu"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="RevEx.Desktop.Views.MainMenu.MainMenuView"
-             x:DataType="vm:MainMenuViewModel">
-    <ListBox ItemsSource="{Binding BtnLinks}">
-        <ListBox.ItemTemplate>
-            <DataTemplate x:DataType="vm:BtnLink">
-                <Button Content="{Binding Name}"
-                        Command="{Binding OpenCommand}"
-                        HorizontalContentAlignment="Left"
-                        HorizontalAlignment="Stretch" />
-            </DataTemplate>
-        </ListBox.ItemTemplate>
-    </ListBox>
-    
+             mc:Ignorable="d" d:DesignWidth="1180" d:DesignHeight="650"
+             x:Class="RevEx.Desktop.Views.MainMenu.MainMenuView" x:DataType="vm:MainMenuViewModel">
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+        <Grid Margin="48,42" RowDefinitions="Auto,32,Auto" MaxWidth="1040" HorizontalAlignment="Center">
+            <StackPanel Spacing="10">
+                <Border Padding="10,5" CornerRadius="12" Background="{StaticResource AccentSoftBrush}" HorizontalAlignment="Left">
+                    <TextBlock Text="РАБОЧЕЕ ПРОСТРАНСТВО" Foreground="{StaticResource AccentBrush}"
+                               FontSize="10" FontWeight="Bold" />
+                </Border>
+                <TextBlock Classes="h1" Text="С чего начнём?" />
+                <TextBlock Classes="caption" FontSize="15"
+                           Text="Откройте нужный раздел — он появится в отдельной вкладке и останется под рукой." />
+            </StackPanel>
+            <ItemsControl Grid.Row="2" ItemsSource="{Binding BtnLinks}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal" ItemWidth="300" ItemHeight="154" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:BtnLink">
+                        <Button Command="{Binding OpenCommand}" Margin="0,0,18,18" Padding="0"
+                                HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                                Background="Transparent" BorderThickness="0">
+                            <Border Classes="card" Padding="22">
+                                <Grid RowDefinitions="Auto,*,Auto">
+                                    <Border Width="42" Height="42" CornerRadius="10" Background="{StaticResource AccentSoftBrush}"
+                                            HorizontalAlignment="Left">
+                                        <TextBlock Text="↗" Foreground="{StaticResource AccentBrush}" FontSize="20"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <TextBlock Grid.Row="1" Margin="0,15,0,0" Text="{Binding Name}"
+                                               FontSize="17" FontWeight="SemiBold" />
+                                    <TextBlock Grid.Row="2" Text="Открыть раздел  →" Classes="caption" />
+                                </Grid>
+                            </Border>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Grid>
+    </ScrollViewer>
 </UserControl>
