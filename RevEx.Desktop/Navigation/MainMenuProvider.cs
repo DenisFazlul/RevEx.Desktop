@@ -37,7 +37,7 @@ public sealed class MainMenuProvider : IMainMenuProvider
             openTab));
 
         return new MainMenuViewModel(
-            "Г",
+            "Основное",
             false,
             links,
             LogoutAsync);
