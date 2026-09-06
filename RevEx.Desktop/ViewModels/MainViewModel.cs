@@ -3,30 +3,47 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
-using RevEx.Desktop.Core.Interfaces;
+using RevEx.Desktop.Navigation;
 using RevEx.Desktop.ViewModels.Catalog;
 using RevEx.Desktop.ViewModels.Contents;
+using RevEx.Desktop.ViewModels.MainMenu;
 using RevEx.Desktop.ViewModels.Tabs;
 
 namespace RevEx.Desktop.ViewModels;
 
 public partial class MainViewModel : ViewModelBase
 {
-    private readonly CatalogTabViewModel _catalogTab;
+    private readonly MainMenuViewModel _mainMenuViewModel;
+    private readonly IWorkspaceTabFactory _tabFactory;
+    private readonly WorkspaceTabContext _tabContext;
 
     [ObservableProperty]
     private WorkspaceTabViewModel _selectedTab;
 
     public ObservableCollection<WorkspaceTabViewModel> Tabs { get; } = [];
 
-    public MainViewModel(IRevExApiService revExApiService)
+    public MainViewModel(
+        IWorkspaceTabFactory tabFactory,
+        IMainMenuProvider mainMenuProvider)
     {
-        _catalogTab = new CatalogTabViewModel(revExApiService, OpenContent);
-        Tabs.Add(_catalogTab);
-        _selectedTab = _catalogTab;
+        _tabFactory = tabFactory;
+        _tabContext = new WorkspaceTabContext(OpenContent);
+
+        var menuLinks = mainMenuProvider.Items
+            .Select(item => new BtnLink(item.Title, item.TabType, OpenTab));
+
+        _mainMenuViewModel = new MainMenuViewModel("Г", false, menuLinks);
+        Tabs.Add(_mainMenuViewModel);
+        _selectedTab = _mainMenuViewModel;
+        
+       // _catalogTab = new CatalogTabViewModel(revExApiService, OpenContent);
+       // Tabs.Add(_catalogTab);
+        //_selectedTab = _catalogTab;
     }
 
-    public Task LoadAsync() => _catalogTab.LoadAsync();
+    public Task LoadAsync() =>
+        Tabs.OfType<CatalogTabViewModel>().FirstOrDefault()?.LoadAsync()
+        ?? Task.CompletedTask;
 
     public void CloseTab(WorkspaceTabViewModel tab)
     {
@@ -44,6 +61,7 @@ public partial class MainViewModel : ViewModelBase
 
     private void OpenContent(ContentItemViewModel content)
     {
+         
         var tab = Tabs.OfType<ContentDetailsViewModel>().FirstOrDefault(item => item.Id == content.Id);
         if (tab is null)
         {
@@ -53,4 +71,19 @@ public partial class MainViewModel : ViewModelBase
 
         SelectedTab = tab;
     }
+    private void OpenTab(Type tabType)
+    {
+        var tab = Tabs.FirstOrDefault(item => item.GetType() == tabType);
+        if (tab is null)
+        {
+            tab = _tabFactory.Create(tabType, _tabContext);
+            Tabs.Add(tab);
+        }
+
+        SelectedTab = tab;
+
+        if (tab is CatalogTabViewModel catalog && catalog.Categories.Count == 0)
+            _ = catalog.LoadAsync();
+    }
+    
 }

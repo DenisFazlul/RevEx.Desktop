@@ -27,7 +27,7 @@ public partial class CatalogTabViewModel : WorkspaceTabViewModel
     public ObservableCollection<ContentItemViewModel> Contents { get; } = [];
 
     public CatalogTabViewModel(IRevExApiService revExApiService, Action<ContentItemViewModel> openContent)
-        : base("Каталог", false)
+        : base("Каталог", true)
     {
         _revExApiService = revExApiService;
         _openContent = openContent;

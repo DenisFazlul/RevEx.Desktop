@@ -15,7 +15,7 @@ public partial class MainWindow : Window
     public MainWindow(MainViewModel viewModel) : this()
     {
         DataContext = viewModel;
-        Opened += async (_, _) => await viewModel.LoadAsync();
+        //Opened += async (_, _) => await viewModel.LoadAsync();
     }
 
     private void OnCloseTabClick(object? sender, RoutedEventArgs eventArgs)
