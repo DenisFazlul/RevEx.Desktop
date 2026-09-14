@@ -11,12 +11,19 @@ public interface IRevExApiService
     Task<ContentDto> CreateContentAsync(
         CreateContentDto request,
         CancellationToken cancellationToken = default);
+    Task UpdateContentAsync(
+        int id,
+        UpdateContentDto request,
+        CancellationToken cancellationToken = default);
 
     Task<IReadOnlyCollection<CategoryDto>> GetCategoriesAsync(CancellationToken cancellationToken = default);
     Task<CategoryDto?> GetCategoryAsync(int id, CancellationToken cancellationToken = default);
 
     Task<IReadOnlyCollection<TagDto>> GetTagsAsync(CancellationToken cancellationToken = default);
     Task<TagDto?> GetTagAsync(int id, CancellationToken cancellationToken = default);
+    Task<TagDto> CreateTagAsync(CreateTagDto request, CancellationToken cancellationToken = default);
+    Task UpdateTagAsync(int id, UpdateTagDto request, CancellationToken cancellationToken = default);
+    Task DeleteTagAsync(int id, CancellationToken cancellationToken = default);
 
     Task<IReadOnlyCollection<ContentStatusDto>> GetContentStatusesAsync(CancellationToken cancellationToken = default);
     Task<ContentStatusDto?> GetContentStatusAsync(int id, CancellationToken cancellationToken = default);

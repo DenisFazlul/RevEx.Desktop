@@ -22,6 +22,12 @@ public sealed class RevExApiService(HttpClient httpClient) : IRevExApiService
         CancellationToken cancellationToken = default) =>
         PostAsJsonAsync<CreateContentDto, ContentDto>("api/content", request, cancellationToken);
 
+    public Task UpdateContentAsync(
+        int id,
+        UpdateContentDto request,
+        CancellationToken cancellationToken = default) =>
+        PutAsJsonAsync($"api/content/{id}", request, cancellationToken);
+
     public Task<IReadOnlyCollection<CategoryDto>> GetCategoriesAsync(
         CancellationToken cancellationToken = default) =>
         GetAllAsync<CategoryDto>("api/categories", cancellationToken);
@@ -34,6 +40,15 @@ public sealed class RevExApiService(HttpClient httpClient) : IRevExApiService
 
     public Task<TagDto?> GetTagAsync(int id, CancellationToken cancellationToken = default) =>
         GetByIdAsync<TagDto>("api/tags", id, cancellationToken);
+
+    public Task<TagDto> CreateTagAsync(CreateTagDto request, CancellationToken cancellationToken = default) =>
+        PostAsJsonAsync<CreateTagDto, TagDto>("api/tags", request, cancellationToken);
+
+    public Task UpdateTagAsync(int id, UpdateTagDto request, CancellationToken cancellationToken = default) =>
+        PutAsJsonAsync($"api/tags/{id}", request, cancellationToken);
+
+    public Task DeleteTagAsync(int id, CancellationToken cancellationToken = default) =>
+        DeleteAsync($"api/tags/{id}", cancellationToken);
 
     public Task<IReadOnlyCollection<ContentStatusDto>> GetContentStatusesAsync(
         CancellationToken cancellationToken = default) =>
@@ -93,6 +108,10 @@ public sealed class RevExApiService(HttpClient httpClient) : IRevExApiService
             .Select(id => $"CategoryIds={id.ToString(CultureInfo.InvariantCulture)}")
             .ToList();
 
+        parameters.AddRange(query.TagIds
+            .Distinct()
+            .Select(id => $"TagIds={id.ToString(CultureInfo.InvariantCulture)}"));
+
         if (!string.IsNullOrWhiteSpace(query.Name))
         {
             parameters.Add($"Name={Uri.EscapeDataString(query.Name.Trim())}");
@@ -136,5 +155,20 @@ public sealed class RevExApiService(HttpClient httpClient) : IRevExApiService
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<TResponse>(cancellationToken: cancellationToken)
             ?? throw new HttpRequestException($"API returned an empty response for '{route}'.");
+    }
+
+    private async Task PutAsJsonAsync<TRequest>(
+        string route,
+        TRequest request,
+        CancellationToken cancellationToken)
+    {
+        using var response = await httpClient.PutAsJsonAsync(route, request, cancellationToken);
+        response.EnsureSuccessStatusCode();
+    }
+
+    private async Task DeleteAsync(string route, CancellationToken cancellationToken)
+    {
+        using var response = await httpClient.DeleteAsync(route, cancellationToken);
+        response.EnsureSuccessStatusCode();
     }
 }

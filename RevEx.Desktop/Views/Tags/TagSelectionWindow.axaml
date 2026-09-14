@@ -1,0 +1,36 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:domain="using:RevEx.Desktop.Core.Domain"
+        xmlns:vm="using:RevEx.Desktop.ViewModels.Tags"
+        x:Class="RevEx.Desktop.Views.Tags.TagSelectionWindow"
+        x:DataType="vm:TagSelectionWindowViewModel"
+        Title="Добавить тег" Width="440" Height="500"
+        MinWidth="360" MinHeight="360" WindowStartupLocation="CenterOwner">
+    <Grid Margin="24" RowDefinitions="Auto,18,*,18,Auto">
+        <StackPanel Spacing="5">
+            <TextBlock Classes="h2" Text="Доступные теги" />
+            <TextBlock Classes="caption" Text="Выберите один тег для добавления к контенту" />
+        </StackPanel>
+        <Border Grid.Row="2" Classes="value-box">
+            <Grid>
+                <TextBlock IsVisible="{Binding !HasTags}" Text="Все доступные теги уже добавлены."
+                           TextWrapping="Wrap" HorizontalAlignment="Center" VerticalAlignment="Center"
+                           Foreground="{StaticResource TextSecondaryBrush}" />
+                <ListBox Classes="clean-list" ItemsSource="{Binding Tags}" SelectedItem="{Binding SelectedTag}"
+                         IsVisible="{Binding HasTags}" DoubleTapped="OnTagDoubleTapped">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="domain:TagDto">
+                            <Border Padding="12,10">
+                                <TextBlock Text="{Binding Name, StringFormat='#{0}'}" FontWeight="SemiBold" />
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+        </Border>
+        <Grid Grid.Row="4" ColumnDefinitions="*,12,*">
+            <Button Content="Отмена" Click="OnCancelClick" />
+            <Button Grid.Column="2" Classes="primary" Content="Добавить" Click="OnAddClick" />
+        </Grid>
+    </Grid>
+</Window>

@@ -4,12 +4,47 @@
              xmlns:vm="using:RevEx.Desktop.ViewModels.Contents"
              x:Class="RevEx.Desktop.Views.Contents.ContentDetailsView" x:DataType="vm:ContentDetailsViewModel">
     <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-        <Grid Margin="40,36" RowDefinitions="Auto,24,Auto,18,Auto" MaxWidth="900" HorizontalAlignment="Center">
+        <Grid Margin="40,36" RowDefinitions="Auto,24,Auto,18,Auto,18,Auto" MaxWidth="900" HorizontalAlignment="Center">
             <HeaderedContentControl Theme="{StaticResource EyebrowHeaderTheme}"
                                     Header="{Binding Title}" Content="Карточка материала из базы знаний" />
             <HeaderedContentControl Grid.Row="2" Theme="{StaticResource DetailsCardTheme}"
                                     Header="Описание" Content="{Binding Description}" />
             <Border Grid.Row="4" Classes="card section-card">
+                <StackPanel Spacing="14">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel Spacing="4">
+                            <TextBlock Classes="h2" Text="Теги контента" />
+                            <TextBlock Classes="caption" Text="Только уже добавленные метки" />
+                        </StackPanel>
+                        <Button Grid.Column="1" Classes="primary" Content="Добавить тег"
+                                Click="OnAddTagClick" IsEnabled="{Binding !IsSavingTags}" />
+                    </Grid>
+                    <ProgressBar IsVisible="{Binding IsSavingTags}" IsIndeterminate="True" />
+                    <TextBlock IsVisible="{Binding HasNoTags}" Text="У контента пока нет тегов."
+                               Foreground="{StaticResource TextSecondaryBrush}" />
+                    <ItemsControl ItemsSource="{Binding Tags}" IsVisible="{Binding HasTags}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:ContentTagItemViewModel">
+                                <Border Classes="value-box" Padding="12,7" Margin="0,0,8,8">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="{Binding Name, StringFormat='#{0}'}" VerticalAlignment="Center" />
+                                        <Button Classes="ghost" Width="24" Height="24" Padding="0" Content="×"
+                                                Command="{Binding RemoveCommand}" />
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock Text="{Binding TagMessage}" Foreground="{StaticResource TextSecondaryBrush}" />
+                    <TextBlock Text="{Binding ErrorMessage}" TextWrapping="Wrap"
+                               Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Row="6" Classes="card section-card">
                 <StackPanel Spacing="14">
                     <Grid ColumnDefinitions="*,Auto">
                         <TextBlock Classes="h2" Text="Версии" />

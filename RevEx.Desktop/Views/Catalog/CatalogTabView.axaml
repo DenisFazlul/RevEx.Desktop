@@ -3,6 +3,7 @@
              xmlns:vm="using:RevEx.Desktop.ViewModels.Catalog"
              xmlns:categoryVm="using:RevEx.Desktop.ViewModels.Categories"
              xmlns:contentVm="using:RevEx.Desktop.ViewModels.Contents"
+             xmlns:tagVm="using:RevEx.Desktop.ViewModels.Tags"
              x:Class="RevEx.Desktop.Views.Catalog.CatalogTabView" x:DataType="vm:CatalogTabViewModel">
     <Grid Margin="32" RowDefinitions="Auto,24,*">
         <Grid ColumnDefinitions="*,360">
@@ -14,7 +15,7 @@
 
         <Grid Grid.Row="2" ColumnDefinitions="260,20,*">
             <Border Classes="card section-card">
-                <Grid RowDefinitions="Auto,14,*">
+                <Grid RowDefinitions="Auto,14,*,18,Auto,14,*">
                     <Grid ColumnDefinitions="*,Auto">
                         <TextBlock Classes="h2" Text="Категории" />
                         <Border Grid.Column="1" Width="28" Height="28" CornerRadius="8" Background="{StaticResource SurfaceMutedBrush}">
@@ -27,6 +28,22 @@
                                  IsVisible="{Binding !IsLoading}">
                             <ListBox.ItemTemplate>
                                 <DataTemplate x:DataType="categoryVm:CategoryItemViewModel">
+                                    <CheckBox Padding="8" Content="{Binding Name}" IsChecked="{Binding IsSelected}"
+                                              HorizontalAlignment="Stretch" />
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+
+                    <Border Grid.Row="3" Classes="section-separator" />
+                    <Grid Grid.Row="4" ColumnDefinitions="*,Auto">
+                        <TextBlock Classes="h2" Text="Теги" />
+                        <TextBlock Grid.Column="1" Classes="caption" Text="необязательно" />
+                    </Grid>
+                    <Grid Grid.Row="6">
+                        <ListBox Classes="clean-list category-list" ItemsSource="{Binding Tags}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate x:DataType="tagVm:TagFilterItemViewModel">
                                     <CheckBox Padding="8" Content="{Binding Name}" IsChecked="{Binding IsSelected}"
                                               HorizontalAlignment="Stretch" />
                                 </DataTemplate>
@@ -59,8 +76,14 @@
                             <ListBox.ItemTemplate>
                                 <DataTemplate x:DataType="contentVm:ContentItemViewModel">
                                     <HeaderedContentControl Theme="{StaticResource ContentRowTheme}"
-                                                            Header="{Binding Name}" Content="{Binding Description}"
-                                                            DoubleTapped="OnContentDoubleTapped" />
+                                                            Header="{Binding Name}"
+                                                            DoubleTapped="OnContentDoubleTapped">
+                                        <StackPanel Spacing="5">
+                                            <TextBlock Text="{Binding Description}" TextWrapping="Wrap" />
+                                            <TextBlock Text="{Binding TagsText}" Classes="caption"
+                                                       Foreground="{StaticResource AccentBrush}" />
+                                        </StackPanel>
+                                    </HeaderedContentControl>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>

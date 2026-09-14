@@ -6,6 +6,7 @@ using RevEx.Desktop.ViewModels.Catalog;
 using RevEx.Desktop.ViewModels.Contents;
 using RevEx.Desktop.ViewModels.Settings;
 using RevEx.Desktop.ViewModels.Tabs;
+using RevEx.Desktop.ViewModels.Tags;
 
 namespace RevEx.Desktop.Navigation;
 
@@ -24,6 +25,7 @@ public sealed class WorkspaceTabFactory : IWorkspaceTabFactory
             [typeof(CatalogTabViewModel)] = CreateCatalogTab,
             [typeof(ContentDetailsViewModel)] = CreateContentDetailsTab,
             [typeof(ContentEditorTabViewModel)] = CreateContentEditorTab,
+            [typeof(TagAdminTabViewModel)] = CreateTagAdminTab,
             [typeof(SettingsTabViewModel)] = CreateSettings
         };
     }
@@ -32,6 +34,9 @@ public sealed class WorkspaceTabFactory : IWorkspaceTabFactory
     {
         return new SettingsTabViewModel(_settings, "settings", true);
     }
+
+    private WorkspaceTabViewModel CreateTagAdminTab(WorkspaceTabContext _, object? __) =>
+        new TagAdminTabViewModel(_revExApiService);
 
     public WorkspaceTabViewModel Create(Type tabType, WorkspaceTabContext context, object? parameter = null)
     {

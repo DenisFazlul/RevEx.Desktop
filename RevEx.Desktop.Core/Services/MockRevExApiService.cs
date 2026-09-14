@@ -14,7 +14,7 @@ public sealed class MockRevExApiService : IRevExApiService
         new(2, "Документы", CreatedAt, UpdatedAt)
     ];
 
-    private static readonly TagDto[] Tags =
+    private static readonly List<TagDto> Tags =
     [
         new(1, "Важное", CreatedAt, UpdatedAt),
         new(2, "Работа", CreatedAt, UpdatedAt)
@@ -57,6 +57,13 @@ public sealed class MockRevExApiService : IRevExApiService
             result = result.Where(content => categoryIds.Contains(content.CategoryId));
         }
 
+        var tagIds = query.TagIds.ToHashSet();
+        if (tagIds.Count > 0)
+        {
+            result = result.Where(content =>
+                tagIds.All(tagId => content.TagIds.Contains(tagId)));
+        }
+
         if (!string.IsNullOrWhiteSpace(query.Name))
         {
             result = result.Where(content =>
@@ -88,6 +95,29 @@ public sealed class MockRevExApiService : IRevExApiService
         return Task.FromResult(content);
     }
 
+    public Task UpdateContentAsync(
+        int id,
+        UpdateContentDto request,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var index = Contents.FindIndex(item => item.Id == id);
+        if (index < 0)
+            throw new HttpRequestException($"Content {id} was not found.");
+
+        var current = Contents[index];
+        Contents[index] = current with
+        {
+            Name = request.Name,
+            Description = request.Description,
+            CategoryId = request.CategoryId,
+            ContentStatusId = request.ContentStatusId ?? current.ContentStatusId,
+            TagIds = request.TagIds?.ToArray() ?? current.TagIds,
+            UpdatedAt = DateTimeOffset.UtcNow
+        };
+        return Task.CompletedTask;
+    }
+
     public Task<IReadOnlyCollection<CategoryDto>> GetCategoriesAsync(CancellationToken cancellationToken = default) =>
         FromCollection(Categories, cancellationToken);
 
@@ -99,6 +129,48 @@ public sealed class MockRevExApiService : IRevExApiService
 
     public Task<TagDto?> GetTagAsync(int id, CancellationToken cancellationToken = default) =>
         FromItem(Tags.FirstOrDefault(item => item.Id == id), cancellationToken);
+
+    public Task<TagDto> CreateTagAsync(
+        CreateTagDto request,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var now = DateTimeOffset.UtcNow;
+        var tag = new TagDto(Tags.Count == 0 ? 1 : Tags.Max(item => item.Id) + 1, request.Name, now, now);
+        Tags.Add(tag);
+        return Task.FromResult(tag);
+    }
+
+    public Task UpdateTagAsync(
+        int id,
+        UpdateTagDto request,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var index = Tags.FindIndex(item => item.Id == id);
+        if (index < 0)
+            throw new HttpRequestException($"Tag {id} was not found.");
+
+        Tags[index] = Tags[index] with { Name = request.Name, UpdatedAt = DateTimeOffset.UtcNow };
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteTagAsync(int id, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        Tags.RemoveAll(item => item.Id == id);
+        for (var index = 0; index < Contents.Count; index++)
+        {
+            var content = Contents[index];
+            Contents[index] = content with
+            {
+                TagIds = content.TagIds.Where(tagId => tagId != id).ToArray(),
+                UpdatedAt = DateTimeOffset.UtcNow
+            };
+        }
+
+        return Task.CompletedTask;
+    }
 
     public Task<IReadOnlyCollection<ContentStatusDto>> GetContentStatusesAsync(
         CancellationToken cancellationToken = default) =>
