@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using RevEx.Desktop.Core.Interfaces;
+using RevEx.Desktop.Core.Domain;
 using RevEx.Desktop.ViewModels.Catalog;
 using RevEx.Desktop.ViewModels.Contents;
 using RevEx.Desktop.ViewModels.Settings;
@@ -22,6 +23,7 @@ public sealed class WorkspaceTabFactory : IWorkspaceTabFactory
         {
             [typeof(CatalogTabViewModel)] = CreateCatalogTab,
             [typeof(ContentDetailsViewModel)] = CreateContentDetailsTab,
+            [typeof(ContentEditorTabViewModel)] = CreateContentEditorTab,
             [typeof(SettingsTabViewModel)] = CreateSettings
         };
     }
@@ -47,12 +49,38 @@ public sealed class WorkspaceTabFactory : IWorkspaceTabFactory
                 content.Id,
                 content)));
 
-    private static ContentDetailsViewModel CreateContentDetailsTab(
-        WorkspaceTabContext _,
-        object? parameter) =>
-        new(GetRequiredParameter<ContentItemViewModel>(parameter));
+    private ContentEditorTabViewModel CreateContentEditorTab(WorkspaceTabContext _, object? parameter) =>
+        parameter switch
+        {
+            ContentVersionEditorParameter versionEditor => new ContentEditorTabViewModel(
+                _revExApiService,
+                versionEditor.Content,
+                versionEditor.VersionAdded),
+            null => new ContentEditorTabViewModel(_revExApiService),
+            _ => throw new ArgumentException("Неизвестный параметр вкладки добавления контента.", nameof(parameter))
+        };
+
+    private ContentDetailsViewModel CreateContentDetailsTab(
+        WorkspaceTabContext context,
+        object? parameter)
+    {
+        var content = GetRequiredParameter<ContentItemViewModel>(parameter);
+        ContentDetailsViewModel? details = null;
+        details = new ContentDetailsViewModel(
+            content,
+            _revExApiService,
+            () => context.OpenTab(new WorkspaceTabRequest(
+                typeof(ContentEditorTabViewModel),
+                content.Id,
+                new ContentVersionEditorParameter(content, details!.AddOrUpdateVersion))));
+        return details;
+    }
 
     private static T GetRequiredParameter<T>(object? parameter) where T : class =>
         parameter as T
         ?? throw new ArgumentException($"Для создания вкладки требуется параметр {typeof(T).Name}.", nameof(parameter));
+
+    private sealed record ContentVersionEditorParameter(
+        ContentItemViewModel Content,
+        Action<ContentVersionDto> VersionAdded);
 }

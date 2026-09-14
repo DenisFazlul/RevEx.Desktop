@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Globalization;
 using RevEx.Desktop.Core.Domain;
@@ -15,6 +16,11 @@ public sealed class RevExApiService(HttpClient httpClient) : IRevExApiService
 
     public Task<ContentDto?> GetContentAsync(int id, CancellationToken cancellationToken = default) =>
         GetByIdAsync<ContentDto>("api/content", id, cancellationToken);
+
+    public Task<ContentDto> CreateContentAsync(
+        CreateContentDto request,
+        CancellationToken cancellationToken = default) =>
+        PostAsJsonAsync<CreateContentDto, ContentDto>("api/content", request, cancellationToken);
 
     public Task<IReadOnlyCollection<CategoryDto>> GetCategoriesAsync(
         CancellationToken cancellationToken = default) =>
@@ -42,6 +48,36 @@ public sealed class RevExApiService(HttpClient httpClient) : IRevExApiService
 
     public Task<ContentVersionDto?> GetContentVersionAsync(int id, CancellationToken cancellationToken = default) =>
         GetByIdAsync<ContentVersionDto>("api/content-versions", id, cancellationToken);
+
+    public Task<ContentVersionDto> CreateContentVersionAsync(
+        CreateContentVersionDto request,
+        CancellationToken cancellationToken = default) =>
+        PostAsJsonAsync<CreateContentVersionDto, ContentVersionDto>(
+            "api/content-versions",
+            request,
+            cancellationToken);
+
+    public async Task<ContentVersionDto> UploadContentVersionFileAsync(
+        int versionId,
+        Stream content,
+        string fileName,
+        string role,
+        CancellationToken cancellationToken = default)
+    {
+        using var multipartContent = new MultipartFormDataContent();
+        using var fileContent = new StreamContent(content);
+        fileContent.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+        multipartContent.Add(fileContent, "File", fileName);
+        multipartContent.Add(new StringContent(role), "Role");
+
+        using var response = await httpClient.PostAsync(
+            $"api/content-versions/{versionId}/file",
+            multipartContent,
+            cancellationToken);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<ContentVersionDto>(cancellationToken: cancellationToken)
+            ?? throw new HttpRequestException("API returned an empty response after uploading the Revit file.");
+    }
 
     public Task<IReadOnlyCollection<ContentFileDto>> GetContentFilesAsync(
         CancellationToken cancellationToken = default) =>
@@ -89,5 +125,16 @@ public sealed class RevExApiService(HttpClient httpClient) : IRevExApiService
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<T>(cancellationToken: cancellationToken)
             ?? throw new HttpRequestException($"API returned an empty response for '{route}/{id}'.");
+    }
+
+    private async Task<TResponse> PostAsJsonAsync<TRequest, TResponse>(
+        string route,
+        TRequest request,
+        CancellationToken cancellationToken)
+    {
+        using var response = await httpClient.PostAsJsonAsync(route, request, cancellationToken);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<TResponse>(cancellationToken: cancellationToken)
+            ?? throw new HttpRequestException($"API returned an empty response for '{route}'.");
     }
 }

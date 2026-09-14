@@ -1,7 +1,7 @@
 namespace RevEx.Desktop.Core.Domain;
 
 public sealed record CategoryDto(
-    int Id,
-    string Name,
-    DateTimeOffset CreatedAt,
-    DateTimeOffset UpdatedAt);
+    /* Идентификатор категории. */ int Id,
+    /* Название категории. */ string Name,
+    /* Дата создания категории. */ DateTimeOffset CreatedAt,
+    /* Дата последнего изменения категории. */ DateTimeOffset UpdatedAt);

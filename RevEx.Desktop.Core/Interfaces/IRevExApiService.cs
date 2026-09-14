@@ -8,6 +8,9 @@ public interface IRevExApiService
         ContentQueryDto query,
         CancellationToken cancellationToken = default);
     Task<ContentDto?> GetContentAsync(int id, CancellationToken cancellationToken = default);
+    Task<ContentDto> CreateContentAsync(
+        CreateContentDto request,
+        CancellationToken cancellationToken = default);
 
     Task<IReadOnlyCollection<CategoryDto>> GetCategoriesAsync(CancellationToken cancellationToken = default);
     Task<CategoryDto?> GetCategoryAsync(int id, CancellationToken cancellationToken = default);
@@ -20,6 +23,15 @@ public interface IRevExApiService
 
     Task<IReadOnlyCollection<ContentVersionDto>> GetContentVersionsAsync(CancellationToken cancellationToken = default);
     Task<ContentVersionDto?> GetContentVersionAsync(int id, CancellationToken cancellationToken = default);
+    Task<ContentVersionDto> CreateContentVersionAsync(
+        CreateContentVersionDto request,
+        CancellationToken cancellationToken = default);
+    Task<ContentVersionDto> UploadContentVersionFileAsync(
+        int versionId,
+        Stream content,
+        string fileName,
+        string role,
+        CancellationToken cancellationToken = default);
 
     Task<IReadOnlyCollection<ContentFileDto>> GetContentFilesAsync(CancellationToken cancellationToken = default);
     Task<ContentFileDto?> GetContentFileAsync(int id, CancellationToken cancellationToken = default);

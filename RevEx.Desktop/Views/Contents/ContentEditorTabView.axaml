@@ -1,0 +1,79 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RevEx.Desktop.ViewModels.Contents"
+             x:Class="RevEx.Desktop.Views.Contents.ContentEditorTabView"
+             x:DataType="vm:ContentEditorTabViewModel">
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+        <Grid Margin="40,36" RowDefinitions="Auto,24,Auto" MaxWidth="920" HorizontalAlignment="Center">
+            <HeaderedContentControl Theme="{StaticResource PageHeaderTheme}"
+                                    Header="{Binding Title}"
+                                    Content="{Binding PageDescription}" />
+
+            <Border Grid.Row="2" Classes="card section-card">
+                <StackPanel Spacing="18">
+                    <StackPanel IsVisible="{Binding IsCreatingContent}" Spacing="14">
+                        <TextBlock Classes="h2" Text="Карточка контента" />
+                        <Grid ColumnDefinitions="*,18,*" RowDefinitions="Auto,14,Auto">
+                            <StackPanel Spacing="7">
+                                <TextBlock Text="Название" />
+                                <TextBox Text="{Binding ContentName}" Watermark="Например, Дверь одностворчатая" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Spacing="7">
+                                <TextBlock Text="Категория" />
+                                <ComboBox ItemsSource="{Binding Categories}"
+                                          SelectedItem="{Binding SelectedCategory}"
+                                          DisplayMemberBinding="{Binding Name}"
+                                          IsEnabled="{Binding !IsLoading}" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="2" Grid.ColumnSpan="3" Spacing="7">
+                                <TextBlock Text="Описание" />
+                                <TextBox Text="{Binding Description}" AcceptsReturn="True" TextWrapping="Wrap"
+                                         MinHeight="92" Watermark="Для чего используется семейство" />
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+
+                    <StackPanel IsVisible="{Binding IsAddingVersion}" Spacing="14">
+                        <TextBlock Classes="h2" Text="Существующий контент" />
+                        <Border Classes="value-box">
+                            <TextBlock Text="{Binding ExistingContentName}" />
+                        </Border>
+                    </StackPanel>
+
+                    <Border Classes="section-separator" />
+                    <TextBlock Classes="h2" Text="Версия Revit-семейства" />
+                    <Grid ColumnDefinitions="*,18,*">
+                        <StackPanel Spacing="7">
+                            <TextBlock Text="Название версии" />
+                            <TextBox Text="{Binding VersionName}" Watermark="Например, 1.0.0" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Spacing="7">
+                            <TextBlock Text="Версия Revit" />
+                            <ComboBox ItemsSource="{Binding RevitVersions}"
+                                      SelectedItem="{Binding RevitVersion}" />
+                        </StackPanel>
+                    </Grid>
+
+                    <StackPanel Spacing="7">
+                        <TextBlock Text="Файл семейства" />
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Border Classes="value-box" Margin="0,0,12,0">
+                                <TextBlock Text="{Binding SelectedFileName}" TextTrimming="CharacterEllipsis" />
+                            </Border>
+                            <Button Grid.Column="1" Content="Выбрать RFA" Click="OnChooseFileClick" />
+                        </Grid>
+                    </StackPanel>
+
+                    <ProgressBar IsVisible="{Binding IsSaving}" IsIndeterminate="True" />
+                    <TextBlock Text="{Binding Message}" TextWrapping="Wrap"
+                               Foreground="{StaticResource TextSecondaryBrush}" />
+
+                    <Button Classes="primary" HorizontalAlignment="Left"
+                            Content="Сохранить"
+                            Command="{Binding SaveCommand}"
+                            IsEnabled="{Binding !IsSaving}" />
+                </StackPanel>
+            </Border>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

@@ -1,13 +1,46 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:domain="using:RevEx.Desktop.Core.Domain"
              xmlns:vm="using:RevEx.Desktop.ViewModels.Contents"
              x:Class="RevEx.Desktop.Views.Contents.ContentDetailsView" x:DataType="vm:ContentDetailsViewModel">
     <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-        <Grid Margin="40,36" RowDefinitions="Auto,24,Auto" MaxWidth="900" HorizontalAlignment="Center">
+        <Grid Margin="40,36" RowDefinitions="Auto,24,Auto,18,Auto" MaxWidth="900" HorizontalAlignment="Center">
             <HeaderedContentControl Theme="{StaticResource EyebrowHeaderTheme}"
                                     Header="{Binding Title}" Content="Карточка материала из базы знаний" />
             <HeaderedContentControl Grid.Row="2" Theme="{StaticResource DetailsCardTheme}"
                                     Header="Описание" Content="{Binding Description}" />
+            <Border Grid.Row="4" Classes="card section-card">
+                <StackPanel Spacing="14">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Classes="h2" Text="Версии" />
+                        <Button Grid.Column="1" Classes="primary"
+                                Content="Добавить версию"
+                                Command="{Binding AddVersionCommand}" />
+                    </Grid>
+
+                    <ProgressBar IsVisible="{Binding IsLoading}" IsIndeterminate="True" />
+                    <TextBlock IsVisible="{Binding HasNoVersions}"
+                               Text="У контента пока нет версий."
+                               Foreground="{StaticResource TextSecondaryBrush}" />
+                    <TextBlock Text="{Binding ErrorMessage}" TextWrapping="Wrap"
+                               Foreground="{StaticResource TextSecondaryBrush}" />
+
+                    <ItemsControl ItemsSource="{Binding Versions}" IsVisible="{Binding HasVersions}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="domain:ContentVersionDto">
+                                <Border Classes="value-box" Margin="0,0,0,8">
+                                    <Grid ColumnDefinitions="2*,*,*,Auto">
+                                        <TextBlock FontWeight="SemiBold" Text="{Binding Name}" />
+                                        <TextBlock Grid.Column="1" Text="{Binding ApplicationVersion, StringFormat='Revit {0}'}" />
+                                        <TextBlock Grid.Column="2" Text="{Binding Status}" />
+                                        <TextBlock Grid.Column="3" Text="{Binding FileIds.Count, StringFormat='Файлов: {0}'}" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
         </Grid>
     </ScrollViewer>
 </UserControl>

@@ -2,6 +2,9 @@ namespace RevEx.Desktop.Core.Domain;
 
 public sealed class ContentQueryDto
 {
+    /// <summary>Категории, по которым фильтруется каталог.</summary>
     public int[] CategoryIds { get; init; } = [];
+
+    /// <summary>Необязательная часть названия для поиска.</summary>
     public string? Name { get; init; }
 }

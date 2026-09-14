@@ -26,18 +26,18 @@ public sealed class MockRevExApiService : IRevExApiService
         new(2, "Опубликовано", CreatedAt, UpdatedAt)
     ];
 
-    private static readonly ContentFileDto[] ContentFiles =
+    private static readonly List<ContentFileDto> ContentFiles =
     [
-        new(1, "/api/content-files/1/content", 1, CreatedAt, UpdatedAt),
-        new(2, "/api/content-files/2/content", null, CreatedAt, UpdatedAt)
+        new(1, "/api/content-files/1/content", 1, "Example.rfa", ".rfa", 1024, "primary", CreatedAt, UpdatedAt),
+        new(2, "/api/content-files/2/content", null, "Preview.png", ".png", 512, "preview", CreatedAt, UpdatedAt)
     ];
 
-    private static readonly ContentVersionDto[] ContentVersions =
+    private static readonly List<ContentVersionDto> ContentVersions =
     [
-        new(1, 1, [1], "Версия 1.0", CreatedAt, "published", CreatedAt, UpdatedAt)
+        new(1, 1, [1], "Версия 1.0", CreatedAt, "published", "revit", "2026", CreatedAt, UpdatedAt)
     ];
 
-    private static readonly ContentDto[] Contents =
+    private static readonly List<ContentDto> Contents =
     [
         new(1, "Пример материала", "Тестовый материал из мок-сервиса.", 1, 2, 2, [1, 2], CreatedAt, UpdatedAt),
         new(2, "Рабочий документ", "Материал без превью.", 2, 1, null, [2], CreatedAt, UpdatedAt)
@@ -69,6 +69,25 @@ public sealed class MockRevExApiService : IRevExApiService
     public Task<ContentDto?> GetContentAsync(int id, CancellationToken cancellationToken = default) =>
         FromItem(Contents.FirstOrDefault(item => item.Id == id), cancellationToken);
 
+    public Task<ContentDto> CreateContentAsync(
+        CreateContentDto request,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var content = new ContentDto(
+            Contents.Count == 0 ? 1 : Contents.Max(item => item.Id) + 1,
+            request.Name,
+            request.Description,
+            request.CategoryId,
+            request.ContentStatusId ?? 1,
+            null,
+            request.TagIds?.ToArray() ?? [],
+            DateTimeOffset.UtcNow,
+            DateTimeOffset.UtcNow);
+        Contents.Add(content);
+        return Task.FromResult(content);
+    }
+
     public Task<IReadOnlyCollection<CategoryDto>> GetCategoriesAsync(CancellationToken cancellationToken = default) =>
         FromCollection(Categories, cancellationToken);
 
@@ -95,6 +114,56 @@ public sealed class MockRevExApiService : IRevExApiService
     public Task<ContentVersionDto?> GetContentVersionAsync(int id, CancellationToken cancellationToken = default) =>
         FromItem(ContentVersions.FirstOrDefault(item => item.Id == id), cancellationToken);
 
+    public Task<ContentVersionDto> CreateContentVersionAsync(
+        CreateContentVersionDto request,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var version = new ContentVersionDto(
+            ContentVersions.Count == 0 ? 1 : ContentVersions.Max(item => item.Id) + 1,
+            request.ContentId,
+            [],
+            request.Name ?? "Новая версия",
+            request.Date ?? DateTimeOffset.UtcNow,
+            request.Status ?? "draft",
+            request.Application,
+            request.ApplicationVersion,
+            DateTimeOffset.UtcNow,
+            DateTimeOffset.UtcNow);
+        ContentVersions.Add(version);
+        return Task.FromResult(version);
+    }
+
+    public Task<ContentVersionDto> UploadContentVersionFileAsync(
+        int versionId,
+        Stream content,
+        string fileName,
+        string role,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var versionIndex = ContentVersions.FindIndex(item => item.Id == versionId);
+        if (versionIndex < 0)
+            throw new HttpRequestException($"Version {versionId} was not found.");
+
+        var fileId = ContentFiles.Count == 0 ? 1 : ContentFiles.Max(item => item.Id) + 1;
+        ContentFiles.Add(new ContentFileDto(
+            fileId,
+            $"/api/content-files/{fileId}/content",
+            versionId,
+            fileName,
+            Path.GetExtension(fileName),
+            content.CanSeek ? content.Length : 0,
+            role,
+            DateTimeOffset.UtcNow,
+            DateTimeOffset.UtcNow));
+
+        var version = ContentVersions[versionIndex];
+        version = version with { FileIds = version.FileIds.Append(fileId).ToArray() };
+        ContentVersions[versionIndex] = version;
+        return Task.FromResult(version);
+    }
+
     public Task<IReadOnlyCollection<ContentFileDto>> GetContentFilesAsync(
         CancellationToken cancellationToken = default) =>
         FromCollection(ContentFiles, cancellationToken);
@@ -103,11 +172,11 @@ public sealed class MockRevExApiService : IRevExApiService
         FromItem(ContentFiles.FirstOrDefault(item => item.Id == id), cancellationToken);
 
     private static Task<IReadOnlyCollection<T>> FromCollection<T>(
-        T[] items,
+        IEnumerable<T> items,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return Task.FromResult<IReadOnlyCollection<T>>(items);
+        return Task.FromResult<IReadOnlyCollection<T>>(items.ToArray());
     }
 
     private static Task<T?> FromItem<T>(T? item, CancellationToken cancellationToken)
