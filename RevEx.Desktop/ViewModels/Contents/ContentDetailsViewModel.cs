@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
@@ -68,21 +68,10 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
             var tagsTask = _apiService.GetTagsAsync();
             await Task.WhenAll(contentTask, versionsTask, tagsTask);
 
-            _content = await contentTask
+            var content = await contentTask
                 ?? throw new HttpRequestException($"Контент {Id} не найден.");
-            Description = _content.Description;
-            _allTags = await tagsTask;
-            await LoadPreviewAsync(_content.PreviewFileId);
-
-            Versions.Clear();
-            foreach (var version in (await versionsTask)
-                         .Where(item => item.ContentId == Id)
-                         .OrderByDescending(item => item.Date))
-                Versions.Add(version);
-
-            Tags.Clear();
-            foreach (var tag in _allTags.Where(tag => _content.TagIds.Contains(tag.Id)).OrderBy(tag => tag.Name))
-                Tags.Add(new ContentTagItemViewModel(tag, RemoveTagAsync));
+            ApplyContent(content, await versionsTask, await tagsTask);
+            await LoadPreviewAsync(content.PreviewFileId);
 
             NotifyCollectionStateChanged();
         }
@@ -233,6 +222,37 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         var previous = PreviewImage;
         PreviewImage = image;
         previous?.Dispose();
+    }
+
+    private void ApplyContent(
+        ContentDto content,
+        IReadOnlyCollection<ContentVersionDto> versions,
+        IReadOnlyCollection<TagDto> tags)
+    {
+        _content = content;
+        _allTags = tags;
+        Description = content.Description;
+
+        ReplaceVersions(versions);
+        ReplaceTags(content.TagIds);
+    }
+
+    private void ReplaceVersions(IEnumerable<ContentVersionDto> versions)
+    {
+        Versions.Clear();
+        foreach (var version in versions
+                     .Where(item => item.ContentId == Id)
+                     .OrderByDescending(item => item.Date))
+            Versions.Add(version);
+    }
+
+    private void ReplaceTags(IReadOnlyCollection<int> assignedTagIds)
+    {
+        Tags.Clear();
+        foreach (var tag in _allTags
+                     .Where(item => assignedTagIds.Contains(item.Id))
+                     .OrderBy(item => item.Name))
+            Tags.Add(new ContentTagItemViewModel(tag, RemoveTagAsync));
     }
 
     private void NotifyCollectionStateChanged()

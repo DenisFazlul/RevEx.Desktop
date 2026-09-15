@@ -16,6 +16,9 @@ namespace RevEx.Desktop.ViewModels.Contents;
 
 public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
 {
+    private const string NoFamilyFileSelected = "Файл не выбран";
+    private const string NoPreviewSelected = "Изображение не выбрано";
+
     private readonly IRevExApiService _apiService;
     private readonly ContentItemViewModel? _existingContent;
     private readonly Action<ContentVersionDto>? _versionAdded;
@@ -37,16 +40,16 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
     private string _revitVersion = "2026";
 
     [ObservableProperty]
-    private string? _selectedFilePath;
+    private string? _selectedFamilyFilePath;
 
     [ObservableProperty]
-    private string _selectedFileName = "Файл не выбран";
+    private string _selectedFamilyFileName = NoFamilyFileSelected;
 
     [ObservableProperty]
     private string? _selectedPreviewPath;
 
     [ObservableProperty]
-    private string _selectedPreviewName = "Изображение не выбрано";
+    private string _selectedPreviewName = NoPreviewSelected;
 
     [ObservableProperty]
     private bool _isLoading;
@@ -117,20 +120,18 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
         }
     }
 
-    public void SetSelectedFile(string path, string fileName)
+    public void SetSelectedFamilyFile(string path, string fileName)
     {
-        SelectedFilePath = path;
-        SelectedFileName = fileName;
-        Message = null;
-        HasError = false;
+        SelectedFamilyFilePath = path;
+        SelectedFamilyFileName = fileName;
+        ClearMessage();
     }
 
     public void SetSelectedPreview(string path, string fileName)
     {
         SelectedPreviewPath = path;
         SelectedPreviewName = fileName;
-        Message = null;
-        HasError = false;
+        ClearMessage();
     }
 
     [RelayCommand]
@@ -148,56 +149,12 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
             HasError = false;
             Message = "Сохраняем контент и загружаем Revit-семейство…";
 
-            ContentDto? createdContent = null;
-            var contentId = _existingContent?.Id ?? 0;
-            if (IsCreatingContent)
-            {
-                createdContent = await _apiService.CreateContentAsync(new CreateContentDto
-                {
-                    Name = ContentName.Trim(),
-                    Description = Description.Trim(),
-                    CategoryId = SelectedCategory!.Id,
-                    TagIds = []
-                });
-                contentId = createdContent.Id;
-
-                await using var previewStream = File.OpenRead(SelectedPreviewPath!);
-                createdContent = await _apiService.UploadContentPreviewAsync(
-                    contentId,
-                    previewStream,
-                    SelectedPreviewName);
-            }
-
-            var version = await _apiService.CreateContentVersionAsync(new CreateContentVersionDto
-            {
-                ContentId = contentId,
-                Name = VersionName.Trim(),
-                Date = DateTimeOffset.UtcNow,
-                Status = "draft",
-                Application = "revit",
-                ApplicationVersion = RevitVersion.Trim()
-            });
-
-            await using var fileStream = File.OpenRead(SelectedFilePath!);
-            version = await _apiService.UploadContentVersionFileAsync(
-                version.Id,
-                fileStream,
-                SelectedFileName,
-                "primary");
+            var createdContent = IsCreatingContent ? await CreateContentWithPreviewAsync() : null;
+            var contentId = createdContent?.Id ?? _existingContent!.Id;
+            var version = await CreateVersionWithFamilyFileAsync(contentId);
 
             _versionAdded?.Invoke(version);
-
-            if (createdContent is not null)
-            {
-                ContentName = string.Empty;
-                Description = string.Empty;
-                SelectedPreviewPath = null;
-                SelectedPreviewName = "Изображение не выбрано";
-            }
-
-            SelectedFilePath = null;
-            SelectedFileName = "Файл не выбран";
-            VersionName = string.Empty;
+            ResetForm(createdContent is not null);
             Message = createdContent is null
                 ? "Новая версия успешно добавлена."
                 : "Контент и первая версия успешно добавлены.";
@@ -260,13 +217,13 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
             return false;
         }
 
-        if (string.IsNullOrWhiteSpace(SelectedFilePath) || !File.Exists(SelectedFilePath))
+        if (string.IsNullOrWhiteSpace(SelectedFamilyFilePath) || !File.Exists(SelectedFamilyFilePath))
         {
             message = "Выберите существующий RFA-файл.";
             return false;
         }
 
-        if (!string.Equals(Path.GetExtension(SelectedFilePath), ".rfa", StringComparison.OrdinalIgnoreCase))
+        if (!string.Equals(Path.GetExtension(SelectedFamilyFilePath), ".rfa", StringComparison.OrdinalIgnoreCase))
         {
             message = "Основным файлом версии может быть только Revit Family (*.rfa).";
             return false;
@@ -280,6 +237,64 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
     {
         HasError = true;
         Message = message;
+    }
+
+    private void ClearMessage()
+    {
+        Message = null;
+        HasError = false;
+    }
+
+    private async Task<ContentDto> CreateContentWithPreviewAsync()
+    {
+        var content = await _apiService.CreateContentAsync(new CreateContentDto
+        {
+            Name = ContentName.Trim(),
+            Description = Description.Trim(),
+            CategoryId = SelectedCategory!.Id,
+            TagIds = []
+        });
+
+        await using var previewStream = File.OpenRead(SelectedPreviewPath!);
+        return await _apiService.UploadContentPreviewAsync(
+            content.Id,
+            previewStream,
+            SelectedPreviewName);
+    }
+
+    private async Task<ContentVersionDto> CreateVersionWithFamilyFileAsync(int contentId)
+    {
+        var version = await _apiService.CreateContentVersionAsync(new CreateContentVersionDto
+        {
+            ContentId = contentId,
+            Name = VersionName.Trim(),
+            Date = DateTimeOffset.UtcNow,
+            Status = "draft",
+            Application = "revit",
+            ApplicationVersion = RevitVersion.Trim()
+        });
+
+        await using var familyStream = File.OpenRead(SelectedFamilyFilePath!);
+        return await _apiService.UploadContentVersionFileAsync(
+            version.Id,
+            familyStream,
+            SelectedFamilyFileName,
+            "primary");
+    }
+
+    private void ResetForm(bool contentWasCreated)
+    {
+        if (contentWasCreated)
+        {
+            ContentName = string.Empty;
+            Description = string.Empty;
+            SelectedPreviewPath = null;
+            SelectedPreviewName = NoPreviewSelected;
+        }
+
+        SelectedFamilyFilePath = null;
+        SelectedFamilyFileName = NoFamilyFileSelected;
+        VersionName = string.Empty;
     }
 
 }

@@ -33,20 +33,13 @@ public sealed class RevExApiService(HttpClient httpClient) : IRevExApiService
         Stream content,
         string fileName,
         CancellationToken cancellationToken = default)
-    {
-        using var multipartContent = new MultipartFormDataContent();
-        using var fileContent = new StreamContent(content);
-        fileContent.Headers.ContentType = new MediaTypeHeaderValue(GetImageMediaType(fileName));
-        multipartContent.Add(fileContent, "File", fileName);
-
-        using var response = await httpClient.PostAsync(
+        => await UploadFileAsync<ContentDto>(
             $"api/content/{id}/preview",
-            multipartContent,
+            content,
+            fileName,
+            GetImageMediaType(fileName),
+            null,
             cancellationToken);
-        response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<ContentDto>(cancellationToken: cancellationToken)
-            ?? throw new HttpRequestException("API returned an empty response after uploading the preview image.");
-    }
 
     public Task<byte[]> DownloadContentFileAsync(int id, CancellationToken cancellationToken = default) =>
         httpClient.GetByteArrayAsync($"api/content-files/{id}/content", cancellationToken);
@@ -101,21 +94,13 @@ public sealed class RevExApiService(HttpClient httpClient) : IRevExApiService
         string fileName,
         string role,
         CancellationToken cancellationToken = default)
-    {
-        using var multipartContent = new MultipartFormDataContent();
-        using var fileContent = new StreamContent(content);
-        fileContent.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
-        multipartContent.Add(fileContent, "File", fileName);
-        multipartContent.Add(new StringContent(role), "Role");
-
-        using var response = await httpClient.PostAsync(
+        => await UploadFileAsync<ContentVersionDto>(
             $"api/content-versions/{versionId}/file",
-            multipartContent,
+            content,
+            fileName,
+            "application/octet-stream",
+            role,
             cancellationToken);
-        response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<ContentVersionDto>(cancellationToken: cancellationToken)
-            ?? throw new HttpRequestException("API returned an empty response after uploading the Revit file.");
-    }
 
     public Task<IReadOnlyCollection<ContentFileDto>> GetContentFilesAsync(
         CancellationToken cancellationToken = default) =>
@@ -154,6 +139,28 @@ public sealed class RevExApiService(HttpClient httpClient) : IRevExApiService
             ".gif" => "image/gif",
             _ => "application/octet-stream"
         };
+
+    private async Task<TResponse> UploadFileAsync<TResponse>(
+        string route,
+        Stream content,
+        string fileName,
+        string mediaType,
+        string? role,
+        CancellationToken cancellationToken)
+    {
+        using var multipartContent = new MultipartFormDataContent();
+        using var fileContent = new StreamContent(content);
+        fileContent.Headers.ContentType = new MediaTypeHeaderValue(mediaType);
+        multipartContent.Add(fileContent, "File", fileName);
+
+        if (role is not null)
+            multipartContent.Add(new StringContent(role), "Role");
+
+        using var response = await httpClient.PostAsync(route, multipartContent, cancellationToken);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<TResponse>(cancellationToken: cancellationToken)
+            ?? throw new HttpRequestException($"API returned an empty response for '{route}'.");
+    }
 
     private async Task<IReadOnlyCollection<T>> GetAllAsync<T>(
         string route,

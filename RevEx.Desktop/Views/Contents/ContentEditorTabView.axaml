@@ -68,7 +68,7 @@
                         <TextBlock Classes="label" Text="Файл семейства" />
                         <Grid ColumnDefinitions="*,Auto">
                             <Border Classes="value-box" Margin="0,0,12,0">
-                                <TextBlock Text="{Binding SelectedFileName}" TextTrimming="CharacterEllipsis" />
+                                <TextBlock Text="{Binding SelectedFamilyFileName}" TextTrimming="CharacterEllipsis" />
                             </Border>
                             <Button Grid.Column="1" Content="Выбрать RFA" Click="OnChooseFileClick" />
                         </Grid>

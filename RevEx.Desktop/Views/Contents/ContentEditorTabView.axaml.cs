@@ -32,7 +32,7 @@ public partial class ContentEditorTabView : UserControl
         if (file is null || DataContext is not ContentEditorTabViewModel viewModel)
             return;
 
-        viewModel.SetSelectedFile(file.Path.LocalPath, file.Name);
+        viewModel.SetSelectedFamilyFile(file.Path.LocalPath, file.Name);
     }
 
     private async void OnChoosePreviewClick(object? sender, RoutedEventArgs eventArgs)
