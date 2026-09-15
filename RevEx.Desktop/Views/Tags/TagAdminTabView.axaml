@@ -3,10 +3,10 @@
              xmlns:vm="using:RevEx.Desktop.ViewModels.Tags"
              x:Class="RevEx.Desktop.Views.Tags.TagAdminTabView"
              x:DataType="vm:TagAdminTabViewModel">
-    <Grid Margin="40,36" RowDefinitions="Auto,24,*" MaxWidth="900" HorizontalAlignment="Center">
+    <Grid Margin="32,30" RowDefinitions="Auto,22,*" MaxWidth="880" HorizontalAlignment="Center">
         <HeaderedContentControl Theme="{StaticResource PageHeaderTheme}"
                                 Header="Теги" Content="Справочник меток для поиска и классификации контента" />
-        <Grid Grid.Row="2" ColumnDefinitions="*,20,340">
+        <Grid Grid.Row="2" ColumnDefinitions="*,16,330">
             <Border Classes="card section-card">
                 <Grid RowDefinitions="Auto,14,*">
                     <TextBlock Classes="h2" Text="Все теги" />
@@ -15,12 +15,12 @@
                         <TextBlock IsVisible="{Binding HasNoTags}" Text="Теги ещё не созданы."
                                    HorizontalAlignment="Center" VerticalAlignment="Center"
                                    Foreground="{StaticResource TextSecondaryBrush}" />
-                        <ListBox Classes="clean-list" ItemsSource="{Binding Tags}" SelectedItem="{Binding SelectedTag}"
+                        <ListBox Classes="clean-list category-list" ItemsSource="{Binding Tags}" SelectedItem="{Binding SelectedTag}"
                                  IsVisible="{Binding HasTags}">
                             <ListBox.ItemTemplate>
                                 <DataTemplate x:DataType="vm:TagItemViewModel">
-                                    <Border Padding="12,10">
-                                        <TextBlock Text="{Binding Name, StringFormat='#{0}'}" FontWeight="SemiBold" />
+                                    <Border Padding="10,8">
+                                        <TextBlock Text="{Binding Name, StringFormat='#{0}'}" FontWeight="Medium" />
                                     </Border>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
@@ -32,13 +32,13 @@
             <Border Grid.Column="2" Classes="card section-card">
                 <StackPanel Spacing="14">
                     <TextBlock Classes="h2" Text="Редактор" />
-                    <TextBlock Text="Название тега" />
+                    <TextBlock Classes="label" Text="Название тега" />
                     <TextBox Text="{Binding TagName}" MaxLength="100" Watermark="Например, Revit" />
                     <Button Classes="primary" Content="Создать" Command="{Binding CreateCommand}"
                             IsEnabled="{Binding !IsSaving}" />
                     <Button Content="Переименовать выбранный" Command="{Binding RenameCommand}"
                             IsEnabled="{Binding !IsSaving}" />
-                    <Button Content="{Binding DeleteButtonText}" Command="{Binding DeleteCommand}"
+                    <Button Classes="danger" Content="{Binding DeleteButtonText}" Command="{Binding DeleteCommand}"
                             IsEnabled="{Binding !IsSaving}" />
                     <ProgressBar IsVisible="{Binding IsSaving}" IsIndeterminate="True" />
                     <TextBlock Text="{Binding Message}" TextWrapping="Wrap"

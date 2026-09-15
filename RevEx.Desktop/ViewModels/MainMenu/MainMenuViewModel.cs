@@ -5,32 +5,29 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using RevEx.Desktop.Navigation;
-using RevEx.Desktop.ViewModels.Tabs;
 
 namespace RevEx.Desktop.ViewModels.MainMenu;
 
 public sealed class BtnLink
 {
     public string Name { get; }
+    public string Symbol { get; }
     public ICommand OpenCommand { get; }
 
-    public BtnLink(string name, WorkspaceTabRequest request, Action<WorkspaceTabRequest> openTab)
+    public BtnLink(string name, string symbol, WorkspaceTabRequest request, Action<WorkspaceTabRequest> openTab)
     {
         Name = name;
+        Symbol = symbol;
         OpenCommand = new RelayCommand(() => openTab(request));
     }
 }
 
-public sealed class MainMenuViewModel : WorkspaceTabViewModel
+public sealed class MainMenuViewModel : ViewModelBase
 {
     public ObservableCollection<BtnLink> BtnLinks { get; }
     public IAsyncRelayCommand LogoutCommand { get; }
 
-    public MainMenuViewModel(
-        string title,
-        bool canClose,
-        IEnumerable<BtnLink> links,
-        Func<Task> logout) : base(title, canClose)
+    public MainMenuViewModel(IEnumerable<BtnLink> links, Func<Task> logout)
     {
         BtnLinks = new ObservableCollection<BtnLink>(links);
         LogoutCommand = new AsyncRelayCommand(logout);

@@ -2,45 +2,120 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:RevEx.Desktop.ViewModels"
         xmlns:tabVm="using:RevEx.Desktop.ViewModels.Tabs"
+        xmlns:menuViews="using:RevEx.Desktop.Views.MainMenu"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="1180" d:DesignHeight="760"
+        mc:Ignorable="d" d:DesignWidth="1240" d:DesignHeight="780"
         x:Class="RevEx.Desktop.Views.MainWindow" x:DataType="vm:MainViewModel"
         Icon="/Assets/avalonia-logo.ico" Title="RevEx"
-        Width="1180" Height="760" MinWidth="860" MinHeight="560">
-    <Grid RowDefinitions="64,*">
-        <Border Classes="app-toolbar">
-            <Grid Margin="22,0" ColumnDefinitions="Auto,*,Auto">
-                <StackPanel Orientation="Horizontal" Spacing="11" VerticalAlignment="Center">
-                    <Border Classes="brand-mark">
+        Width="1240" Height="780" MinWidth="900" MinHeight="580"
+        Background="{StaticResource CanvasBrush}"
+        KeyDown="OnWindowKeyDown">
+    <Window.Resources>
+        <DataTemplate x:Key="WorkspaceTabHeaderTemplate" x:DataType="tabVm:WorkspaceTabViewModel">
+            <Grid ColumnDefinitions="*,Auto" Margin="2,0">
+                <Button Grid.ColumnSpan="2" Classes="top-tab-button"
+                        Classes.selected="{Binding IsSelected}" Click="OnSelectTabClick">
+                    <TextBlock Margin="0,0,24,0" VerticalAlignment="Center"
+                               Text="{Binding Title}" TextTrimming="CharacterEllipsis" />
+                </Button>
+                <Button Grid.Column="1" Classes="tab-close" IsVisible="{Binding CanClose}"
+                        Margin="0,0,5,0" Click="OnCloseTabClick" ToolTip.Tip="Закрыть вкладку">
+                    <PathIcon Width="12" Height="12"
+                              Data="M2,3 L3,2 L10,9 L9,10 Z M9,2 L10,3 L3,10 L2,9 Z" />
+                </Button>
+            </Grid>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid x:Name="WorkspaceGrid">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="264" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Border x:Name="WorkspaceSidebar" Classes="workspace-sidebar">
+            <Grid RowDefinitions="58,Auto,12,*,Auto">
+                <Grid Margin="14,0" ColumnDefinitions="Auto,*,Auto">
+                    <Border Classes="brand-mark" VerticalAlignment="Center">
                         <TextBlock Text="R" />
                     </Border>
-                    <StackPanel VerticalAlignment="Center" Spacing="1">
-                        <TextBlock Text="RevEx" Foreground="White" FontSize="16" FontWeight="SemiBold" />
-                        <TextBlock Text="Knowledge workspace" Foreground="#8F8F9D" FontSize="11" />
+                    <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center" Spacing="0">
+                        <TextBlock Text="RevEx" FontSize="15" FontWeight="SemiBold" />
+                        <TextBlock Text="База знаний" Classes="caption" FontSize="11" LineHeight="14" />
                     </StackPanel>
-                </StackPanel>
-                <Border Grid.Column="2" Padding="10,5" CornerRadius="12" Background="#26262F" VerticalAlignment="Center">
-                    <TextBlock Text="DESKTOP" Foreground="#B6B2E9" FontSize="10" FontWeight="SemiBold" />
+                    <Button Grid.Column="2" Classes="sidebar-toggle"
+                            Click="OnHideSidebarClick" ToolTip.Tip="Скрыть меню (Ctrl/⌘+B)">
+                        <PathIcon Width="16" Height="16"
+                                  Data="M2,3 L18,3 L18,4 L2,4 Z M2,16 L18,16 L18,17 L2,17 Z M2,4 L3,4 L3,16 L2,16 Z M8,4 L9,4 L9,16 L8,16 Z M17,4 L18,4 L18,16 L17,16 Z" />
+                    </Button>
+                </Grid>
+
+                <TextBlock Grid.Row="1" Margin="16,10,16,0"
+                           Classes="section-label" Text="ОСНОВНОЕ" />
+
+                <menuViews:MainMenuView Grid.Row="3" DataContext="{Binding MainMenu}" />
+
+                <Border Grid.Row="4" Margin="12" Classes="sidebar-footer">
+                    <Grid ColumnDefinitions="30,*,Auto">
+                        <Border Width="30" Height="30" CornerRadius="9"
+                                Background="{StaticResource AccentBrush}" VerticalAlignment="Center">
+                            <TextBlock Text="R" Foreground="White" FontWeight="SemiBold"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center" Spacing="1">
+                            <TextBlock Text="RevEx Desktop" FontSize="13" FontWeight="Medium" />
+                            <TextBlock Text="Локальное пространство" Classes="caption" FontSize="11" />
+                        </StackPanel>
+                        <Border Grid.Column="2" Width="8" Height="8" CornerRadius="4"
+                                Background="{StaticResource SuccessBrush}" VerticalAlignment="Center"
+                                ToolTip.Tip="Подключено" />
+                    </Grid>
                 </Border>
             </Grid>
         </Border>
-        <TabControl Grid.Row="1" Classes="workspace-tabs"
-                    ItemsSource="{Binding Tabs}" SelectedItem="{Binding SelectedTab}">
-            <TabControl.ItemTemplate>
-                <DataTemplate x:DataType="tabVm:WorkspaceTabViewModel">
-                    <StackPanel Orientation="Horizontal" Spacing="9">
-                        <TextBlock VerticalAlignment="Center" Text="{Binding Title}" />
-                        <Button Classes="ghost" Width="24" Height="24" Padding="0" IsVisible="{Binding CanClose}"
-                                Click="OnCloseTabClick" Content="×" FontSize="16" />
-                    </StackPanel>
-                </DataTemplate>
-            </TabControl.ItemTemplate>
-            <TabControl.ContentTemplate>
-                <DataTemplate x:DataType="tabVm:WorkspaceTabViewModel">
-                    <ContentControl Content="{Binding}" />
-                </DataTemplate>
-            </TabControl.ContentTemplate>
-        </TabControl>
+
+        <Grid Grid.Column="1" RowDefinitions="52,*">
+            <Border Classes="workspace-header">
+                <Grid Margin="10,0" ColumnDefinitions="Auto,*,Auto">
+                    <Button x:Name="ShowSidebarButton" Classes="sidebar-toggle" IsVisible="False"
+                            Margin="0,0,6,0" Click="OnShowSidebarClick"
+                            ToolTip.Tip="Показать меню (Ctrl/⌘+B)">
+                        <PathIcon Width="16" Height="16"
+                                  Data="M2,3 L18,3 L18,4 L2,4 Z M2,16 L18,16 L18,17 L2,17 Z M2,4 L3,4 L3,16 L2,16 Z M8,4 L9,4 L9,16 L8,16 Z M17,4 L18,4 L18,16 L17,16 Z" />
+                    </Button>
+
+                    <ScrollViewer Grid.Column="1" HorizontalScrollBarVisibility="Auto"
+                                  VerticalScrollBarVisibility="Disabled">
+                        <ItemsControl ItemsSource="{Binding Tabs}"
+                                      ItemTemplate="{StaticResource WorkspaceTabHeaderTemplate}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
+                    </ScrollViewer>
+
+                    <Border Grid.Column="2" Classes="shortcut-key" Margin="8,0,2,0"
+                            VerticalAlignment="Center">
+                        <TextBlock Text="Ctrl / ⌘ W" />
+                    </Border>
+                </Grid>
+            </Border>
+
+            <ContentControl Grid.Row="1" Content="{Binding SelectedTab}" />
+
+            <Grid Grid.Row="1" IsVisible="{Binding !HasTabs}">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10">
+                    <Border Classes="welcome-mark" HorizontalAlignment="Center">
+                        <TextBlock Text="R" />
+                    </Border>
+                    <TextBlock Classes="h2" Text="Откройте раздел из меню" HorizontalAlignment="Center" />
+                    <TextBlock Classes="caption" Text="Новая вкладка появится в верхней панели"
+                               HorizontalAlignment="Center" />
+                </StackPanel>
+            </Grid>
+        </Grid>
     </Grid>
 </Window>

@@ -3,38 +3,37 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:RevEx.Desktop.ViewModels.MainMenu"
-             mc:Ignorable="d" d:DesignWidth="1180" d:DesignHeight="650"
+             mc:Ignorable="d" d:DesignWidth="264" d:DesignHeight="520"
              x:Class="RevEx.Desktop.Views.MainMenu.MainMenuView" x:DataType="vm:MainMenuViewModel">
-    <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-        <Grid Margin="48,42" RowDefinitions="Auto,32,Auto" MaxWidth="1040" HorizontalAlignment="Center">
-            <Grid ColumnDefinitions="*,Auto">
-                <StackPanel Spacing="10">
-                    <Border Classes="eyebrow" HorizontalAlignment="Left">
-                        <TextBlock Text="РАБОЧЕЕ ПРОСТРАНСТВО" />
-                    </Border>
-                    <TextBlock Classes="h1" Text="С чего начнём?" />
-                    <TextBlock Classes="caption" FontSize="15"
-                               Text="Откройте нужный раздел — он появится в отдельной вкладке и останется под рукой." />
-                </StackPanel>
-
-                <Button Grid.Column="1"
-                        Classes="ghost"
-                        VerticalAlignment="Top"
-                        Content="Выйти из профиля"
-                        Command="{Binding LogoutCommand}" />
-            </Grid>
-            <ItemsControl Grid.Row="2" ItemsSource="{Binding BtnLinks}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <WrapPanel Orientation="Horizontal" ItemWidth="300" ItemHeight="154" />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
+    <Grid RowDefinitions="*,Auto">
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+            <ItemsControl Margin="8,0" ItemsSource="{Binding BtnLinks}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="vm:BtnLink">
-                        <Button Classes="menu-card" Content="{Binding Name}" Command="{Binding OpenCommand}" />
+                        <Button Classes="sidebar-menu-button" Command="{Binding OpenCommand}">
+                            <Grid ColumnDefinitions="28,*">
+                                <Border Width="28" Height="28" CornerRadius="8"
+                                        Background="{StaticResource SurfaceBrush}">
+                                    <TextBlock Text="{Binding Symbol}" FontSize="16" FontWeight="Normal"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <TextBlock Grid.Column="1" Margin="9,0,0,0" VerticalAlignment="Center"
+                                           Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                            </Grid>
+                        </Button>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
-        </Grid>
-    </ScrollViewer>
+        </ScrollViewer>
+
+        <Button Grid.Row="1" Margin="8,8,8,0" Classes="sidebar-menu-button danger-menu"
+                Command="{Binding LogoutCommand}">
+            <Grid ColumnDefinitions="28,*">
+                <PathIcon Width="17" Height="17" Foreground="{StaticResource DangerBrush}"
+                          Data="M3,2 L11,2 L11,4 L5,4 L5,16 L11,16 L11,18 L3,18 Z M10,9 L17,9 L14,6 L15,5 L20,10 L15,15 L14,14 L17,11 L10,11 Z" />
+                <TextBlock Grid.Column="1" Margin="9,0,0,0" VerticalAlignment="Center"
+                           Text="Выйти из профиля" />
+            </Grid>
+        </Button>
+    </Grid>
 </UserControl>

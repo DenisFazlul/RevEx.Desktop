@@ -4,7 +4,7 @@
              x:Class="RevEx.Desktop.Views.Contents.ContentEditorTabView"
              x:DataType="vm:ContentEditorTabViewModel">
     <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-        <Grid Margin="40,36" RowDefinitions="Auto,24,Auto" MaxWidth="920" HorizontalAlignment="Center">
+        <Grid Margin="32,30" RowDefinitions="Auto,22,Auto" MaxWidth="880" HorizontalAlignment="Center">
             <HeaderedContentControl Theme="{StaticResource PageHeaderTheme}"
                                     Header="{Binding Title}"
                                     Content="{Binding PageDescription}" />
@@ -15,18 +15,18 @@
                         <TextBlock Classes="h2" Text="Карточка контента" />
                         <Grid ColumnDefinitions="*,18,*" RowDefinitions="Auto,14,Auto">
                             <StackPanel Spacing="7">
-                                <TextBlock Text="Название" />
+                                <TextBlock Classes="label" Text="Название" />
                                 <TextBox Text="{Binding ContentName}" Watermark="Например, Дверь одностворчатая" />
                             </StackPanel>
                             <StackPanel Grid.Column="2" Spacing="7">
-                                <TextBlock Text="Категория" />
+                                <TextBlock Classes="label" Text="Категория" />
                                 <ComboBox ItemsSource="{Binding Categories}"
                                           SelectedItem="{Binding SelectedCategory}"
                                           DisplayMemberBinding="{Binding Name}"
                                           IsEnabled="{Binding !IsLoading}" />
                             </StackPanel>
                             <StackPanel Grid.Row="2" Grid.ColumnSpan="3" Spacing="7">
-                                <TextBlock Text="Описание" />
+                                <TextBlock Classes="label" Text="Описание" />
                                 <TextBox Text="{Binding Description}" AcceptsReturn="True" TextWrapping="Wrap"
                                          MinHeight="92" Watermark="Для чего используется семейство" />
                             </StackPanel>
@@ -44,18 +44,18 @@
                     <TextBlock Classes="h2" Text="Версия Revit-семейства" />
                     <Grid ColumnDefinitions="*,18,*">
                         <StackPanel Spacing="7">
-                            <TextBlock Text="Название версии" />
+                            <TextBlock Classes="label" Text="Название версии" />
                             <TextBox Text="{Binding VersionName}" Watermark="Например, 1.0.0" />
                         </StackPanel>
                         <StackPanel Grid.Column="2" Spacing="7">
-                            <TextBlock Text="Версия Revit" />
+                            <TextBlock Classes="label" Text="Версия Revit" />
                             <ComboBox ItemsSource="{Binding RevitVersions}"
                                       SelectedItem="{Binding RevitVersion}" />
                         </StackPanel>
                     </Grid>
 
                     <StackPanel Spacing="7">
-                        <TextBlock Text="Файл семейства" />
+                        <TextBlock Classes="label" Text="Файл семейства" />
                         <Grid ColumnDefinitions="*,Auto">
                             <Border Classes="value-box" Margin="0,0,12,0">
                                 <TextBlock Text="{Binding SelectedFileName}" TextTrimming="CharacterEllipsis" />

@@ -1,21 +1,41 @@
 <Styles xmlns="https://github.com/avaloniaui">
-    <!-- Buttons, inputs and collection controls. -->
+    <!-- Compact controls with quiet surfaces and strong, predictable states. -->
+    <Style Selector="Button">
+        <Setter Property="MinHeight" Value="38" />
+        <Setter Property="Padding" Value="14,8" />
+        <Setter Property="CornerRadius" Value="9" />
+        <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        <Setter Property="FontWeight" Value="Medium" />
+    </Style>
+    <Style Selector="Button:pointerover">
+        <Setter Property="Background" Value="{StaticResource SurfaceHoverBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderStrongBrush}" />
+    </Style>
+    <Style Selector="Button:disabled">
+        <Setter Property="Opacity" Value="0.45" />
+    </Style>
+
     <Style Selector="Button.primary">
-        <Setter Property="MinHeight" Value="40" />
-        <Setter Property="Padding" Value="18,9" />
-        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="MinHeight" Value="38" />
+        <Setter Property="Padding" Value="16,8" />
+        <Setter Property="CornerRadius" Value="9" />
         <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
         <Setter Property="Foreground" Value="White" />
         <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
     <Style Selector="Button.primary:pointerover">
         <Setter Property="Background" Value="{StaticResource AccentHoverBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource AccentHoverBrush}" />
     </Style>
 
     <Style Selector="Button.ghost">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="CornerRadius" Value="7" />
+        <Setter Property="CornerRadius" Value="8" />
         <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
     </Style>
     <Style Selector="Button.ghost:pointerover">
@@ -23,13 +43,33 @@
         <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
     </Style>
 
-    <Style Selector="TextBox.search">
-        <Setter Property="MinHeight" Value="42" />
-        <Setter Property="Padding" Value="14,10" />
+    <Style Selector="Button.danger">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource DangerBrush}" />
+    </Style>
+    <Style Selector="Button.danger:pointerover">
+        <Setter Property="Background" Value="{StaticResource DangerSoftBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource DangerBrush}" />
+    </Style>
+
+    <Style Selector="TextBox, ComboBox">
+        <Setter Property="MinHeight" Value="40" />
         <Setter Property="CornerRadius" Value="9" />
         <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderStrongBrush}" />
         <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="TextBox:focus, ComboBox:focus">
+        <Setter Property="BorderBrush" Value="{StaticResource TextPrimaryBrush}" />
+    </Style>
+
+    <Style Selector="TextBox.search">
+        <Setter Property="MinHeight" Value="40" />
+        <Setter Property="Padding" Value="38,9,14,9" />
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="Background" Value="{StaticResource SurfaceMutedBrush}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
     </Style>
 
     <Style Selector="ListBox.clean-list">
@@ -37,21 +77,34 @@
         <Setter Property="BorderThickness" Value="0" />
     </Style>
     <Style Selector="ListBox.category-list ListBoxItem">
-        <Setter Property="Padding" Value="0" />
-        <Setter Property="Margin" Value="0,2" />
+        <Setter Property="Padding" Value="2" />
+        <Setter Property="Margin" Value="0,1" />
         <Setter Property="CornerRadius" Value="8" />
+    </Style>
+    <Style Selector="ListBox.category-list ListBoxItem:pointerover">
+        <Setter Property="Background" Value="{StaticResource SurfaceHoverBrush}" />
+    </Style>
+    <Style Selector="ListBox.category-list ListBoxItem:selected">
+        <Setter Property="Background" Value="{StaticResource SurfaceSelectedBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
     </Style>
     <Style Selector="ListBox.content-list ListBoxItem">
         <Setter Property="Padding" Value="0" />
-        <Setter Property="Margin" Value="0,0,0,10" />
-        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Margin" Value="0,0,0,6" />
+        <Setter Property="CornerRadius" Value="12" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
     </Style>
 
     <Style Selector="Ellipse.status-dot">
         <Setter Property="Width" Value="8" />
         <Setter Property="Height" Value="8" />
-        <Setter Property="Fill" Value="#34A66F" />
+        <Setter Property="Fill" Value="{StaticResource SuccessBrush}" />
         <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="ProgressBar">
+        <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+    </Style>
+    <Style Selector="CheckBox:checked">
+        <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
     </Style>
 </Styles>

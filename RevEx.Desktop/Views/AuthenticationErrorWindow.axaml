@@ -2,23 +2,33 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         x:Class="RevEx.Desktop.Views.AuthenticationErrorWindow"
         Title="Ошибка авторизации"
-        Width="480"
-        Height="220"
+        Width="460"
+        Height="240"
         CanResize="False"
         WindowStartupLocation="CenterScreen">
-    <Grid Margin="28" RowDefinitions="Auto,*,Auto">
-        <TextBlock Classes="h2" Text="Не удалось войти в RevEx" />
+    <Grid Margin="24">
+        <Border Classes="card section-card">
+            <Grid RowDefinitions="Auto,16,*,20,Auto" ColumnDefinitions="38,12,*">
+                <Border Classes="icon-tile" Width="38" Height="38" Background="{StaticResource DangerSoftBrush}">
+                    <PathIcon Width="18" Height="18" Foreground="{StaticResource DangerBrush}"
+                              Data="M10,2 L18,17 L2,17 Z M10,7 L10,11 M10,14 L10,14.2" />
+                </Border>
+                <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="2">
+                    <TextBlock Classes="h2" Text="Не удалось войти в RevEx" />
+                    <TextBlock Classes="caption" Text="Проверьте подключение и попробуйте ещё раз" />
+                </StackPanel>
 
-        <TextBlock x:Name="MessageText"
-                   Grid.Row="1"
-                   Margin="0,16,0,20"
-                   Classes="caption"
-                   TextWrapping="Wrap" />
+                <TextBlock x:Name="MessageText"
+                           Grid.Row="2" Grid.ColumnSpan="3"
+                           Classes="caption"
+                           TextWrapping="Wrap" />
 
-        <Button Grid.Row="2"
-                HorizontalAlignment="Right"
-                Classes="primary"
-                Content="Закрыть"
-                Click="OnCloseClick" />
+                <Button Grid.Row="4" Grid.Column="2"
+                        HorizontalAlignment="Right"
+                        Classes="primary"
+                        Content="Закрыть"
+                        Click="OnCloseClick" />
+            </Grid>
+        </Border>
     </Grid>
 </Window>

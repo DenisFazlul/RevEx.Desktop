@@ -6,7 +6,7 @@
              mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="650"
              x:DataType="vm:SettingsTabViewModel" x:Class="RevEx.Desktop.Views.Settings.SettingsTabView">
     <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-        <Grid Margin="40,36" RowDefinitions="Auto,24,Auto" MaxWidth="900" HorizontalAlignment="Center">
+        <Grid Margin="32,30" RowDefinitions="Auto,22,Auto" MaxWidth="880" HorizontalAlignment="Center">
             <HeaderedContentControl Theme="{StaticResource PageHeaderTheme}" Header="Настройки"
                                     Content="Подключение и параметры рабочего пространства" />
             <HeaderedContentControl Grid.Row="2" Theme="{StaticResource ApiSettingsCardTheme}"

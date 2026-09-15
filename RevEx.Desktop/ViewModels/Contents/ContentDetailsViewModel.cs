@@ -38,7 +38,10 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         ContentItemViewModel content,
         IRevExApiService apiService,
         Action openVersionEditor)
-        : base(content.Name, true, content.Id)
+        : base(
+            content.Name,
+            true,
+            content.Id)
     {
         _apiService = apiService;
         _openVersionEditor = openVersionEditor;

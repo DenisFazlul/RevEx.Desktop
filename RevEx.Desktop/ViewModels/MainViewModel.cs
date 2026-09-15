@@ -3,6 +3,8 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using RevEx.Desktop.Navigation;
+using RevEx.Desktop.ViewModels.Catalog;
+using RevEx.Desktop.ViewModels.MainMenu;
 using RevEx.Desktop.ViewModels.Tabs;
 
 namespace RevEx.Desktop.ViewModels;
@@ -13,9 +15,13 @@ public partial class MainViewModel : ViewModelBase
     private readonly WorkspaceTabContext _tabContext;
 
     [ObservableProperty]
-    private WorkspaceTabViewModel _selectedTab;
+    private WorkspaceTabViewModel? _selectedTab;
+
+    [ObservableProperty]
+    private bool _hasTabs;
 
     public ObservableCollection<WorkspaceTabViewModel> Tabs { get; } = [];
+    public MainMenuViewModel MainMenu { get; }
 
     public MainViewModel(
         IWorkspaceTabFactory tabFactory,
@@ -24,9 +30,8 @@ public partial class MainViewModel : ViewModelBase
         _tabFactory = tabFactory;
         _tabContext = new WorkspaceTabContext(OpenTab);
 
-        var mainMenu = mainMenuProvider.Create(OpenTab);
-        Tabs.Add(mainMenu);
-        _selectedTab = mainMenu;
+        MainMenu = mainMenuProvider.Create(OpenTab);
+        OpenTab(new WorkspaceTabRequest(typeof(CatalogTabViewModel)));
     }
 
     public void CloseTab(WorkspaceTabViewModel tab)
@@ -39,8 +44,9 @@ public partial class MainViewModel : ViewModelBase
             return;
 
         Tabs.RemoveAt(tabIndex);
+        HasTabs = Tabs.Count > 0;
         if (ReferenceEquals(SelectedTab, tab))
-            SelectedTab = Tabs[Math.Min(tabIndex, Tabs.Count - 1)];
+            SelectedTab = Tabs.Count == 0 ? null : Tabs[Math.Min(tabIndex, Tabs.Count - 1)];
     }
 
     private void OpenTab(WorkspaceTabRequest request)
@@ -52,9 +58,18 @@ public partial class MainViewModel : ViewModelBase
         {
             tab = _tabFactory.Create(request.TabType, _tabContext, request.Parameter);
             Tabs.Add(tab);
+            HasTabs = true;
         }
 
         SelectedTab = tab;
-        _ = tab.ActivateAsync();
+    }
+
+    partial void OnSelectedTabChanged(WorkspaceTabViewModel? value)
+    {
+        foreach (var tab in Tabs)
+            tab.IsSelected = ReferenceEquals(tab, value);
+
+        if (value is not null)
+            _ = value.ActivateAsync();
     }
 }

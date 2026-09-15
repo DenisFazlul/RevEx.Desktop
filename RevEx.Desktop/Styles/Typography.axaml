@@ -6,35 +6,54 @@
         <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
     </Style>
 
+    <Style Selector="UserControl">
+        <Setter Property="FontFamily" Value="Inter" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+    </Style>
+
     <Style Selector="TextBlock.h1">
-        <Setter Property="FontSize" Value="30" />
+        <Setter Property="FontSize" Value="28" />
         <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="LineHeight" Value="34" />
         <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
     </Style>
     <Style Selector="TextBlock.h2">
-        <Setter Property="FontSize" Value="19" />
+        <Setter Property="FontSize" Value="16" />
         <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="LineHeight" Value="21" />
         <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
     </Style>
     <Style Selector="TextBlock.caption">
         <Setter Property="FontSize" Value="13" />
+        <Setter Property="LineHeight" Value="19" />
         <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
     </Style>
+    <Style Selector="TextBlock.label">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+    </Style>
+    <Style Selector="TextBlock.section-label">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="Foreground" Value="{StaticResource TextTertiaryBrush}" />
+    </Style>
     <Style Selector="TextBlock.body-copy">
-        <Setter Property="Margin" Value="0,25,0,0" />
-        <Setter Property="FontSize" Value="15" />
-        <Setter Property="LineHeight" Value="24" />
+        <Setter Property="Margin" Value="0,20,0,0" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="LineHeight" Value="23" />
         <Setter Property="TextWrapping" Value="Wrap" />
     </Style>
     <Style Selector="TextBlock.row-arrow">
         <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
         <Setter Property="VerticalAlignment" Value="Center" />
-        <Setter Property="FontSize" Value="18" />
-        <Setter Property="Margin" Value="14,0,0,0" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Margin" Value="12,0,0,0" />
     </Style>
     <Style Selector="TextBlock.menu-card-title">
-        <Setter Property="Margin" Value="0,15,0,0" />
-        <Setter Property="FontSize" Value="17" />
+        <Setter Property="Margin" Value="0,14,0,0" />
+        <Setter Property="FontSize" Value="16" />
         <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
 </Styles>

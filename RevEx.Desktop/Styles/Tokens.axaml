@@ -1,16 +1,23 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <!-- Design tokens: edit these values to change the application palette globally. -->
+    <!-- Neutral, content-first palette inspired by modern conversational desktop apps. -->
     <Styles.Resources>
-        <SolidColorBrush x:Key="CanvasBrush" Color="#F7F7FA" />
+        <SolidColorBrush x:Key="CanvasBrush" Color="#FFFFFF" />
         <SolidColorBrush x:Key="SurfaceBrush" Color="#FFFFFF" />
-        <SolidColorBrush x:Key="SurfaceMutedBrush" Color="#F1F1F6" />
-        <SolidColorBrush x:Key="SidebarBrush" Color="#17171D" />
-        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#202027" />
-        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#6F6F7B" />
-        <SolidColorBrush x:Key="BorderBrush" Color="#E4E4EA" />
-        <SolidColorBrush x:Key="AccentBrush" Color="#6657D9" />
-        <SolidColorBrush x:Key="AccentHoverBrush" Color="#5749C5" />
-        <SolidColorBrush x:Key="AccentSoftBrush" Color="#EEECFF" />
+        <SolidColorBrush x:Key="SurfaceMutedBrush" Color="#F7F7F8" />
+        <SolidColorBrush x:Key="SurfaceHoverBrush" Color="#F1F1F1" />
+        <SolidColorBrush x:Key="SurfaceSelectedBrush" Color="#E9E9E9" />
+        <SolidColorBrush x:Key="SidebarBrush" Color="#F7F7F8" />
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#2D2D2D" />
+        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#6B6B6B" />
+        <SolidColorBrush x:Key="TextTertiaryBrush" Color="#8F8F8F" />
+        <SolidColorBrush x:Key="BorderBrush" Color="#E5E5E5" />
+        <SolidColorBrush x:Key="BorderStrongBrush" Color="#D4D4D4" />
+        <SolidColorBrush x:Key="AccentBrush" Color="#111111" />
+        <SolidColorBrush x:Key="AccentHoverBrush" Color="#2F2F2F" />
+        <SolidColorBrush x:Key="AccentSoftBrush" Color="#ECECEC" />
+        <SolidColorBrush x:Key="DangerBrush" Color="#C13D3D" />
+        <SolidColorBrush x:Key="DangerSoftBrush" Color="#FFF1F1" />
+        <SolidColorBrush x:Key="SuccessBrush" Color="#1F8A5B" />
     </Styles.Resources>
 </Styles>

@@ -19,10 +19,10 @@ public sealed class MainMenuProvider : IMainMenuProvider
 
     private readonly IReadOnlyList<WorkspaceTabDescriptor> _items =
     [
-        WorkspaceTabDescriptor.Create<CatalogTabViewModel>("Каталог"),
-        WorkspaceTabDescriptor.Create<ContentEditorTabViewModel>("Добавить контент"),
-        WorkspaceTabDescriptor.Create<TagAdminTabViewModel>("Теги"),
-        WorkspaceTabDescriptor.Create<SettingsTabViewModel>("SettingsView")
+        WorkspaceTabDescriptor.Create<CatalogTabViewModel>("Каталог", "⌕"),
+        WorkspaceTabDescriptor.Create<ContentEditorTabViewModel>("Добавить контент", "+"),
+        WorkspaceTabDescriptor.Create<TagAdminTabViewModel>("Теги", "#"),
+        WorkspaceTabDescriptor.Create<SettingsTabViewModel>("Настройки", "⚙")
     ];
 
     public MainMenuProvider(
@@ -37,14 +37,11 @@ public sealed class MainMenuProvider : IMainMenuProvider
     {
         var links = _items.Select(item => new BtnLink(
             item.Title,
+            item.Symbol,
             new WorkspaceTabRequest(item.TabType),
             openTab));
 
-        return new MainMenuViewModel(
-            "Основное",
-            false,
-            links,
-            LogoutAsync);
+        return new MainMenuViewModel(links, LogoutAsync);
     }
 
     private async Task LogoutAsync()

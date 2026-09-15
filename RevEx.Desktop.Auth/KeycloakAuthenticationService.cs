@@ -140,30 +140,58 @@ public sealed class KeycloakAuthenticationService : IAuthenticationService
 
     private async Task<string> LoginAsync(CancellationToken cancellationToken)
     {
-        using var listener = new HttpListener();
-        listener.Prefixes.Add(_redirectUri);
-        listener.Start();
-
         var state = await _oidcClient.PrepareLoginAsync(cancellationToken: cancellationToken);
         if (string.IsNullOrWhiteSpace(state.StartUrl))
             throw new InvalidOperationException("Keycloak returned an empty authorization URL.");
 
-        Process.Start(new ProcessStartInfo(state.StartUrl) { UseShellExecute = true });
+        using var listener = CreateCallbackListener();
+        try
+        {
+            Process.Start(new ProcessStartInfo(state.StartUrl) { UseShellExecute = true });
 
-        var context = await listener.GetContextAsync().WaitAsync(cancellationToken);
-        var result = await _oidcClient.ProcessResponseAsync(
-            context.Request.RawUrl,
-            state,
-            cancellationToken: cancellationToken);
+            var context = await listener.GetContextAsync().WaitAsync(cancellationToken);
+            var result = await _oidcClient.ProcessResponseAsync(
+                context.Request.RawUrl,
+                state,
+                cancellationToken: cancellationToken);
 
-        if (result.IsError || string.IsNullOrWhiteSpace(result.AccessToken))
-            throw new InvalidOperationException($"Keycloak authentication failed: {result.Error}");
+            if (result.IsError || string.IsNullOrWhiteSpace(result.AccessToken))
+                throw new InvalidOperationException($"Keycloak authentication failed: {result.Error}");
 
-        await WriteBrowserResponseAsync(context.Response, cancellationToken);
+            await WriteBrowserResponseAsync(context.Response, cancellationToken);
 
-        _refreshToken = result.RefreshToken;
-        _accessTokenExpiration = result.AccessTokenExpiration;
-        return result.AccessToken;
+            _refreshToken = result.RefreshToken;
+            _accessTokenExpiration = result.AccessTokenExpiration;
+            return result.AccessToken;
+        }
+        finally
+        {
+            if (listener.IsListening)
+                listener.Stop();
+        }
+    }
+
+    private HttpListener CreateCallbackListener()
+    {
+        var listener = new HttpListener
+        {
+            IgnoreWriteExceptions = true
+        };
+        listener.Prefixes.Add(_redirectUri);
+
+        try
+        {
+            listener.Start();
+            return listener;
+        }
+        catch (HttpListenerException exception)
+        {
+            listener.Close();
+            throw new InvalidOperationException(
+                $"Не удалось открыть адрес авторизации {_redirectUri}. " +
+                "Порт занят другим приложением. Закройте второй экземпляр RevEx и повторите попытку.",
+                exception);
+        }
     }
 
     private static async Task WriteBrowserResponseAsync(
