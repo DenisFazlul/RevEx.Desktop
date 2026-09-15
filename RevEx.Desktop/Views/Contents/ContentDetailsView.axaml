@@ -4,12 +4,29 @@
              xmlns:vm="using:RevEx.Desktop.ViewModels.Contents"
              x:Class="RevEx.Desktop.Views.Contents.ContentDetailsView" x:DataType="vm:ContentDetailsViewModel">
     <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-        <Grid Margin="32,30" RowDefinitions="Auto,22,Auto,16,Auto,16,Auto" MaxWidth="880" HorizontalAlignment="Center">
+        <Grid Margin="32,30" RowDefinitions="Auto,22,Auto,16,Auto,16,Auto,16,Auto" MaxWidth="880" HorizontalAlignment="Center">
             <HeaderedContentControl Theme="{StaticResource EyebrowHeaderTheme}"
                                     Header="{Binding Title}" Content="Карточка материала из базы знаний" />
             <HeaderedContentControl Grid.Row="2" Theme="{StaticResource DetailsCardTheme}"
                                     Header="Описание" Content="{Binding Description}" />
             <Border Grid.Row="4" Classes="card section-card">
+                <StackPanel Spacing="14">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Classes="h2" Text="Изображение" />
+                        <Button Grid.Column="1" Classes="primary" Content="Обновить изображение"
+                                Click="OnUpdatePreviewClick" IsEnabled="{Binding !IsUpdatingPreview}" />
+                    </Grid>
+                    <ProgressBar IsVisible="{Binding IsUpdatingPreview}" IsIndeterminate="True" />
+                    <Border IsVisible="{Binding HasPreview}" CornerRadius="10" ClipToBounds="True"
+                            Background="{StaticResource SurfaceMutedBrush}" MinHeight="240">
+                        <Image Source="{Binding PreviewImage}" Stretch="Uniform" MaxHeight="480" />
+                    </Border>
+                    <TextBlock IsVisible="{Binding HasNoPreview}" Text="Изображение пока не загружено."
+                               Foreground="{StaticResource TextSecondaryBrush}" />
+                    <TextBlock Text="{Binding PreviewMessage}" Foreground="{StaticResource TextSecondaryBrush}" />
+                </StackPanel>
+            </Border>
+            <Border Grid.Row="6" Classes="card section-card">
                 <StackPanel Spacing="14">
                     <Grid ColumnDefinitions="*,Auto">
                         <StackPanel Spacing="4">
@@ -47,7 +64,7 @@
                 </StackPanel>
             </Border>
 
-            <Border Grid.Row="6" Classes="card section-card">
+            <Border Grid.Row="8" Classes="card section-card">
                 <StackPanel Spacing="14">
                     <Grid ColumnDefinitions="*,Auto">
                         <TextBlock Classes="h2" Text="Версии" />

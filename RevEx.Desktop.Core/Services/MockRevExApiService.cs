@@ -118,6 +118,37 @@ public sealed class MockRevExApiService : IRevExApiService
         return Task.CompletedTask;
     }
 
+    public Task<ContentDto> UploadContentPreviewAsync(
+        int id,
+        Stream content,
+        string fileName,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var index = Contents.FindIndex(item => item.Id == id);
+        if (index < 0)
+            throw new HttpRequestException($"Content {id} was not found.");
+
+        var fileId = ContentFiles.Count == 0 ? 1 : ContentFiles.Max(item => item.Id) + 1;
+        ContentFiles.Add(new ContentFileDto(
+            fileId, $"/api/content-files/{fileId}/content", null, fileName,
+            Path.GetExtension(fileName), content.CanSeek ? content.Length : 0, "preview",
+            DateTimeOffset.UtcNow, DateTimeOffset.UtcNow));
+        var updated = Contents[index] with { PreviewFileId = fileId, UpdatedAt = DateTimeOffset.UtcNow };
+        Contents[index] = updated;
+        return Task.FromResult(updated);
+    }
+
+    public Task<byte[]> DownloadContentFileAsync(int id, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (ContentFiles.All(item => item.Id != id))
+            throw new HttpRequestException($"File {id} was not found.");
+
+        return Task.FromResult(Convert.FromBase64String(
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="));
+    }
+
     public Task<IReadOnlyCollection<CategoryDto>> GetCategoriesAsync(CancellationToken cancellationToken = default) =>
         FromCollection(Categories, cancellationToken);
 

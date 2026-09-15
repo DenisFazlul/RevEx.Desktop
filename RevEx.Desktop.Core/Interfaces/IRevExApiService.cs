@@ -15,6 +15,12 @@ public interface IRevExApiService
         int id,
         UpdateContentDto request,
         CancellationToken cancellationToken = default);
+    Task<ContentDto> UploadContentPreviewAsync(
+        int id,
+        Stream content,
+        string fileName,
+        CancellationToken cancellationToken = default);
+    Task<byte[]> DownloadContentFileAsync(int id, CancellationToken cancellationToken = default);
 
     Task<IReadOnlyCollection<CategoryDto>> GetCategoriesAsync(CancellationToken cancellationToken = default);
     Task<CategoryDto?> GetCategoryAsync(int id, CancellationToken cancellationToken = default);

@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using RevEx.Desktop.Core.Domain;
@@ -20,9 +22,12 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
 
     [ObservableProperty] private bool _isLoading;
     [ObservableProperty] private bool _isSavingTags;
+    [ObservableProperty] private bool _isUpdatingPreview;
     [ObservableProperty] private string? _errorMessage;
     [ObservableProperty] private string? _tagMessage;
+    [ObservableProperty] private string? _previewMessage;
     [ObservableProperty] private string _description;
+    [ObservableProperty] private Bitmap? _previewImage;
 
     public int Id { get; }
     public ObservableCollection<ContentVersionDto> Versions { get; } = [];
@@ -33,6 +38,8 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
     public bool HasNoVersions => !HasVersions && !IsLoading;
     public bool HasTags => Tags.Count > 0;
     public bool HasNoTags => !HasTags && !IsLoading;
+    public bool HasPreview => PreviewImage is not null;
+    public bool HasNoPreview => !HasPreview && !IsLoading;
 
     public ContentDetailsViewModel(
         ContentItemViewModel content,
@@ -65,6 +72,7 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
                 ?? throw new HttpRequestException($"Контент {Id} не найден.");
             Description = _content.Description;
             _allTags = await tagsTask;
+            await LoadPreviewAsync(_content.PreviewFileId);
 
             Versions.Clear();
             foreach (var version in (await versionsTask)
@@ -130,6 +138,32 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         NotifyCollectionStateChanged();
     }
 
+    public async Task UpdatePreviewAsync(string path, string fileName)
+    {
+        if (_content is null)
+            return;
+
+        try
+        {
+            IsUpdatingPreview = true;
+            ErrorMessage = null;
+            PreviewMessage = "Загружаем изображение…";
+            await using var stream = File.OpenRead(path);
+            _content = await _apiService.UploadContentPreviewAsync(Id, stream, fileName);
+            await LoadPreviewAsync(_content.PreviewFileId);
+            PreviewMessage = "Изображение обновлено.";
+        }
+        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException or IOException or UnauthorizedAccessException)
+        {
+            ErrorMessage = $"Не удалось обновить изображение: {exception.Message}";
+            PreviewMessage = null;
+        }
+        finally
+        {
+            IsUpdatingPreview = false;
+        }
+    }
+
     [RelayCommand]
     private void AddVersion() => _openVersionEditor();
 
@@ -184,6 +218,22 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
     }
 
     partial void OnIsLoadingChanged(bool value) => NotifyCollectionStateChanged();
+    partial void OnPreviewImageChanged(Bitmap? value) => NotifyCollectionStateChanged();
+
+    private async Task LoadPreviewAsync(int? fileId)
+    {
+        Bitmap? image = null;
+        if (fileId is int id)
+        {
+            var bytes = await _apiService.DownloadContentFileAsync(id);
+            using var stream = new MemoryStream(bytes);
+            image = new Bitmap(stream);
+        }
+
+        var previous = PreviewImage;
+        PreviewImage = image;
+        previous?.Dispose();
+    }
 
     private void NotifyCollectionStateChanged()
     {
@@ -192,5 +242,7 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         OnPropertyChanged(nameof(HasTags));
         OnPropertyChanged(nameof(HasNoTags));
         OnPropertyChanged(nameof(AvailableTags));
+        OnPropertyChanged(nameof(HasPreview));
+        OnPropertyChanged(nameof(HasNoPreview));
     }
 }

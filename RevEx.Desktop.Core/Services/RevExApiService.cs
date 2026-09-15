@@ -28,6 +28,29 @@ public sealed class RevExApiService(HttpClient httpClient) : IRevExApiService
         CancellationToken cancellationToken = default) =>
         PutAsJsonAsync($"api/content/{id}", request, cancellationToken);
 
+    public async Task<ContentDto> UploadContentPreviewAsync(
+        int id,
+        Stream content,
+        string fileName,
+        CancellationToken cancellationToken = default)
+    {
+        using var multipartContent = new MultipartFormDataContent();
+        using var fileContent = new StreamContent(content);
+        fileContent.Headers.ContentType = new MediaTypeHeaderValue(GetImageMediaType(fileName));
+        multipartContent.Add(fileContent, "File", fileName);
+
+        using var response = await httpClient.PostAsync(
+            $"api/content/{id}/preview",
+            multipartContent,
+            cancellationToken);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<ContentDto>(cancellationToken: cancellationToken)
+            ?? throw new HttpRequestException("API returned an empty response after uploading the preview image.");
+    }
+
+    public Task<byte[]> DownloadContentFileAsync(int id, CancellationToken cancellationToken = default) =>
+        httpClient.GetByteArrayAsync($"api/content-files/{id}/content", cancellationToken);
+
     public Task<IReadOnlyCollection<CategoryDto>> GetCategoriesAsync(
         CancellationToken cancellationToken = default) =>
         GetAllAsync<CategoryDto>("api/categories", cancellationToken);
@@ -121,6 +144,16 @@ public sealed class RevExApiService(HttpClient httpClient) : IRevExApiService
             ? "api/content/query"
             : $"api/content/query?{string.Join("&", parameters)}";
     }
+
+    private static string GetImageMediaType(string fileName) =>
+        Path.GetExtension(fileName).ToLowerInvariant() switch
+        {
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".png" => "image/png",
+            ".webp" => "image/webp",
+            ".gif" => "image/gif",
+            _ => "application/octet-stream"
+        };
 
     private async Task<IReadOnlyCollection<T>> GetAllAsync<T>(
         string route,

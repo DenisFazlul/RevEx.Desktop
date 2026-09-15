@@ -1,4 +1,8 @@
 using Avalonia.Controls;
+using Avalonia.Platform.Storage;
+using System.Collections.Generic;
+using System.Linq;
+using RevEx.Desktop.Configuration;
 using RevEx.Desktop.Core.Domain;
 using RevEx.Desktop.ViewModels.Contents;
 using RevEx.Desktop.Views.Tags;
@@ -23,5 +27,22 @@ public partial class ContentDetailsView : UserControl
         var tag = await window.ShowDialog<TagDto?>(owner);
         if (tag is not null)
             await viewModel.AssignTagAsync(tag);
+    }
+
+    private async void OnUpdatePreviewClick(object? sender, Avalonia.Interactivity.RoutedEventArgs eventArgs)
+    {
+        var topLevel = TopLevel.GetTopLevel(this);
+        if (topLevel?.StorageProvider is null || DataContext is not ContentDetailsViewModel viewModel)
+            return;
+
+        var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "Выберите новое изображение контента",
+            AllowMultiple = false,
+            FileTypeFilter = new List<FilePickerFileType> { ContentImageUploadConfiguration.FilePickerType }
+        });
+        var file = files.FirstOrDefault();
+        if (file is not null)
+            await viewModel.UpdatePreviewAsync(file.Path.LocalPath, file.Name);
     }
 }

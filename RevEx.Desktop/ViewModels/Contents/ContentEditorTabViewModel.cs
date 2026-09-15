@@ -9,6 +9,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using RevEx.Desktop.Core.Domain;
 using RevEx.Desktop.Core.Interfaces;
+using RevEx.Desktop.Configuration;
 using RevEx.Desktop.ViewModels.Tabs;
 
 namespace RevEx.Desktop.ViewModels.Contents;
@@ -40,6 +41,12 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
 
     [ObservableProperty]
     private string _selectedFileName = "Файл не выбран";
+
+    [ObservableProperty]
+    private string? _selectedPreviewPath;
+
+    [ObservableProperty]
+    private string _selectedPreviewName = "Изображение не выбрано";
 
     [ObservableProperty]
     private bool _isLoading;
@@ -118,6 +125,14 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
         HasError = false;
     }
 
+    public void SetSelectedPreview(string path, string fileName)
+    {
+        SelectedPreviewPath = path;
+        SelectedPreviewName = fileName;
+        Message = null;
+        HasError = false;
+    }
+
     [RelayCommand]
     private async Task SaveAsync()
     {
@@ -145,6 +160,12 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
                     TagIds = []
                 });
                 contentId = createdContent.Id;
+
+                await using var previewStream = File.OpenRead(SelectedPreviewPath!);
+                createdContent = await _apiService.UploadContentPreviewAsync(
+                    contentId,
+                    previewStream,
+                    SelectedPreviewName);
             }
 
             var version = await _apiService.CreateContentVersionAsync(new CreateContentVersionDto
@@ -170,6 +191,8 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
             {
                 ContentName = string.Empty;
                 Description = string.Empty;
+                SelectedPreviewPath = null;
+                SelectedPreviewName = "Изображение не выбрано";
             }
 
             SelectedFilePath = null;
@@ -209,6 +232,20 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
             return false;
         }
 
+
+        if (IsCreatingContent &&
+            (string.IsNullOrWhiteSpace(SelectedPreviewPath) || !File.Exists(SelectedPreviewPath)))
+        {
+            message = "Выберите изображение контента.";
+            return false;
+        }
+
+        if (IsCreatingContent && !ContentImageUploadConfiguration.IsSupported(SelectedPreviewPath!))
+        {
+            message = "Изображение должно быть в формате JPEG, PNG, WebP или GIF.";
+            return false;
+        }
+
         if (string.IsNullOrWhiteSpace(VersionName))
         {
             message = "Укажите название версии.";
@@ -244,4 +281,5 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
         HasError = true;
         Message = message;
     }
+
 }
