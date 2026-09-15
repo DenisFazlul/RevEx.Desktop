@@ -12,7 +12,7 @@ public partial class AuthenticationErrorWindow : Window
 
     public AuthenticationErrorWindow(string message) : this()
     {
-        MessageText.Text = $"Авторизация через Keycloak не завершена.\n{message}";
+        MessageText.Text = $"Авторизация не завершена.\n{message}";
     }
 
     private void OnCloseClick(object? sender, RoutedEventArgs eventArgs)

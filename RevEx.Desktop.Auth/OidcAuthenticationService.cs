@@ -7,7 +7,7 @@ using RevEx.Desktop.Core.Interfaces;
 
 namespace RevEx.Desktop.Auth;
 
-public sealed class KeycloakAuthenticationService : IAuthenticationService
+public sealed class OidcAuthenticationService : IAuthenticationService
 {
     private const string AuthorizationPageResource =
         "RevEx.Desktop.Auth.Assets.AuthorizationCompleted.html";
@@ -15,34 +15,38 @@ public sealed class KeycloakAuthenticationService : IAuthenticationService
     private readonly OidcClient _oidcClient;
     private readonly HttpClient _backchannelClient;
     private readonly string _clientId;
-    private readonly string _logoutEndpoint;
+    private readonly string? _refreshTokenRevocationEndpoint;
     private readonly string _redirectUri;
     private readonly SemaphoreSlim _loginLock = new(1, 1);
     private string? _accessToken;
     private string? _refreshToken;
     private DateTimeOffset _accessTokenExpiration;
 
-    public KeycloakAuthenticationService(
+    public OidcAuthenticationService(
         IAppSettings settings,
         IHttpClientFactory httpClientFactory)
     {
         var authentication = settings.Authentication;
-        _backchannelClient = httpClientFactory.CreateClient(nameof(KeycloakAuthenticationService));
-        _clientId = authentication.ClientId;
-        _logoutEndpoint = $"{authentication.Authority.TrimEnd('/')}/protocol/openid-connect/logout";
+        if (!authentication.Providers.TryGetValue(authentication.Provider, out var provider))
+            throw new InvalidOperationException(
+                $"Authentication provider '{authentication.Provider}' is not configured.");
+
+        _backchannelClient = httpClientFactory.CreateClient(nameof(OidcAuthenticationService));
+        _clientId = provider.ClientId;
+        _refreshTokenRevocationEndpoint = provider.RefreshTokenRevocationEndpoint;
         _redirectUri = authentication.RedirectUri;
         _oidcClient = new OidcClient(new OidcClientOptions
         {
-            Authority = authentication.Authority,
-            ClientId = authentication.ClientId,
-            Scope = authentication.Scope,
+            Authority = provider.Authority,
+            ClientId = provider.ClientId,
+            Scope = provider.Scope,
             RedirectUri = authentication.RedirectUri,
             DisablePushedAuthorization = true,
             Policy = new Policy
             {
                 Discovery = new DiscoveryPolicy
                 {
-                    RequireHttps = authentication.RequireHttpsMetadata
+                    RequireHttps = provider.RequireHttpsMetadata
                 }
             }
         });
@@ -78,7 +82,8 @@ public sealed class KeycloakAuthenticationService : IAuthenticationService
         {
             var refreshToken = _refreshToken;
 
-            if (string.IsNullOrWhiteSpace(refreshToken))
+            if (string.IsNullOrWhiteSpace(refreshToken) ||
+                string.IsNullOrWhiteSpace(_refreshTokenRevocationEndpoint))
             {
                 ClearTokens();
                 return;
@@ -90,7 +95,7 @@ public sealed class KeycloakAuthenticationService : IAuthenticationService
                 ["refresh_token"] = refreshToken
             });
             using var response = await _backchannelClient.PostAsync(
-                _logoutEndpoint,
+                _refreshTokenRevocationEndpoint,
                 content,
                 cancellationToken);
 
@@ -98,7 +103,7 @@ public sealed class KeycloakAuthenticationService : IAuthenticationService
             {
                 var details = await response.Content.ReadAsStringAsync(cancellationToken);
                 throw new InvalidOperationException(
-                    $"Keycloak logout failed ({(int)response.StatusCode}): {details}");
+                    $"OIDC refresh token revocation failed ({(int)response.StatusCode}): {details}");
             }
 
             ClearTokens();
@@ -142,7 +147,7 @@ public sealed class KeycloakAuthenticationService : IAuthenticationService
     {
         var state = await _oidcClient.PrepareLoginAsync(cancellationToken: cancellationToken);
         if (string.IsNullOrWhiteSpace(state.StartUrl))
-            throw new InvalidOperationException("Keycloak returned an empty authorization URL.");
+            throw new InvalidOperationException("The identity provider returned an empty authorization URL.");
 
         using var listener = CreateCallbackListener();
         try
@@ -156,7 +161,7 @@ public sealed class KeycloakAuthenticationService : IAuthenticationService
                 cancellationToken: cancellationToken);
 
             if (result.IsError || string.IsNullOrWhiteSpace(result.AccessToken))
-                throw new InvalidOperationException($"Keycloak authentication failed: {result.Error}");
+                throw new InvalidOperationException($"OIDC authentication failed: {result.Error}");
 
             await WriteBrowserResponseAsync(context.Response, cancellationToken);
 
@@ -209,7 +214,7 @@ public sealed class KeycloakAuthenticationService : IAuthenticationService
 
     private static string LoadAuthorizationPage()
     {
-        using var stream = typeof(KeycloakAuthenticationService).Assembly
+        using var stream = typeof(OidcAuthenticationService).Assembly
             .GetManifestResourceStream(AuthorizationPageResource)
             ?? throw new InvalidOperationException(
                 $"Embedded resource '{AuthorizationPageResource}' was not found.");

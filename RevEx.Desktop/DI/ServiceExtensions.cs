@@ -50,15 +50,36 @@ public static class ServiceExtensions
 
     private static void ValidateAuthenticationSettings(AuthenticationSettings settings)
     {
-        if (!Uri.TryCreate(settings.Authority, UriKind.Absolute, out var authorityUri) ||
-            (settings.RequireHttpsMetadata && authorityUri.Scheme != Uri.UriSchemeHttps))
+        if (string.IsNullOrWhiteSpace(settings.Provider))
+            throw new InvalidOperationException("AppSettings:Authentication:Provider is required.");
+
+        if (settings.Provider.Equals(
+                AuthenticationProviderNames.ActiveDirectory,
+                StringComparison.OrdinalIgnoreCase))
+            return;
+
+        if (!settings.Provider.Equals(
+                AuthenticationProviderNames.Keycloak,
+                StringComparison.OrdinalIgnoreCase))
         {
-            throw new InvalidOperationException("AppSettings:Authentication:Authority is invalid.");
+            throw new InvalidOperationException(
+                $"Authentication provider '{settings.Provider}' is not supported. " +
+                $"Supported providers: {AuthenticationProviderNames.Keycloak}, " +
+                $"{AuthenticationProviderNames.ActiveDirectory}.");
         }
-        if (string.IsNullOrWhiteSpace(settings.ClientId))
-            throw new InvalidOperationException("AppSettings:Authentication:ClientId is required.");
-        if (string.IsNullOrWhiteSpace(settings.Scope))
-            throw new InvalidOperationException("AppSettings:Authentication:Scope is required.");
+
+        if (!settings.Providers.TryGetValue(AuthenticationProviderNames.Keycloak, out var provider))
+            throw new InvalidOperationException("Keycloak authentication is not configured.");
+        if (!Uri.TryCreate(provider.Authority, UriKind.Absolute, out var authorityUri) ||
+            (provider.RequireHttpsMetadata && authorityUri.Scheme != Uri.UriSchemeHttps))
+        {
+            throw new InvalidOperationException(
+                $"AppSettings:Authentication:Providers:{settings.Provider}:Authority is invalid.");
+        }
+        if (string.IsNullOrWhiteSpace(provider.ClientId))
+            throw new InvalidOperationException("Authentication provider ClientId is required.");
+        if (string.IsNullOrWhiteSpace(provider.Scope))
+            throw new InvalidOperationException("Authentication provider Scope is required.");
         if (!Uri.TryCreate(settings.RedirectUri, UriKind.Absolute, out var redirectUri) ||
             redirectUri.Host != "127.0.0.1")
         {
@@ -75,7 +96,7 @@ public static class ServiceExtensions
             {
                 httpClient.BaseAddress = new Uri(appSettings.ApiPath);
             })
-            .AddKeycloakAuthentication();
+            .AddConfiguredAuthentication(appSettings.Authentication);
 
     private static IServiceCollection AddUIServices(this IServiceCollection services)
     {

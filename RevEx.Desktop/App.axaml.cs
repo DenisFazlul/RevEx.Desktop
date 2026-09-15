@@ -59,7 +59,7 @@ public partial class App : Application
         }
         catch (Exception exception)
         {
-            Console.Error.WriteLine($"Keycloak startup authentication failed: {exception}");
+            Console.Error.WriteLine($"OIDC startup authentication failed: {exception}");
 
             var errorWindow = new AuthenticationErrorWindow(exception.Message);
             desktop.MainWindow = errorWindow;
