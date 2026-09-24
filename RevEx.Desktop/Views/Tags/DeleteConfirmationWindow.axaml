@@ -1,0 +1,17 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="RevEx.Desktop.Views.Tags.DeleteConfirmationWindow"
+        Title="Подтверждение удаления" Width="440" Height="230"
+        MinWidth="400" MinHeight="210" WindowStartupLocation="CenterOwner"
+        CanResize="False">
+    <Grid Margin="24" RowDefinitions="Auto,14,*,Auto">
+        <TextBlock Classes="h2" Text="Удалить?" />
+        <TextBlock Grid.Row="2" Text="{Binding Message}" TextWrapping="Wrap"
+                   Foreground="{StaticResource TextSecondaryBrush}" />
+        <Grid Grid.Row="3" ColumnDefinitions="*,12,*">
+            <Button Content="{Binding CancelButtonText}" Click="OnCancelClick" />
+            <Button Grid.Column="2" Classes="danger" Content="Удалить"
+                    IsVisible="{Binding CanDelete}" Click="OnDeleteClick" />
+        </Grid>
+    </Grid>
+</Window>

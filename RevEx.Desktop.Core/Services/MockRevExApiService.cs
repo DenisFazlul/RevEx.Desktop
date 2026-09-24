@@ -14,10 +14,16 @@ public sealed class MockRevExApiService : IRevExApiService
         new(2, "Документы", CreatedAt, UpdatedAt)
     ];
 
+    private static readonly List<TagGroupDto> TagGroups =
+    [
+        new(1, "Проекты", CreatedAt, UpdatedAt),
+        new(2, "Назначение", CreatedAt, UpdatedAt)
+    ];
+
     private static readonly List<TagDto> Tags =
     [
-        new(1, "Важное", CreatedAt, UpdatedAt),
-        new(2, "Работа", CreatedAt, UpdatedAt)
+        new(1, "Важное", 2, "Назначение", CreatedAt, UpdatedAt),
+        new(2, "Работа", 1, "Проекты", CreatedAt, UpdatedAt)
     ];
 
     private static readonly ContentStatusDto[] ContentStatuses =
@@ -155,6 +161,40 @@ public sealed class MockRevExApiService : IRevExApiService
     public Task<CategoryDto?> GetCategoryAsync(int id, CancellationToken cancellationToken = default) =>
         FromItem(Categories.FirstOrDefault(item => item.Id == id), cancellationToken);
 
+    public Task<IReadOnlyCollection<TagGroupDto>> GetTagGroupsAsync(CancellationToken cancellationToken = default) =>
+        FromCollection(TagGroups, cancellationToken);
+
+    public Task<TagGroupDto> CreateTagGroupAsync(CreateTagGroupDto request, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var now = DateTimeOffset.UtcNow;
+        var group = new TagGroupDto(TagGroups.Count == 0 ? 1 : TagGroups.Max(item => item.Id) + 1,
+            request.Name, now, now);
+        TagGroups.Add(group);
+        return Task.FromResult(group);
+    }
+
+    public Task UpdateTagGroupAsync(int id, UpdateTagGroupDto request, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var index = TagGroups.FindIndex(item => item.Id == id);
+        if (index < 0) throw new HttpRequestException($"Tag group {id} was not found.");
+        TagGroups[index] = TagGroups[index] with { Name = request.Name, UpdatedAt = DateTimeOffset.UtcNow };
+        for (var tagIndex = 0; tagIndex < Tags.Count; tagIndex++)
+            if (Tags[tagIndex].TagGroupId == id)
+                Tags[tagIndex] = Tags[tagIndex] with { TagGroupName = request.Name };
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteTagGroupAsync(int id, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (Tags.Any(item => item.TagGroupId == id))
+            throw new HttpRequestException("Move or delete all tags in this group first.");
+        TagGroups.RemoveAll(item => item.Id == id);
+        return Task.CompletedTask;
+    }
+
     public Task<IReadOnlyCollection<TagDto>> GetTagsAsync(CancellationToken cancellationToken = default) =>
         FromCollection(Tags, cancellationToken);
 
@@ -167,7 +207,10 @@ public sealed class MockRevExApiService : IRevExApiService
     {
         cancellationToken.ThrowIfCancellationRequested();
         var now = DateTimeOffset.UtcNow;
-        var tag = new TagDto(Tags.Count == 0 ? 1 : Tags.Max(item => item.Id) + 1, request.Name, now, now);
+        var group = TagGroups.FirstOrDefault(item => item.Id == request.TagGroupId)
+            ?? throw new HttpRequestException($"Tag group {request.TagGroupId} was not found.");
+        var tag = new TagDto(Tags.Count == 0 ? 1 : Tags.Max(item => item.Id) + 1,
+            request.Name, group.Id, group.Name, now, now);
         Tags.Add(tag);
         return Task.FromResult(tag);
     }
@@ -182,7 +225,15 @@ public sealed class MockRevExApiService : IRevExApiService
         if (index < 0)
             throw new HttpRequestException($"Tag {id} was not found.");
 
-        Tags[index] = Tags[index] with { Name = request.Name, UpdatedAt = DateTimeOffset.UtcNow };
+        var group = TagGroups.FirstOrDefault(item => item.Id == request.TagGroupId)
+            ?? throw new HttpRequestException($"Tag group {request.TagGroupId} was not found.");
+        Tags[index] = Tags[index] with
+        {
+            Name = request.Name,
+            TagGroupId = group.Id,
+            TagGroupName = group.Name,
+            UpdatedAt = DateTimeOffset.UtcNow
+        };
         return Task.CompletedTask;
     }
 

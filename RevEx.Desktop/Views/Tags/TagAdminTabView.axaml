@@ -2,51 +2,94 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:RevEx.Desktop.ViewModels.Tags"
              x:Class="RevEx.Desktop.Views.Tags.TagAdminTabView"
-             x:DataType="vm:TagAdminTabViewModel">
-    <Grid Margin="32,30" RowDefinitions="Auto,22,*" MaxWidth="880" HorizontalAlignment="Center">
-        <HeaderedContentControl Theme="{StaticResource PageHeaderTheme}"
-                                Header="Теги" Content="Справочник меток для поиска и классификации контента" />
-        <Grid Grid.Row="2" ColumnDefinitions="*,16,330">
-            <Border Classes="card section-card">
-                <Grid RowDefinitions="Auto,14,*">
-                    <TextBlock Classes="h2" Text="Все теги" />
-                    <Grid Grid.Row="2">
-                        <ProgressBar IsVisible="{Binding IsLoading}" IsIndeterminate="True" VerticalAlignment="Top" />
-                        <TextBlock IsVisible="{Binding HasNoTags}" Text="Теги ещё не созданы."
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"
-                                   Foreground="{StaticResource TextSecondaryBrush}" />
-                        <ListBox Classes="clean-list category-list" ItemsSource="{Binding Tags}" SelectedItem="{Binding SelectedTag}"
-                                 IsVisible="{Binding HasTags}">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate x:DataType="vm:TagItemViewModel">
-                                    <Border Padding="10,8">
-                                        <TextBlock Text="{Binding Name, StringFormat='#{0}'}" FontWeight="Medium" />
+             x:DataType="vm:TagAdminTabViewModel"
+             HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+    <Grid Margin="32,30" RowDefinitions="Auto,22,*,Auto">
+        <Grid ColumnDefinitions="*,Auto,10,Auto">
+            <HeaderedContentControl Theme="{StaticResource PageHeaderTheme}"
+                                    Header="Группы тегов"
+                                    Content="Группы и относящиеся к ним теги" />
+            <Button Grid.Column="1" Content="+  Создать тег" Click="OnCreateTagClick"
+                    IsEnabled="{Binding HasGroups}" VerticalAlignment="Center" />
+            <Button Grid.Column="3" Classes="primary" Content="+  Создать группу"
+                    Click="OnCreateGroupClick" VerticalAlignment="Center" />
+        </Grid>
+
+        <Border Grid.Row="2" Classes="card section-card">
+            <Grid RowDefinitions="Auto,14,*">
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Classes="h2" Text="Группы и теги" />
+                    <TextBlock Grid.Column="1" Classes="caption"
+                               Text="{Binding Groups.Count, StringFormat='Групп: {0}'}" />
+                </Grid>
+
+                <Grid Grid.Row="2">
+                    <ProgressBar IsVisible="{Binding IsLoading}" IsIndeterminate="True"
+                                 VerticalAlignment="Top" />
+                    <TextBlock IsVisible="{Binding HasNoGroups}"
+                               Text="Групп пока нет. Создайте первую группу."
+                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                               Foreground="{StaticResource TextSecondaryBrush}" />
+                    <ScrollViewer IsVisible="{Binding HasGroups}" VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding Groups}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:TagGroupItemViewModel">
+                                    <Border Margin="0,0,0,12" BorderBrush="{StaticResource BorderBrush}"
+                                            BorderThickness="1" CornerRadius="10">
+                                        <Grid RowDefinitions="Auto,Auto">
+                                            <Border Padding="14,10" Background="{StaticResource SurfaceMutedBrush}"
+                                                    CornerRadius="9,9,0,0">
+                                                <Grid ColumnDefinitions="*,Auto,12,Auto,6,Auto">
+                                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold"
+                                                               FontSize="15" VerticalAlignment="Center" />
+                                                    <TextBlock Grid.Column="1" Classes="caption"
+                                                               Text="{Binding TagCount, StringFormat='Тегов: {0}'}"
+                                                               VerticalAlignment="Center" />
+                                                    <Button Grid.Column="3" Classes="icon" Content="✎"
+                                                            Click="OnEditGroupClick"
+                                                            ToolTip.Tip="Редактировать группу" />
+                                                    <Button Grid.Column="5" Classes="icon danger" Content="×"
+                                                            Click="OnDeleteGroupClick"
+                                                            ToolTip.Tip="Удалить группу" />
+                                                </Grid>
+                                            </Border>
+
+                                            <Grid Grid.Row="1" MinHeight="48">
+                                                <TextBlock IsVisible="{Binding HasNoTags}"
+                                                           Text="В группе пока нет тегов"
+                                                           Classes="caption" Margin="16,14" />
+                                                <ItemsControl ItemsSource="{Binding Tags}"
+                                                              IsVisible="{Binding HasTags}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate x:DataType="vm:TagItemViewModel">
+                                                            <Border Padding="16,8" BorderBrush="{StaticResource BorderBrush}"
+                                                                    BorderThickness="0,1,0,0">
+                                                                <Grid ColumnDefinitions="*,Auto,6,Auto">
+                                                                    <TextBlock Text="{Binding Name, StringFormat='#{0}'}"
+                                                                               FontWeight="Medium"
+                                                                               VerticalAlignment="Center" />
+                                                                    <Button Grid.Column="1" Classes="icon" Content="✎"
+                                                                            Click="OnEditTagClick"
+                                                                            ToolTip.Tip="Редактировать тег" />
+                                                                    <Button Grid.Column="3" Classes="icon danger" Content="×"
+                                                                            Click="OnDeleteTagClick"
+                                                                            ToolTip.Tip="Удалить тег" />
+                                                                </Grid>
+                                                            </Border>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </Grid>
+                                        </Grid>
                                     </Border>
                                 </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-                    </Grid>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
                 </Grid>
-            </Border>
-
-            <Border Grid.Column="2" Classes="card section-card">
-                <StackPanel Spacing="14">
-                    <TextBlock Classes="h2" Text="Редактор" />
-                    <TextBlock Classes="label" Text="Название тега" />
-                    <TextBox Text="{Binding TagName}" MaxLength="100" Watermark="Например, Revit" />
-                    <Button Classes="primary" Content="Создать" Command="{Binding CreateCommand}"
-                            IsEnabled="{Binding !IsSaving}" />
-                    <Button Content="Переименовать выбранный" Command="{Binding RenameCommand}"
-                            IsEnabled="{Binding !IsSaving}" />
-                    <Button Classes="danger" Content="{Binding DeleteButtonText}" Command="{Binding DeleteCommand}"
-                            IsEnabled="{Binding !IsSaving}" />
-                    <ProgressBar IsVisible="{Binding IsSaving}" IsIndeterminate="True" />
-                    <TextBlock Text="{Binding Message}" TextWrapping="Wrap"
-                               Foreground="{StaticResource TextSecondaryBrush}" />
-                    <TextBlock Text="{Binding ErrorMessage}" TextWrapping="Wrap"
-                               Foreground="{StaticResource TextSecondaryBrush}" />
-                </StackPanel>
-            </Border>
-        </Grid>
+            </Grid>
+        </Border>
+        <TextBlock Grid.Row="3" Margin="2,12,0,0" Text="{Binding ErrorMessage}"
+                   TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" />
     </Grid>
 </UserControl>

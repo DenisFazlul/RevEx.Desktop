@@ -20,9 +20,10 @@
                          IsVisible="{Binding HasTags}" DoubleTapped="OnTagDoubleTapped">
                     <ListBox.ItemTemplate>
                         <DataTemplate x:DataType="domain:TagDto">
-                            <Border Padding="10,8">
+                            <Grid Margin="10,8" ColumnDefinitions="*,Auto">
                                 <TextBlock Text="{Binding Name, StringFormat='#{0}'}" FontWeight="Medium" />
-                            </Border>
+                                <TextBlock Grid.Column="1" Text="{Binding TagGroupName}" Classes="caption" />
+                            </Grid>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>

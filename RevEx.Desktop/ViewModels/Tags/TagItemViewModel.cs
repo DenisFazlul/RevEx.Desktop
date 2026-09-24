@@ -6,6 +6,7 @@ namespace RevEx.Desktop.ViewModels.Tags;
 public partial class TagItemViewModel : ViewModelBase
 {
     public int Id { get; }
+    public int TagGroupId { get; set; }
 
     [ObservableProperty]
     private string _name;
@@ -13,6 +14,7 @@ public partial class TagItemViewModel : ViewModelBase
     public TagItemViewModel(TagDto dto)
     {
         Id = dto.Id;
+        TagGroupId = dto.TagGroupId;
         _name = dto.Name;
     }
 }

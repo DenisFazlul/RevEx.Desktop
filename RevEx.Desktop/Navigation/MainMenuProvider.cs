@@ -21,7 +21,7 @@ public sealed class MainMenuProvider : IMainMenuProvider
     [
         WorkspaceTabDescriptor.Create<CatalogTabViewModel>("Каталог", "⌕"),
         WorkspaceTabDescriptor.Create<ContentEditorTabViewModel>("Добавить контент", "+"),
-        WorkspaceTabDescriptor.Create<TagAdminTabViewModel>("Теги", "#"),
+        WorkspaceTabDescriptor.Create<TagAdminTabViewModel>("Группы тегов", "#"),
         WorkspaceTabDescriptor.Create<SettingsTabViewModel>("Настройки", "⚙")
     ];
 

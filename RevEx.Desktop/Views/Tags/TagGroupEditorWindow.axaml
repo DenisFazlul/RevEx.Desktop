@@ -1,0 +1,25 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="RevEx.Desktop.Views.Tags.TagGroupEditorWindow"
+        Title="Группа тегов" Width="460" Height="270"
+        MinWidth="400" MinHeight="250" WindowStartupLocation="CenterOwner"
+        CanResize="False">
+    <Grid Margin="24" RowDefinitions="Auto,18,Auto,*,Auto">
+        <StackPanel Spacing="4">
+            <TextBlock Classes="h2" Text="{Binding DialogTitle}" />
+            <TextBlock Classes="caption" Text="Укажите название группы тегов" />
+        </StackPanel>
+        <StackPanel Grid.Row="2" Spacing="7">
+            <TextBlock Classes="label" Text="Название группы" />
+            <TextBox x:Name="NameBox" Text="{Binding EntityName}" MaxLength="100"
+                     Watermark="Например, Платформа" />
+            <TextBlock x:Name="ValidationMessage" Foreground="{StaticResource TextSecondaryBrush}" />
+        </StackPanel>
+        <Grid Grid.Row="4" ColumnDefinitions="Auto,*,Auto,10,Auto">
+            <Button Classes="danger" Content="Удалить" IsVisible="{Binding IsEditing}"
+                    Click="OnDeleteClick" />
+            <Button Grid.Column="2" Content="Отмена" Click="OnCancelClick" />
+            <Button Grid.Column="4" Classes="primary" Content="Сохранить" Click="OnSaveClick" />
+        </Grid>
+    </Grid>
+</Window>

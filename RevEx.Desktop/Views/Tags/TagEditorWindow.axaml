@@ -1,0 +1,34 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RevEx.Desktop.ViewModels.Tags"
+        x:Class="RevEx.Desktop.Views.Tags.TagEditorWindow"
+        Title="Тег" Width="480" Height="350"
+        MinWidth="420" MinHeight="320" WindowStartupLocation="CenterOwner"
+        CanResize="False">
+    <Grid Margin="24" RowDefinitions="Auto,18,*,Auto">
+        <StackPanel Spacing="4">
+            <TextBlock Classes="h2" Text="{Binding DialogTitle}" />
+            <TextBlock Classes="caption" Text="Укажите имя тега и группу, к которой он относится" />
+        </StackPanel>
+        <StackPanel Grid.Row="2" Spacing="9">
+            <TextBlock Classes="label" Text="Название тега" />
+            <TextBox x:Name="NameBox" Text="{Binding EntityName}" MaxLength="100"
+                     Watermark="Например, Revit" />
+            <TextBlock Classes="label" Text="Группа" Margin="0,5,0,0" />
+            <ComboBox x:Name="GroupBox" ItemsSource="{Binding Groups}" SelectedItem="{Binding SelectedGroup}">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="vm:TagGroupItemViewModel">
+                        <TextBlock Text="{Binding Name}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <TextBlock x:Name="ValidationMessage" Foreground="{StaticResource TextSecondaryBrush}" />
+        </StackPanel>
+        <Grid Grid.Row="3" ColumnDefinitions="Auto,*,Auto,10,Auto">
+            <Button Classes="danger" Content="Удалить" IsVisible="{Binding IsEditing}"
+                    Click="OnDeleteClick" />
+            <Button Grid.Column="2" Content="Отмена" Click="OnCancelClick" />
+            <Button Grid.Column="4" Classes="primary" Content="Сохранить" Click="OnSaveClick" />
+        </Grid>
+    </Grid>
+</Window>

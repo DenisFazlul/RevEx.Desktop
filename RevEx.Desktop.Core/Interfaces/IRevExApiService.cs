@@ -25,6 +25,11 @@ public interface IRevExApiService
     Task<IReadOnlyCollection<CategoryDto>> GetCategoriesAsync(CancellationToken cancellationToken = default);
     Task<CategoryDto?> GetCategoryAsync(int id, CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyCollection<TagGroupDto>> GetTagGroupsAsync(CancellationToken cancellationToken = default);
+    Task<TagGroupDto> CreateTagGroupAsync(CreateTagGroupDto request, CancellationToken cancellationToken = default);
+    Task UpdateTagGroupAsync(int id, UpdateTagGroupDto request, CancellationToken cancellationToken = default);
+    Task DeleteTagGroupAsync(int id, CancellationToken cancellationToken = default);
+
     Task<IReadOnlyCollection<TagDto>> GetTagsAsync(CancellationToken cancellationToken = default);
     Task<TagDto?> GetTagAsync(int id, CancellationToken cancellationToken = default);
     Task<TagDto> CreateTagAsync(CreateTagDto request, CancellationToken cancellationToken = default);
