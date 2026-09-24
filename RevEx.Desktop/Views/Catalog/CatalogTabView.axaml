@@ -81,15 +81,44 @@
                                  IsVisible="{Binding !IsContentLoading}">
                             <ListBox.ItemTemplate>
                                 <DataTemplate x:DataType="contentVm:ContentItemViewModel">
-                                    <HeaderedContentControl Theme="{StaticResource ContentRowTheme}"
-                                                            Header="{Binding Name}"
-                                                            DoubleTapped="OnContentDoubleTapped">
-                                        <StackPanel Spacing="5">
-                                            <TextBlock Text="{Binding Description}" TextWrapping="Wrap" />
-                                            <TextBlock Text="{Binding TagsText}" Classes="caption"
-                                                       Foreground="{StaticResource AccentBrush}" />
-                                        </StackPanel>
-                                    </HeaderedContentControl>
+                                    <Border Classes="content-row" Margin="0,0,0,8"
+                                            DoubleTapped="OnContentDoubleTapped">
+                                        <Grid ColumnDefinitions="84,14,*">
+                                            <Border Width="84" Height="72" CornerRadius="8" ClipToBounds="True"
+                                                    Background="{StaticResource SurfaceMutedBrush}">
+                                                <Grid>
+                                                    <TextBlock Text="Нет фото" Classes="caption"
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                               IsVisible="{Binding !HasPreview}" />
+                                                    <Image Source="{Binding PreviewImage}" Stretch="UniformToFill"
+                                                           IsVisible="{Binding HasPreview}" />
+                                                </Grid>
+                                            </Border>
+                                            <StackPanel Grid.Column="2" Spacing="7" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="15" />
+                                                <WrapPanel Orientation="Horizontal">
+                                                    <ItemsControl ItemsSource="{Binding VisibleTags}">
+                                                        <ItemsControl.ItemsPanel>
+                                                            <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                                                        </ItemsControl.ItemsPanel>
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <Border Classes="value-box" Padding="8,3" Margin="0,0,6,0">
+                                                                    <TextBlock Text="{Binding StringFormat='#{0}'}" Classes="caption"
+                                                                               Foreground="{StaticResource AccentBrush}" />
+                                                                </Border>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+                                                    <Border Classes="value-box" Padding="8,3"
+                                                            IsVisible="{Binding HasAdditionalTags}">
+                                                        <TextBlock Text="{Binding AdditionalTagsText}" Classes="caption"
+                                                                   Foreground="{StaticResource AccentBrush}" />
+                                                    </Border>
+                                                </WrapPanel>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>

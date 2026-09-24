@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -102,6 +103,8 @@ public partial class CatalogTabViewModel : WorkspaceTabViewModel
     private void ScheduleContentLoad()
     {
         _contentLoadCancellation?.Cancel();
+        foreach (var content in Contents)
+            content.Dispose();
         Contents.Clear();
         IsContentLoading = false;
 
@@ -129,10 +132,14 @@ public partial class CatalogTabViewModel : WorkspaceTabViewModel
                 return;
 
             var tagNames = Tags.ToDictionary(tag => tag.Id, tag => tag.Name);
-            foreach (var dto in ApplyQuery(contentDtos, query))
+            var itemTasks = ApplyQuery(contentDtos, query)
+                .Select(dto => CreateContentItemAsync(dto, tagNames, cancellation.Token));
+            var items = await Task.WhenAll(itemTasks);
+
+            foreach (var item in items)
             {
                 cancellation.Token.ThrowIfCancellationRequested();
-                Contents.Add(new ContentItemViewModel(dto, tagNames));
+                Contents.Add(item);
             }
         }
         catch (OperationCanceledException)
@@ -149,6 +156,27 @@ public partial class CatalogTabViewModel : WorkspaceTabViewModel
 
             cancellation.Dispose();
         }
+    }
+
+    private async Task<ContentItemViewModel> CreateContentItemAsync(
+        ContentDto content,
+        IReadOnlyDictionary<int, string> tagNames,
+        CancellationToken cancellationToken)
+    {
+        byte[]? previewBytes = null;
+        if (content.PreviewFileId is int previewFileId)
+        {
+            try
+            {
+                previewBytes = await _revExApiService.DownloadContentFileAsync(previewFileId, cancellationToken);
+            }
+            catch (HttpRequestException)
+            {
+                // Карточка каталога остается доступной, даже если превью повреждено или удалено.
+            }
+        }
+
+        return new ContentItemViewModel(content, tagNames, previewBytes);
     }
 
     private static IEnumerable<ContentDto> ApplyQuery(
