@@ -124,6 +124,14 @@ public sealed class MockRevExApiService : IRevExApiService
         return Task.CompletedTask;
     }
 
+    public Task DeleteContentAsync(int id, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        Contents.RemoveAll(item => item.Id == id);
+        ContentVersions.RemoveAll(item => item.ContentId == id);
+        return Task.CompletedTask;
+    }
+
     public Task<ContentDto> UploadContentPreviewAsync(
         int id,
         Stream content,

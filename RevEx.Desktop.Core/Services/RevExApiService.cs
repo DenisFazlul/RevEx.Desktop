@@ -28,6 +28,9 @@ public sealed class RevExApiService(HttpClient httpClient) : IRevExApiService
         CancellationToken cancellationToken = default) =>
         PutAsJsonAsync($"api/content/{id}", request, cancellationToken);
 
+    public Task DeleteContentAsync(int id, CancellationToken cancellationToken = default) =>
+        DeleteAsync($"api/content/{id}", cancellationToken);
+
     public async Task<ContentDto> UploadContentPreviewAsync(
         int id,
         Stream content,

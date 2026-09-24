@@ -31,8 +31,31 @@
                 </Border>
 
                 <StackPanel Grid.Column="2" Spacing="16">
-                    <HeaderedContentControl Theme="{StaticResource DetailsCardTheme}"
-                                            Header="Описание" Content="{Binding Description}" />
+                    <Border Classes="card section-card">
+                        <StackPanel Spacing="14">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBlock Classes="h2" Text="Основная информация" />
+                                <Button Grid.Column="1" Classes="danger" Content="Удалить контент"
+                                        Click="OnDeleteContentClick"
+                                        IsEnabled="{Binding !IsDeleting}" />
+                            </Grid>
+                            <StackPanel Spacing="7">
+                                <TextBlock Classes="label" Text="Название" />
+                                <TextBox Text="{Binding Name}" IsEnabled="{Binding !IsSavingContent}" />
+                            </StackPanel>
+                            <StackPanel Spacing="7">
+                                <TextBlock Classes="label" Text="Описание" />
+                                <TextBox Text="{Binding Description}" AcceptsReturn="True" TextWrapping="Wrap"
+                                         MinHeight="110" IsEnabled="{Binding !IsSavingContent}" />
+                            </StackPanel>
+                            <ProgressBar IsVisible="{Binding IsSavingContent}" IsIndeterminate="True" />
+                            <TextBlock Text="{Binding ContentMessage}"
+                                       Foreground="{StaticResource TextSecondaryBrush}" />
+                            <Button Classes="primary" HorizontalAlignment="Left" Content="Сохранить изменения"
+                                    Command="{Binding SaveContentCommand}"
+                                    IsEnabled="{Binding !IsSavingContent}" />
+                        </StackPanel>
+                    </Border>
                     <Border Classes="card section-card">
                         <StackPanel Spacing="14">
                             <Grid ColumnDefinitions="*,Auto">

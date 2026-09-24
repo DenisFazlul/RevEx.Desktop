@@ -13,12 +13,13 @@ public abstract partial class WorkspaceTabViewModel : ViewModelBase
         bool canClose,
         object? key = null)
     {
-        Title = title;
+        _title = title;
         CanClose = canClose;
         Key = key;
     }
 
-    public string Title { get; }
+    [ObservableProperty]
+    private string _title;
     public bool CanClose { get; }
     public object? Key { get; }
 

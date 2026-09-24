@@ -16,6 +16,8 @@ namespace RevEx.Desktop.ViewModels.Contents;
 public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
 {
     private readonly Action _openVersionEditor;
+    private readonly Action _close;
+    private readonly Action<string, string> _contentUpdated;
     private readonly IRevExApiService _apiService;
     private ContentDto? _content;
     private IReadOnlyCollection<TagDto> _allTags = [];
@@ -23,9 +25,13 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
     [ObservableProperty] private bool _isLoading;
     [ObservableProperty] private bool _isSavingTags;
     [ObservableProperty] private bool _isUpdatingPreview;
+    [ObservableProperty] private bool _isSavingContent;
+    [ObservableProperty] private bool _isDeleting;
     [ObservableProperty] private string? _errorMessage;
     [ObservableProperty] private string? _tagMessage;
     [ObservableProperty] private string? _previewMessage;
+    [ObservableProperty] private string? _contentMessage;
+    [ObservableProperty] private string _name;
     [ObservableProperty] private string _description;
     [ObservableProperty] private Bitmap? _previewImage;
 
@@ -44,7 +50,9 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
     public ContentDetailsViewModel(
         ContentItemViewModel content,
         IRevExApiService apiService,
-        Action openVersionEditor)
+        Action openVersionEditor,
+        Action close,
+        Action<string, string> contentUpdated)
         : base(
             content.Name,
             true,
@@ -52,7 +60,10 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
     {
         _apiService = apiService;
         _openVersionEditor = openVersionEditor;
+        _close = close;
+        _contentUpdated = contentUpdated;
         Id = content.Id;
+        _name = content.Name;
         _description = content.Description;
     }
 
@@ -154,6 +165,62 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
     }
 
     [RelayCommand]
+    private async Task SaveContentAsync()
+    {
+        if (_content is null)
+            return;
+
+        if (string.IsNullOrWhiteSpace(Name) || string.IsNullOrWhiteSpace(Description))
+        {
+            ErrorMessage = "Название и описание не должны быть пустыми.";
+            return;
+        }
+
+        try
+        {
+            IsSavingContent = true;
+            ErrorMessage = null;
+            ContentMessage = null;
+            var name = Name.Trim();
+            var description = Description.Trim();
+            await _apiService.UpdateContentAsync(Id, CreateUpdateRequest(name, description, _content.TagIds));
+            _content = _content with { Name = name, Description = description, UpdatedAt = DateTimeOffset.UtcNow };
+            Name = name;
+            Description = description;
+            Title = name;
+            _contentUpdated(name, description);
+            ContentMessage = "Изменения сохранены.";
+        }
+        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
+        {
+            ErrorMessage = $"Не удалось сохранить контент: {exception.Message}";
+        }
+        finally
+        {
+            IsSavingContent = false;
+        }
+    }
+
+    public async Task DeleteContentAsync()
+    {
+        try
+        {
+            IsDeleting = true;
+            ErrorMessage = null;
+            await _apiService.DeleteContentAsync(Id);
+            _close();
+        }
+        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
+        {
+            ErrorMessage = $"Не удалось удалить контент: {exception.Message}";
+        }
+        finally
+        {
+            IsDeleting = false;
+        }
+    }
+
+    [RelayCommand]
     private void AddVersion() => _openVersionEditor();
 
     private async Task RemoveTagAsync(ContentTagItemViewModel tag)
@@ -176,14 +243,9 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         if (_content is null)
             return;
 
-        await _apiService.UpdateContentAsync(Id, new UpdateContentDto
-        {
-            Name = _content.Name,
-            Description = _content.Description,
-            CategoryId = _content.CategoryId,
-            ContentStatusId = _content.ContentStatusId,
-            TagIds = tagIds
-        });
+        await _apiService.UpdateContentAsync(
+            Id,
+            CreateUpdateRequest(_content.Name, _content.Description, tagIds));
         _content = _content with { TagIds = tagIds, UpdatedAt = DateTimeOffset.UtcNow };
     }
 
@@ -231,7 +293,9 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
     {
         _content = content;
         _allTags = tags;
+        Name = content.Name;
         Description = content.Description;
+        Title = content.Name;
 
         ReplaceVersions(versions);
         ReplaceTags(content.TagIds);
@@ -265,4 +329,17 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         OnPropertyChanged(nameof(HasPreview));
         OnPropertyChanged(nameof(HasNoPreview));
     }
+
+    private UpdateContentDto CreateUpdateRequest(
+        string name,
+        string description,
+        IReadOnlyCollection<int> tagIds) =>
+        new()
+        {
+            Name = name,
+            Description = description,
+            CategoryId = _content!.CategoryId,
+            ContentStatusId = _content.ContentStatusId,
+            TagIds = tagIds
+        };
 }

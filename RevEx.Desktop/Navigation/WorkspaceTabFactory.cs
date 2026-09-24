@@ -77,7 +77,13 @@ public sealed class WorkspaceTabFactory : IWorkspaceTabFactory
             () => context.OpenTab(new WorkspaceTabRequest(
                 typeof(ContentEditorTabViewModel),
                 content.Id,
-                new ContentVersionEditorParameter(content, details!.AddOrUpdateVersion))));
+                new ContentVersionEditorParameter(content, details!.AddOrUpdateVersion))),
+            () => context.CloseTab(details!),
+            (name, description) =>
+            {
+                content.Name = name;
+                content.Description = description;
+            });
         return details;
     }
 

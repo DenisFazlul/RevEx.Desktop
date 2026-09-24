@@ -45,4 +45,16 @@ public partial class ContentDetailsView : UserControl
         if (file is not null)
             await viewModel.UpdatePreviewAsync(file.Path.LocalPath, file.Name);
     }
+
+    private async void OnDeleteContentClick(object? sender, Avalonia.Interactivity.RoutedEventArgs eventArgs)
+    {
+        if (DataContext is not ContentDetailsViewModel viewModel ||
+            TopLevel.GetTopLevel(this) is not Window owner)
+            return;
+
+        var confirmation = new DeleteConfirmationWindow(
+            $"Контент «{viewModel.Name}» и все его версии будут удалены. Продолжить?");
+        if (await confirmation.ShowDialog<bool>(owner))
+            await viewModel.DeleteContentAsync();
+    }
 }

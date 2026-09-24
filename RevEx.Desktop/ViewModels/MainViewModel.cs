@@ -28,7 +28,7 @@ public partial class MainViewModel : ViewModelBase
         IMainMenuProvider mainMenuProvider)
     {
         _tabFactory = tabFactory;
-        _tabContext = new WorkspaceTabContext(OpenTab);
+        _tabContext = new WorkspaceTabContext(OpenTab, CloseTab);
 
         MainMenu = mainMenuProvider.Create(OpenTab);
         OpenTab(new WorkspaceTabRequest(typeof(CatalogTabViewModel)));
