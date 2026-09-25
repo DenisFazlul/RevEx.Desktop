@@ -8,6 +8,10 @@ public sealed record LoadFamilyRequest(string Path);
 
 public sealed record LoadFamilyResponse(bool Success, FamilyInfoDto Family);
 
+public sealed record LoadContentVersionRequest(IReadOnlyCollection<string> Paths);
+
+public sealed record LoadContentVersionResponse(bool Success, int LoadedFileCount);
+
 public sealed record FamilyInfoDto(string Name, string Category);
 
 public sealed record RevitApiErrorResponse(RevitApiError Error);

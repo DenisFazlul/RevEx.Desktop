@@ -2,9 +2,15 @@ namespace RevEx.Configuration;
 
 public static class RevExSettingsPaths
 {
+    private static readonly string SettingsDirectory = GetSettingsDirectory();
+
     public static string UserSettingsFile { get; } = Path.Combine(
-        GetSettingsDirectory(),
+        SettingsDirectory,
         "user-settings.json");
+
+    public static string DownloadsDirectory { get; } = Path.Combine(
+        SettingsDirectory,
+        "Downloads");
 
     private static string GetSettingsDirectory()
     {

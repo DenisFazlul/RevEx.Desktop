@@ -19,6 +19,8 @@ public sealed class ConnectorHost(ConnectorHostOptions options) : IAsyncDisposab
 
     public event Func<InspectFamilyRequest, CancellationToken, Task<InspectFamilyResponse>>? InspectRequested;
     public event Func<LoadFamilyRequest, CancellationToken, Task<LoadFamilyResponse>>? LoadRequested;
+    public event Func<LoadContentVersionRequest, CancellationToken, Task<LoadContentVersionResponse>>?
+        ContentVersionLoadRequested;
     public event EventHandler? PingReceived;
 
     public Guid InstanceId { get; } = options.InstanceId ?? Guid.NewGuid();
@@ -56,6 +58,16 @@ public sealed class ConnectorHost(ConnectorHostOptions options) : IAsyncDisposab
             var handler = LoadRequested;
             return handler is null
                 ? Results.Problem("Обработчик загрузки семейства не зарегистрирован.", statusCode: 503)
+                : Results.Ok(await handler(request, token));
+        });
+
+        app.MapPost("/api/v1/projects/active/content-versions/load", async (
+            LoadContentVersionRequest request,
+            CancellationToken token) =>
+        {
+            var handler = ContentVersionLoadRequested;
+            return handler is null
+                ? Results.Problem("Обработчик загрузки версии не зарегистрирован.", statusCode: 503)
                 : Results.Ok(await handler(request, token));
         });
 

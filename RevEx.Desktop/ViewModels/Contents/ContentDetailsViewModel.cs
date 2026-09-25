@@ -10,6 +10,9 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using RevEx.Desktop.Core.Domain;
 using RevEx.Desktop.Core.Interfaces;
+using RevEx.Connector.Contracts;
+using RevEx.Configuration;
+using RevEx.Desktop.Connectors;
 
 namespace RevEx.Desktop.ViewModels.Contents;
 
@@ -19,6 +22,8 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
     private readonly Action _close;
     private readonly Action<string, string, int> _contentUpdated;
     private readonly IRevExApiService _apiService;
+    private readonly IConnectorClient _connectorClient;
+    private readonly IConnectorRegistry _connectorRegistry;
     private ContentDto? _content;
     private IReadOnlyCollection<TagDto> _allTags = [];
     private IReadOnlyCollection<CategoryDto> _categories = [];
@@ -40,6 +45,7 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
     [ObservableProperty] private FileRoleOption _selectedFileRole;
     [ObservableProperty] private bool _isLoadingVersion;
     [ObservableProperty] private bool _isSavingVersionFile;
+    [ObservableProperty] private bool _isLoadingVersionIntoProject;
     [ObservableProperty] private string? _versionErrorMessage;
     [ObservableProperty] private string? _versionMessage;
 
@@ -61,7 +67,8 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
     public bool HasSelectedVersion => SelectedVersion is not null;
     public bool HasVersionFiles => VersionFiles.Count > 0;
     public bool HasNoVersionFiles => HasSelectedVersion && !HasVersionFiles && !IsLoadingVersion;
-    public bool IsVersionBusy => IsLoadingVersion || IsSavingVersionFile;
+    public bool IsVersionBusy => IsLoadingVersion || IsSavingVersionFile || IsLoadingVersionIntoProject;
+    public bool CanLoadVersionIntoProject => HasVersionFiles && !IsVersionBusy;
     public string SelectedVersionDateText => SelectedVersion?.Date.ToLocalTime().ToString("dd.MM.yyyy HH:mm") ?? string.Empty;
     public string SelectedVersionCreatedAtText => SelectedVersion?.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm") ?? string.Empty;
     public string SelectedVersionUpdatedAtText => SelectedVersion?.UpdatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm") ?? string.Empty;
@@ -73,6 +80,8 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
     public ContentDetailsViewModel(
         ContentItemViewModel content,
         IRevExApiService apiService,
+        IConnectorClient connectorClient,
+        IConnectorRegistry connectorRegistry,
         Action openVersionEditor,
         Action close,
         Action<string, string, int> contentUpdated)
@@ -82,6 +91,8 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
             content.Id)
     {
         _apiService = apiService;
+        _connectorClient = connectorClient;
+        _connectorRegistry = connectorRegistry;
         _openVersionEditor = openVersionEditor;
         _close = close;
         _contentUpdated = contentUpdated;
@@ -243,6 +254,58 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         finally
         {
             IsSavingVersionFile = false;
+            NotifyVersionStateChanged();
+        }
+    }
+
+    public IReadOnlyCollection<ConnectorDescriptor> GetAvailableConnectors() =>
+        _connectorRegistry.GetAll();
+
+    public async Task LoadVersionIntoProjectAsync(ConnectorDescriptor connector)
+    {
+        if (SelectedVersion is null || VersionFiles.Count == 0)
+            return;
+
+        try
+        {
+            IsLoadingVersionIntoProject = true;
+            VersionErrorMessage = null;
+            VersionMessage = "Скачиваем файлы версии…";
+
+            var targetDirectory = Path.Combine(
+                RevExSettingsPaths.DownloadsDirectory,
+                CreateSafeDirectoryName(Name, $"content-{Id}"),
+                CreateSafeDirectoryName(SelectedVersion.Name, $"version-{SelectedVersion.Id}"));
+            Directory.CreateDirectory(targetDirectory);
+
+            var localPaths = new List<string>(VersionFiles.Count);
+            foreach (var file in VersionFiles)
+            {
+                var bytes = await _apiService.DownloadContentFileAsync(file.Id);
+                var hasDuplicateName = VersionFiles.Count(item =>
+                    string.Equals(item.Name, file.Name, StringComparison.OrdinalIgnoreCase)) > 1;
+                var path = GetVersionFilePath(targetDirectory, file.Name, file.Id, hasDuplicateName);
+                await File.WriteAllBytesAsync(path, bytes);
+                localPaths.Add(path);
+            }
+
+            VersionMessage = $"Передаём {localPaths.Count} файл(ов) в {connector.Name}…";
+            var response = await _connectorClient.LoadContentVersionAsync(connector, localPaths);
+            if (!response.Success)
+                throw new InvalidOperationException("Connector не подтвердил загрузку версии.");
+
+            VersionMessage =
+                $"В {connector.Name} передано файлов: {response.LoadedFileCount}. Папка: {targetDirectory}";
+        }
+        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException or
+                                             IOException or UnauthorizedAccessException or InvalidOperationException)
+        {
+            VersionErrorMessage = $"Не удалось загрузить версию в проект: {exception.Message}";
+            VersionMessage = null;
+        }
+        finally
+        {
+            IsLoadingVersionIntoProject = false;
             NotifyVersionStateChanged();
         }
     }
@@ -418,6 +481,7 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
     partial void OnSelectedVersionChanged(ContentVersionDto? value) => NotifyVersionStateChanged();
     partial void OnIsLoadingVersionChanged(bool value) => NotifyVersionStateChanged();
     partial void OnIsSavingVersionFileChanged(bool value) => NotifyVersionStateChanged();
+    partial void OnIsLoadingVersionIntoProjectChanged(bool value) => NotifyVersionStateChanged();
 
     private async Task LoadPreviewAsync(int? fileId)
     {
@@ -521,9 +585,35 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         OnPropertyChanged(nameof(HasVersionFiles));
         OnPropertyChanged(nameof(HasNoVersionFiles));
         OnPropertyChanged(nameof(IsVersionBusy));
+        OnPropertyChanged(nameof(CanLoadVersionIntoProject));
         OnPropertyChanged(nameof(SelectedVersionDateText));
         OnPropertyChanged(nameof(SelectedVersionCreatedAtText));
         OnPropertyChanged(nameof(SelectedVersionUpdatedAtText));
+    }
+
+    private static string CreateSafeDirectoryName(string value, string fallback)
+    {
+        var invalidCharacters = Path.GetInvalidFileNameChars();
+        var sanitized = new string(value.Trim()
+            .Select(character => invalidCharacters.Contains(character) ? '_' : character)
+            .ToArray());
+        return string.IsNullOrWhiteSpace(sanitized) ? fallback : sanitized;
+    }
+
+    private static string GetVersionFilePath(
+        string directory,
+        string fileName,
+        int fileId,
+        bool includeFileId)
+    {
+        var safeName = Path.GetFileName(fileName);
+        if (string.IsNullOrWhiteSpace(safeName))
+            safeName = $"file-{fileId}";
+
+        if (includeFileId)
+            safeName = $"{Path.GetFileNameWithoutExtension(safeName)}-{fileId}{Path.GetExtension(safeName)}";
+
+        return Path.Combine(directory, safeName);
     }
 
     private UpdateContentDto CreateUpdateRequest(

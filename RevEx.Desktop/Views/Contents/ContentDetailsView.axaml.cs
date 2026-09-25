@@ -7,6 +7,7 @@ using RevEx.Desktop.Core.Domain;
 using RevEx.Desktop.ViewModels.Contents;
 using RevEx.Desktop.Views.Categories;
 using RevEx.Desktop.Views.Common;
+using RevEx.Desktop.Views.Connectors;
 using RevEx.Desktop.Views.Tags;
 
 namespace RevEx.Desktop.Views.Contents;
@@ -146,5 +147,19 @@ public partial class ContentDetailsView : UserControl
             $"Файл «{file.Name}» будет удалён из версии. Продолжить?");
         if (await confirmation.ShowDialog<bool>(owner))
             await viewModel.DeleteVersionFileAsync(file);
+    }
+
+    private async void OnLoadVersionIntoProjectClick(
+        object? sender,
+        Avalonia.Interactivity.RoutedEventArgs eventArgs)
+    {
+        if (DataContext is not ContentDetailsViewModel viewModel ||
+            TopLevel.GetTopLevel(this) is not Window owner)
+            return;
+
+        var selector = new ConnectorSelectionWindow(viewModel.GetAvailableConnectors());
+        var connector = await selector.ShowDialog<RevEx.Connector.Contracts.ConnectorDescriptor?>(owner);
+        if (connector is not null)
+            await viewModel.LoadVersionIntoProjectAsync(connector);
     }
 }

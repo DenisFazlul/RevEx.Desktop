@@ -41,6 +41,19 @@ public sealed class ConnectorClient(HttpClient httpClient) : IConnectorClient
             cancellationToken);
     }
 
+    public async Task<LoadContentVersionResponse> LoadContentVersionAsync(
+        ConnectorDescriptor connector,
+        IReadOnlyCollection<string> paths,
+        CancellationToken cancellationToken = default)
+    {
+        await GetHealthAsync(connector, cancellationToken);
+        return await PostAsync<LoadContentVersionRequest, LoadContentVersionResponse>(
+            connector,
+            "api/v1/projects/active/content-versions/load",
+            new LoadContentVersionRequest(paths),
+            cancellationToken);
+    }
+
     private async Task<TResponse> PostAsync<TRequest, TResponse>(
         ConnectorDescriptor connector,
         string route,

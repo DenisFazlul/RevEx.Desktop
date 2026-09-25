@@ -105,6 +105,8 @@ public sealed class WorkspaceTabFactory : IWorkspaceTabFactory
         details = new ContentDetailsViewModel(
             content,
             _revExApiService,
+            _connectorClient,
+            _connectorRegistry,
             () => context.OpenTab(new WorkspaceTabRequest(
                 typeof(ContentEditorTabViewModel),
                 content.Id,

@@ -20,6 +20,24 @@ connector.LoadRequested += (request, _) =>
     return Task.FromResult(new LoadFamilyResponse(true, CreateFamilyInfo(request.Path)));
 };
 
+connector.ContentVersionLoadRequested += (request, _) =>
+{
+    if (request.Paths.Count == 0)
+        throw new ArgumentException("Список файлов версии пуст.");
+
+    foreach (var path in request.Paths)
+    {
+        if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+            throw new FileNotFoundException("Файл версии не найден.", path);
+    }
+
+    Console.WriteLine($"Mock-загрузка в проект: {request.Paths.Count} файл(ов)");
+    foreach (var path in request.Paths)
+        Console.WriteLine($"  {path}");
+
+    return Task.FromResult(new LoadContentVersionResponse(true, request.Paths.Count));
+};
+
 connector.PingReceived += (_, _) =>
     Console.WriteLine($"Получен ping от Desktop: {DateTimeOffset.Now:O}");
 

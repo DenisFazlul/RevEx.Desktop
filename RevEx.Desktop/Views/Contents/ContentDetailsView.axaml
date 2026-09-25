@@ -167,12 +167,15 @@
 
                             <Border Classes="card section-card">
                                 <StackPanel Spacing="14">
-                                    <Grid ColumnDefinitions="*,180,12,Auto">
+                                    <Grid ColumnDefinitions="*,Auto,12,180,12,Auto">
                                         <TextBlock Classes="h2" Text="Файлы версии" VerticalAlignment="Center" />
-                                        <ComboBox Grid.Column="1" ItemsSource="{Binding FileRoles}"
+                                        <Button Grid.Column="1" Classes="primary" Content="Загрузить в проект"
+                                                Click="OnLoadVersionIntoProjectClick"
+                                                IsEnabled="{Binding CanLoadVersionIntoProject}" />
+                                        <ComboBox Grid.Column="3" ItemsSource="{Binding FileRoles}"
                                                   SelectedItem="{Binding SelectedFileRole}"
                                                   DisplayMemberBinding="{Binding Name}" />
-                                        <Button Grid.Column="3" Classes="secondary" Content="Добавить файл"
+                                        <Button Grid.Column="5" Classes="secondary" Content="Добавить файл"
                                                 Click="OnAddVersionFileClick" IsEnabled="{Binding !IsVersionBusy}" />
                                     </Grid>
                                     <ProgressBar IsVisible="{Binding IsVersionBusy}" IsIndeterminate="True" />
