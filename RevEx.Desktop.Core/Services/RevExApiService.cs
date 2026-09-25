@@ -54,6 +54,20 @@ public sealed class RevExApiService(HttpClient httpClient) : IRevExApiService
     public Task<CategoryDto?> GetCategoryAsync(int id, CancellationToken cancellationToken = default) =>
         GetByIdAsync<CategoryDto>("api/categories", id, cancellationToken);
 
+    public Task<CategoryDto> CreateCategoryAsync(
+        CreateCategoryDto request,
+        CancellationToken cancellationToken = default) =>
+        PostAsJsonAsync<CreateCategoryDto, CategoryDto>("api/categories", request, cancellationToken);
+
+    public Task UpdateCategoryAsync(
+        int id,
+        UpdateCategoryDto request,
+        CancellationToken cancellationToken = default) =>
+        PutAsJsonAsync($"api/categories/{id}", request, cancellationToken);
+
+    public Task DeleteCategoryAsync(int id, CancellationToken cancellationToken = default) =>
+        DeleteAsync($"api/categories/{id}", cancellationToken);
+
     public Task<IReadOnlyCollection<TagGroupDto>> GetTagGroupsAsync(CancellationToken cancellationToken = default) =>
         GetAllAsync<TagGroupDto>("api/tag-groups", cancellationToken);
 

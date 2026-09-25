@@ -1,0 +1,30 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:domain="using:RevEx.Desktop.Core.Domain"
+        x:Class="RevEx.Desktop.Views.Categories.CategorySelectionWindow"
+        Title="Изменение категории" Width="500" Height="300"
+        MinWidth="440" MinHeight="280" WindowStartupLocation="CenterOwner"
+        CanResize="False">
+    <Grid Margin="24" RowDefinitions="Auto,18,*,Auto">
+        <HeaderedContentControl Theme="{StaticResource DialogHeaderTheme}"
+                                Header="Категория контента"
+                                Content="Выберите новую категорию карточки" />
+
+        <HeaderedContentControl Grid.Row="2" Theme="{StaticResource FormFieldTheme}"
+                                Header="Категория">
+            <ComboBox x:Name="CategoryBox" ItemsSource="{Binding Categories}"
+                      SelectedItem="{Binding SelectedCategory}">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="domain:CategoryDto">
+                        <TextBlock Text="{Binding Name}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+        </HeaderedContentControl>
+
+        <Grid Grid.Row="3" ColumnDefinitions="*,Auto,10,Auto">
+            <Button Grid.Column="1" Classes="secondary" Content="Отмена" Click="OnCancelClick" />
+            <Button Grid.Column="3" Classes="primary" Content="Сохранить" Click="OnSaveClick" />
+        </Grid>
+    </Grid>
+</Window>

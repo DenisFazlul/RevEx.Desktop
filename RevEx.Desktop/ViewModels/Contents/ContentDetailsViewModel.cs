@@ -16,11 +16,13 @@ namespace RevEx.Desktop.ViewModels.Contents;
 public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
 {
     private readonly Action _openVersionEditor;
+    private readonly Action<ContentVersionDto> _openVersionDetails;
     private readonly Action _close;
-    private readonly Action<string, string> _contentUpdated;
+    private readonly Action<string, string, int> _contentUpdated;
     private readonly IRevExApiService _apiService;
     private ContentDto? _content;
     private IReadOnlyCollection<TagDto> _allTags = [];
+    private IReadOnlyCollection<CategoryDto> _categories = [];
 
     [ObservableProperty] private bool _isLoading;
     [ObservableProperty] private bool _isSavingTags;
@@ -33,6 +35,7 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
     [ObservableProperty] private string? _contentMessage;
     [ObservableProperty] private string _name;
     [ObservableProperty] private string _description;
+    [ObservableProperty] private string _categoryName = string.Empty;
     [ObservableProperty] private Bitmap? _previewImage;
 
     public int Id { get; }
@@ -51,8 +54,9 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         ContentItemViewModel content,
         IRevExApiService apiService,
         Action openVersionEditor,
+        Action<ContentVersionDto> openVersionDetails,
         Action close,
-        Action<string, string> contentUpdated)
+        Action<string, string, int> contentUpdated)
         : base(
             content.Name,
             true,
@@ -60,6 +64,7 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
     {
         _apiService = apiService;
         _openVersionEditor = openVersionEditor;
+        _openVersionDetails = openVersionDetails;
         _close = close;
         _contentUpdated = contentUpdated;
         Id = content.Id;
@@ -77,11 +82,12 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
             var contentTask = _apiService.GetContentAsync(Id);
             var versionsTask = _apiService.GetContentVersionsAsync();
             var tagsTask = _apiService.GetTagsAsync();
-            await Task.WhenAll(contentTask, versionsTask, tagsTask);
+            var categoriesTask = _apiService.GetCategoriesAsync();
+            await Task.WhenAll(contentTask, versionsTask, tagsTask, categoriesTask);
 
             var content = await contentTask
                 ?? throw new HttpRequestException($"Контент {Id} не найден.");
-            ApplyContent(content, await versionsTask, await tagsTask);
+            ApplyContent(content, await versionsTask, await tagsTask, await categoriesTask);
             await LoadPreviewAsync(content.PreviewFileId);
 
             NotifyCollectionStateChanged();
@@ -138,6 +144,8 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         NotifyCollectionStateChanged();
     }
 
+    public void OpenVersion(ContentVersionDto version) => _openVersionDetails(version);
+
     public async Task UpdatePreviewAsync(string path, string fileName)
     {
         if (_content is null)
@@ -164,13 +172,12 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         }
     }
 
-    [RelayCommand]
-    private async Task SaveContentAsync()
+    public async Task UpdateContentInformationAsync(string name, string description)
     {
         if (_content is null)
             return;
 
-        if (string.IsNullOrWhiteSpace(Name) || string.IsNullOrWhiteSpace(Description))
+        if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(description))
         {
             ErrorMessage = "Название и описание не должны быть пустыми.";
             return;
@@ -181,19 +188,56 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
             IsSavingContent = true;
             ErrorMessage = null;
             ContentMessage = null;
-            var name = Name.Trim();
-            var description = Description.Trim();
+            name = name.Trim();
+            description = description.Trim();
             await _apiService.UpdateContentAsync(Id, CreateUpdateRequest(name, description, _content.TagIds));
             _content = _content with { Name = name, Description = description, UpdatedAt = DateTimeOffset.UtcNow };
             Name = name;
             Description = description;
             Title = name;
-            _contentUpdated(name, description);
+            _contentUpdated(name, description, _content.CategoryId);
             ContentMessage = "Изменения сохранены.";
         }
         catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
         {
             ErrorMessage = $"Не удалось сохранить контент: {exception.Message}";
+        }
+        finally
+        {
+            IsSavingContent = false;
+        }
+    }
+
+    public Task UpdateContentNameAsync(string name) =>
+        UpdateContentInformationAsync(name, Description);
+
+    public Task UpdateContentDescriptionAsync(string description) =>
+        UpdateContentInformationAsync(Name, description);
+
+    public IReadOnlyCollection<CategoryDto> GetCategories() => _categories;
+    public int? GetCurrentCategoryId() => _content?.CategoryId;
+
+    public async Task UpdateContentCategoryAsync(CategoryDto category)
+    {
+        if (_content is null || _content.CategoryId == category.Id)
+            return;
+
+        try
+        {
+            IsSavingContent = true;
+            ErrorMessage = null;
+            ContentMessage = null;
+            await _apiService.UpdateContentAsync(
+                Id,
+                CreateUpdateRequest(_content.Name, _content.Description, _content.TagIds, category.Id));
+            _content = _content with { CategoryId = category.Id, UpdatedAt = DateTimeOffset.UtcNow };
+            CategoryName = category.Name;
+            _contentUpdated(_content.Name, _content.Description, category.Id);
+            ContentMessage = "Категория изменена.";
+        }
+        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
+        {
+            ErrorMessage = $"Не удалось изменить категорию: {exception.Message}";
         }
         finally
         {
@@ -289,13 +333,17 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
     private void ApplyContent(
         ContentDto content,
         IReadOnlyCollection<ContentVersionDto> versions,
-        IReadOnlyCollection<TagDto> tags)
+        IReadOnlyCollection<TagDto> tags,
+        IReadOnlyCollection<CategoryDto> categories)
     {
         _content = content;
         _allTags = tags;
+        _categories = categories;
         Name = content.Name;
         Description = content.Description;
         Title = content.Name;
+        CategoryName = categories.FirstOrDefault(item => item.Id == content.CategoryId)?.Name
+            ?? $"Категория {content.CategoryId}";
 
         ReplaceVersions(versions);
         ReplaceTags(content.TagIds);
@@ -333,13 +381,14 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
     private UpdateContentDto CreateUpdateRequest(
         string name,
         string description,
-        IReadOnlyCollection<int> tagIds) =>
+        IReadOnlyCollection<int> tagIds,
+        int? categoryId = null) =>
         new()
         {
             Name = name,
             Description = description,
-            CategoryId = _content!.CategoryId,
-            ContentStatusId = _content.ContentStatusId,
+            CategoryId = categoryId ?? _content!.CategoryId,
+            ContentStatusId = _content!.ContentStatusId,
             TagIds = tagIds
         };
 }

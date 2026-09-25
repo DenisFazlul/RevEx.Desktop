@@ -6,6 +6,7 @@ namespace RevEx.Desktop.ViewModels.Categories;
 public partial class CategoryItemViewModel : ViewModelBase
 {
     public int Id { get; }
+    public bool CanModify => Id != 1;
 
     [ObservableProperty]
     private string _name;

@@ -1,0 +1,61 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RevEx.Desktop.ViewModels.Categories"
+             x:Class="RevEx.Desktop.Views.Categories.CategoryAdminTabView"
+             x:DataType="vm:CategoryAdminTabViewModel">
+    <Grid Margin="32,30" RowDefinitions="Auto,22,*,Auto">
+        <Grid ColumnDefinitions="*,Auto">
+            <HeaderedContentControl Theme="{StaticResource PageHeaderTheme}"
+                                    Header="Категории"
+                                    Content="Управление категориями контента" />
+            <Button Grid.Column="1" Classes="primary" Content="Создать категорию"
+                    Click="OnCreateClick" VerticalAlignment="Center"
+                    IsEnabled="{Binding !IsSaving}" />
+        </Grid>
+
+        <Border Grid.Row="2" Classes="card section-card">
+            <Grid RowDefinitions="Auto,14,*">
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Classes="h2" Text="Список категорий" />
+                    <TextBlock Grid.Column="1" Classes="caption"
+                               Text="{Binding Categories.Count, StringFormat='Категорий: {0}'}" />
+                </Grid>
+
+                <Grid Grid.Row="2">
+                    <ProgressBar IsVisible="{Binding IsLoading}" IsIndeterminate="True"
+                                 VerticalAlignment="Top" />
+                    <TextBlock IsVisible="{Binding HasNoCategories}" Classes="caption"
+                               Text="Категорий пока нет." HorizontalAlignment="Center"
+                               VerticalAlignment="Center" />
+                    <ItemsControl ItemsSource="{Binding Categories}" IsVisible="{Binding HasCategories}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:CategoryItemViewModel">
+                                <Border Classes="value-box" Margin="0,0,0,8">
+                                    <Grid ColumnDefinitions="*,Auto,6,Auto">
+                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold"
+                                                   VerticalAlignment="Center" />
+                                        <Button Grid.Column="1" Classes="icon" Click="OnEditClick"
+                                                IsVisible="{Binding CanModify}"
+                                                ToolTip.Tip="Переименовать категорию">
+                                            <PathIcon Data="M3,11 L3,14 L6,14 L14,6 L11,3 Z M10,4 L13,7 M3,14 L7,13" />
+                                        </Button>
+                                        <Button Grid.Column="3" Classes="icon danger" Click="OnDeleteClick"
+                                                IsVisible="{Binding CanModify}"
+                                                ToolTip.Tip="Удалить категорию">
+                                            <PathIcon Data="M3,4 L13,4 M5,4 L5,14 L11,14 L11,4 M6,2 L10,2 L11,4 L5,4 Z M7,7 L7,12 M9,7 L9,12" />
+                                        </Button>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <StackPanel Grid.Row="3" Margin="2,12,0,0" Spacing="4">
+            <TextBlock Classes="status-message" Text="{Binding Message}" />
+            <TextBlock Classes="validation-message" Text="{Binding ErrorMessage}" />
+        </StackPanel>
+    </Grid>
+</UserControl>

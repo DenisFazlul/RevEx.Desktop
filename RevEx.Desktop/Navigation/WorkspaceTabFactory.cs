@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using RevEx.Desktop.Core.Interfaces;
 using RevEx.Desktop.Core.Domain;
 using RevEx.Desktop.ViewModels.Catalog;
+using RevEx.Desktop.ViewModels.Categories;
 using RevEx.Desktop.ViewModels.Contents;
 using RevEx.Desktop.ViewModels.Settings;
 using RevEx.Desktop.ViewModels.Tabs;
@@ -23,7 +24,9 @@ public sealed class WorkspaceTabFactory : IWorkspaceTabFactory
         _factories = new Dictionary<Type, Func<WorkspaceTabContext, object?, WorkspaceTabViewModel>>
         {
             [typeof(CatalogTabViewModel)] = CreateCatalogTab,
+            [typeof(CategoryAdminTabViewModel)] = CreateCategoryAdminTab,
             [typeof(ContentDetailsViewModel)] = CreateContentDetailsTab,
+            [typeof(ContentVersionDetailsViewModel)] = CreateContentVersionDetailsTab,
             [typeof(ContentEditorTabViewModel)] = CreateContentEditorTab,
             [typeof(TagAdminTabViewModel)] = CreateTagAdminTab,
             [typeof(SettingsTabViewModel)] = CreateSettings
@@ -37,6 +40,9 @@ public sealed class WorkspaceTabFactory : IWorkspaceTabFactory
 
     private WorkspaceTabViewModel CreateTagAdminTab(WorkspaceTabContext _, object? __) =>
         new TagAdminTabViewModel(_revExApiService);
+
+    private WorkspaceTabViewModel CreateCategoryAdminTab(WorkspaceTabContext _, object? __) =>
+        new CategoryAdminTabViewModel(_revExApiService);
 
     public WorkspaceTabViewModel Create(Type tabType, WorkspaceTabContext context, object? parameter = null)
     {
@@ -78,14 +84,24 @@ public sealed class WorkspaceTabFactory : IWorkspaceTabFactory
                 typeof(ContentEditorTabViewModel),
                 content.Id,
                 new ContentVersionEditorParameter(content, details!.AddOrUpdateVersion))),
+            version => context.OpenTab(new WorkspaceTabRequest(
+                typeof(ContentVersionDetailsViewModel),
+                version.Id,
+                version)),
             () => context.CloseTab(details!),
-            (name, description) =>
+            (name, description, categoryId) =>
             {
                 content.Name = name;
                 content.Description = description;
+                content.CategoryId = categoryId;
             });
         return details;
     }
+
+    private ContentVersionDetailsViewModel CreateContentVersionDetailsTab(
+        WorkspaceTabContext _,
+        object? parameter) =>
+        new(GetRequiredParameter<ContentVersionDto>(parameter), _revExApiService);
 
     private static T GetRequiredParameter<T>(object? parameter) where T : class =>
         parameter as T

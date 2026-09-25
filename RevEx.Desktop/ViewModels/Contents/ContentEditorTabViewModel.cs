@@ -22,6 +22,7 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
     private readonly IRevExApiService _apiService;
     private readonly ContentItemViewModel? _existingContent;
     private readonly Action<ContentVersionDto>? _versionAdded;
+    private IReadOnlyCollection<TagDto> _availableTags = [];
     private bool _isLoaded;
 
     [ObservableProperty]
@@ -64,10 +65,13 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
     private bool _hasError;
 
     public ObservableCollection<CategoryDto> Categories { get; } = [];
+    public ObservableCollection<ContentTagItemViewModel> SelectedTags { get; } = [];
     public IReadOnlyList<string> RevitVersions { get; } = ["2022", "2023", "2024", "2025", "2026", "2027"];
 
     public bool IsCreatingContent => _existingContent is null;
     public bool IsAddingVersion => _existingContent is not null;
+    public bool HasSelectedTags => SelectedTags.Count > 0;
+    public bool HasNoSelectedTags => !HasSelectedTags;
     public string ExistingContentName => _existingContent?.Name ?? string.Empty;
     public string PageDescription => IsCreatingContent
         ? "Создайте карточку контента и загрузите первое Revit-семейство"
@@ -100,12 +104,17 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
 
             if (IsCreatingContent)
             {
-                var categories = await _apiService.GetCategoriesAsync();
+                var categoriesTask = _apiService.GetCategoriesAsync();
+                var tagsTask = _apiService.GetTagsAsync();
+                await Task.WhenAll(categoriesTask, tagsTask);
+
+                var categories = await categoriesTask;
                 Categories.Clear();
                 foreach (var category in categories.OrderBy(item => item.Name))
                     Categories.Add(category);
 
                 SelectedCategory ??= Categories.FirstOrDefault();
+                _availableTags = await tagsTask;
             }
 
             _isLoaded = true;
@@ -132,6 +141,22 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
         SelectedPreviewPath = path;
         SelectedPreviewName = fileName;
         ClearMessage();
+    }
+
+    public IReadOnlyCollection<TagDto> GetAvailableTags() =>
+        _availableTags
+            .Where(tag => SelectedTags.All(selected => selected.Id != tag.Id))
+            .OrderBy(tag => tag.TagGroupName)
+            .ThenBy(tag => tag.Name)
+            .ToArray();
+
+    public void AddTag(TagDto tag)
+    {
+        if (SelectedTags.Any(item => item.Id == tag.Id))
+            return;
+
+        SelectedTags.Add(new ContentTagItemViewModel(tag, RemoveTagAsync));
+        NotifySelectedTagsChanged();
     }
 
     [RelayCommand]
@@ -252,7 +277,7 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
             Name = ContentName.Trim(),
             Description = Description.Trim(),
             CategoryId = SelectedCategory!.Id,
-            TagIds = []
+            TagIds = SelectedTags.Select(tag => tag.Id).ToArray()
         });
 
         await using var previewStream = File.OpenRead(SelectedPreviewPath!);
@@ -290,11 +315,26 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
             Description = string.Empty;
             SelectedPreviewPath = null;
             SelectedPreviewName = NoPreviewSelected;
+            SelectedTags.Clear();
+            NotifySelectedTagsChanged();
         }
 
         SelectedFamilyFilePath = null;
         SelectedFamilyFileName = NoFamilyFileSelected;
         VersionName = string.Empty;
+    }
+
+    private Task RemoveTagAsync(ContentTagItemViewModel tag)
+    {
+        SelectedTags.Remove(tag);
+        NotifySelectedTagsChanged();
+        return Task.CompletedTask;
+    }
+
+    private void NotifySelectedTagsChanged()
+    {
+        OnPropertyChanged(nameof(HasSelectedTags));
+        OnPropertyChanged(nameof(HasNoSelectedTags));
     }
 
 }

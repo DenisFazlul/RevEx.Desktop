@@ -12,12 +12,14 @@
                     <StackPanel Spacing="14">
                         <Grid ColumnDefinitions="*,Auto">
                             <TextBlock Classes="h2" Text="Изображение" />
-                            <Button Grid.Column="1" Content="Обновить" Click="OnUpdatePreviewClick"
-                                    IsEnabled="{Binding !IsUpdatingPreview}" />
+                            <Button Grid.Column="1" Classes="icon"
+                                    Click="OnUpdatePreviewClick" IsEnabled="{Binding !IsUpdatingPreview}"
+                                    ToolTip.Tip="Обновить изображение">
+                                <PathIcon Data="M13,5 L13,1 L11.5,2.5 A6,6 0 1 0 13.5,9 M13,1 L9,1" />
+                            </Button>
                         </Grid>
                         <ProgressBar IsVisible="{Binding IsUpdatingPreview}" IsIndeterminate="True" />
-                        <Border CornerRadius="10" ClipToBounds="True"
-                                Background="{StaticResource SurfaceMutedBrush}" MinHeight="300">
+                        <Border Classes="image-frame" MinHeight="300">
                             <Grid>
                                 <TextBlock IsVisible="{Binding HasNoPreview}" Text="Изображение пока не загружено."
                                            Foreground="{StaticResource TextSecondaryBrush}"
@@ -26,7 +28,7 @@
                                        IsVisible="{Binding HasPreview}" MaxHeight="480" />
                             </Grid>
                         </Border>
-                        <TextBlock Text="{Binding PreviewMessage}" Foreground="{StaticResource TextSecondaryBrush}" />
+                        <TextBlock Text="{Binding PreviewMessage}" Classes="status-message" />
                     </StackPanel>
                 </Border>
 
@@ -35,25 +37,41 @@
                         <StackPanel Spacing="14">
                             <Grid ColumnDefinitions="*,Auto">
                                 <TextBlock Classes="h2" Text="Основная информация" />
-                                <Button Grid.Column="1" Classes="danger" Content="Удалить контент"
-                                        Click="OnDeleteContentClick"
-                                        IsEnabled="{Binding !IsDeleting}" />
+                                <Button Grid.Column="1" Classes="icon danger"
+                                        Click="OnDeleteContentClick" IsEnabled="{Binding !IsDeleting}"
+                                        ToolTip.Tip="Удалить контент">
+                                    <PathIcon Data="M3,4 L13,4 M5,4 L5,14 L11,14 L11,4 M6,2 L10,2 L11,4 L5,4 Z M7,7 L7,12 M9,7 L9,12" />
+                                </Button>
                             </Grid>
-                            <StackPanel Spacing="7">
-                                <TextBlock Classes="label" Text="Название" />
-                                <TextBox Text="{Binding Name}" IsEnabled="{Binding !IsSavingContent}" />
-                            </StackPanel>
-                            <StackPanel Spacing="7">
-                                <TextBlock Classes="label" Text="Описание" />
-                                <TextBox Text="{Binding Description}" AcceptsReturn="True" TextWrapping="Wrap"
-                                         MinHeight="110" IsEnabled="{Binding !IsSavingContent}" />
-                            </StackPanel>
+                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,6,Auto">
+                                <HeaderedContentControl Grid.RowSpan="3" Theme="{StaticResource InfoFieldTheme}"
+                                                        Header="Название" Content="{Binding Name}" />
+                                <Button Grid.Column="1" Grid.RowSpan="3" Classes="icon"
+                                        Click="OnEditNameClick" IsEnabled="{Binding !IsSavingContent}"
+                                        ToolTip.Tip="Изменить название">
+                                    <PathIcon Data="M3,11 L3,14 L6,14 L14,6 L11,3 Z M10,4 L13,7 M3,14 L7,13" />
+                                </Button>
+                            </Grid>
+                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,6,Auto">
+                                <HeaderedContentControl Grid.RowSpan="3" Theme="{StaticResource InfoFieldTheme}"
+                                                        Header="Описание" Content="{Binding Description}" />
+                                <Button Grid.Column="1" Grid.RowSpan="3" Classes="icon"
+                                        Click="OnEditDescriptionClick" IsEnabled="{Binding !IsSavingContent}"
+                                        ToolTip.Tip="Изменить описание">
+                                    <PathIcon Data="M3,11 L3,14 L6,14 L14,6 L11,3 Z M10,4 L13,7 M3,14 L7,13" />
+                                </Button>
+                            </Grid>
+                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,6,Auto">
+                                <HeaderedContentControl Grid.RowSpan="3" Theme="{StaticResource InfoFieldTheme}"
+                                                        Header="Категория" Content="{Binding CategoryName}" />
+                                <Button Grid.Column="1" Grid.RowSpan="3" Classes="icon"
+                                        Click="OnEditCategoryClick" IsEnabled="{Binding !IsSavingContent}"
+                                        ToolTip.Tip="Изменить категорию">
+                                    <PathIcon Data="M3,11 L3,14 L6,14 L14,6 L11,3 Z M10,4 L13,7 M3,14 L7,13" />
+                                </Button>
+                            </Grid>
                             <ProgressBar IsVisible="{Binding IsSavingContent}" IsIndeterminate="True" />
-                            <TextBlock Text="{Binding ContentMessage}"
-                                       Foreground="{StaticResource TextSecondaryBrush}" />
-                            <Button Classes="primary" HorizontalAlignment="Left" Content="Сохранить изменения"
-                                    Command="{Binding SaveContentCommand}"
-                                    IsEnabled="{Binding !IsSavingContent}" />
+                            <TextBlock Text="{Binding ContentMessage}" Classes="status-message" />
                         </StackPanel>
                     </Border>
                     <Border Classes="card section-card">
@@ -75,13 +93,12 @@
                                 </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate x:DataType="vm:ContentTagItemViewModel">
-                                        <Border Classes="value-box" Padding="11,6" Margin="0,0,7,7">
+                                        <Border Classes="tag">
                                             <StackPanel Orientation="Horizontal" Spacing="8">
                                                 <TextBlock Text="{Binding Name, StringFormat='#{0}'}" VerticalAlignment="Center" />
-                                                <Button Classes="ghost" Width="24" Height="24" MinHeight="24" Padding="0"
+                                                <Button Classes="icon-sm"
                                                         Command="{Binding RemoveCommand}" ToolTip.Tip="Удалить тег">
-                                                    <PathIcon Width="11" Height="11"
-                                                              Data="M2,3 L3,2 L10,9 L9,10 Z M9,2 L10,3 L3,10 L2,9 Z" />
+                                                    <PathIcon Data="M2,3 L3,2 L10,9 L9,10 Z M9,2 L10,3 L3,10 L2,9 Z" />
                                                 </Button>
                                             </StackPanel>
                                         </Border>
@@ -99,7 +116,10 @@
             <Border Grid.Row="4" Classes="card section-card">
                 <StackPanel Spacing="14">
                     <Grid ColumnDefinitions="*,Auto">
-                        <TextBlock Classes="h2" Text="Версии" />
+                        <StackPanel Spacing="3">
+                            <TextBlock Classes="h2" Text="Версии" />
+                            <TextBlock Classes="caption" Text="Дважды нажмите на версию, чтобы открыть детали" />
+                        </StackPanel>
                         <Button Grid.Column="1" Classes="primary"
                                 Content="Добавить версию"
                                 Command="{Binding AddVersionCommand}" />
@@ -115,12 +135,16 @@
                     <ItemsControl ItemsSource="{Binding Versions}" IsVisible="{Binding HasVersions}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="domain:ContentVersionDto">
-                                <Border Classes="value-box" Margin="0,0,0,8">
-                                    <Grid ColumnDefinitions="2*,*,*,Auto">
+                                <Border Classes="value-box" Margin="0,0,0,8"
+                                        DoubleTapped="OnVersionDoubleTapped">
+                                    <Grid ColumnDefinitions="2*,*,*,Auto,24">
                                         <TextBlock FontWeight="SemiBold" Text="{Binding Name}" />
                                         <TextBlock Grid.Column="1" Text="{Binding ApplicationVersion, StringFormat='Revit {0}'}" />
                                         <TextBlock Grid.Column="2" Text="{Binding Status}" />
                                         <TextBlock Grid.Column="3" Text="{Binding FileIds.Count, StringFormat='Файлов: {0}'}" />
+                                        <PathIcon Grid.Column="4" Width="13" Height="13" HorizontalAlignment="Right"
+                                                  Foreground="{StaticResource TextTertiaryBrush}"
+                                                  Data="M5,2 L11,8 L5,14" />
                                     </Grid>
                                 </Border>
                             </DataTemplate>

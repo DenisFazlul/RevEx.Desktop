@@ -31,6 +31,35 @@
                                          MinHeight="92" Watermark="Для чего используется семейство" />
                             </StackPanel>
                         </Grid>
+                        <StackPanel Spacing="9">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBlock Classes="label" Text="Теги" VerticalAlignment="Center" />
+                                <Button Grid.Column="1" Classes="compact secondary" Content="Добавить тег"
+                                        Click="OnAddTagClick" IsEnabled="{Binding !IsLoading}" />
+                            </Grid>
+                            <TextBlock IsVisible="{Binding HasNoSelectedTags}" Classes="caption"
+                                       Text="Теги не выбраны." />
+                            <ItemsControl ItemsSource="{Binding SelectedTags}"
+                                          IsVisible="{Binding HasSelectedTags}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:ContentTagItemViewModel">
+                                        <Border Classes="tag">
+                                            <StackPanel Orientation="Horizontal" Spacing="7">
+                                                <TextBlock Text="{Binding Name, StringFormat='#{0}'}"
+                                                           VerticalAlignment="Center" />
+                                                <Button Classes="icon-sm" Command="{Binding RemoveCommand}"
+                                                        ToolTip.Tip="Убрать тег">
+                                                    <PathIcon Data="M2,3 L3,2 L10,9 L9,10 Z M9,2 L10,3 L3,10 L2,9 Z" />
+                                                </Button>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
                         <StackPanel Spacing="7">
                             <TextBlock Classes="label" Text="Изображение контента" />
                             <Grid ColumnDefinitions="*,Auto">

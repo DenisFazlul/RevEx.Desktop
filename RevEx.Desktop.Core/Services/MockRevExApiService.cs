@@ -8,7 +8,7 @@ public sealed class MockRevExApiService : IRevExApiService
     private static readonly DateTimeOffset CreatedAt = new(2026, 1, 10, 9, 0, 0, TimeSpan.Zero);
     private static readonly DateTimeOffset UpdatedAt = new(2026, 1, 15, 12, 30, 0, TimeSpan.Zero);
 
-    private static readonly CategoryDto[] Categories =
+    private static readonly List<CategoryDto> Categories =
     [
         new(1, "Общие", CreatedAt, UpdatedAt),
         new(2, "Документы", CreatedAt, UpdatedAt)
@@ -168,6 +168,42 @@ public sealed class MockRevExApiService : IRevExApiService
 
     public Task<CategoryDto?> GetCategoryAsync(int id, CancellationToken cancellationToken = default) =>
         FromItem(Categories.FirstOrDefault(item => item.Id == id), cancellationToken);
+
+    public Task<CategoryDto> CreateCategoryAsync(
+        CreateCategoryDto request,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var now = DateTimeOffset.UtcNow;
+        var category = new CategoryDto(
+            Categories.Count == 0 ? 1 : Categories.Max(item => item.Id) + 1,
+            request.Name,
+            now,
+            now);
+        Categories.Add(category);
+        return Task.FromResult(category);
+    }
+
+    public Task UpdateCategoryAsync(
+        int id,
+        UpdateCategoryDto request,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var index = Categories.FindIndex(item => item.Id == id);
+        if (index < 0)
+            throw new HttpRequestException($"Category {id} was not found.");
+
+        Categories[index] = Categories[index] with { Name = request.Name, UpdatedAt = DateTimeOffset.UtcNow };
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteCategoryAsync(int id, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        Categories.RemoveAll(item => item.Id == id);
+        return Task.CompletedTask;
+    }
 
     public Task<IReadOnlyCollection<TagGroupDto>> GetTagGroupsAsync(CancellationToken cancellationToken = default) =>
         FromCollection(TagGroups, cancellationToken);

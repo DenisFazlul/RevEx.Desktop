@@ -13,6 +13,41 @@
             </Setter>
         </ControlTheme>
 
+        <ControlTheme x:Key="DialogHeaderTheme" TargetType="HeaderedContentControl">
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <StackPanel Spacing="4">
+                        <TextBlock Classes="h2" Text="{TemplateBinding Header}" TextWrapping="Wrap" />
+                        <TextBlock Classes="caption" Text="{TemplateBinding Content}" TextWrapping="Wrap" />
+                    </StackPanel>
+                </ControlTemplate>
+            </Setter>
+        </ControlTheme>
+
+        <ControlTheme x:Key="FormFieldTheme" TargetType="HeaderedContentControl">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <StackPanel Spacing="7">
+                        <TextBlock Classes="label" Text="{TemplateBinding Header}" />
+                        <ContentPresenter Content="{TemplateBinding Content}"
+                                          HorizontalContentAlignment="Stretch" />
+                    </StackPanel>
+                </ControlTemplate>
+            </Setter>
+        </ControlTheme>
+
+        <ControlTheme x:Key="InfoFieldTheme" TargetType="HeaderedContentControl">
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <StackPanel Spacing="6">
+                        <TextBlock Classes="label" Text="{TemplateBinding Header}" />
+                        <TextBlock Text="{TemplateBinding Content}" TextWrapping="Wrap" />
+                    </StackPanel>
+                </ControlTemplate>
+            </Setter>
+        </ControlTheme>
+
         <ControlTheme x:Key="EyebrowHeaderTheme" TargetType="HeaderedContentControl">
             <Setter Property="Template">
                 <ControlTemplate>

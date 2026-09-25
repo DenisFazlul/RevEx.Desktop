@@ -32,6 +32,15 @@
         <Setter Property="BorderBrush" Value="{StaticResource AccentHoverBrush}" />
     </Style>
 
+    <Style Selector="Button.secondary">
+        <Setter Property="Background" Value="{StaticResource SurfaceMutedBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+    </Style>
+    <Style Selector="Button.secondary:pointerover">
+        <Setter Property="Background" Value="{StaticResource SurfaceHoverBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderStrongBrush}" />
+    </Style>
+
     <Style Selector="Button.ghost">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
@@ -53,6 +62,62 @@
         <Setter Property="BorderBrush" Value="{StaticResource DangerBrush}" />
     </Style>
 
+    <!-- Button modifiers. Combine with a semantic variant: "icon ghost" or "icon danger". -->
+    <Style Selector="Button.icon">
+        <Setter Property="Width" Value="32" />
+        <Setter Property="Height" Value="32" />
+        <Setter Property="MinWidth" Value="32" />
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="Padding" Value="7" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+    </Style>
+    <Style Selector="Button.icon:pointerover">
+        <Setter Property="Background" Value="{StaticResource SurfaceMutedBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+    </Style>
+    <Style Selector="Button.icon.danger">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Foreground" Value="{StaticResource DangerBrush}" />
+    </Style>
+    <Style Selector="Button.icon.danger:pointerover">
+        <Setter Property="Background" Value="{StaticResource DangerSoftBrush}" />
+    </Style>
+    <Style Selector="Button.icon PathIcon">
+        <Setter Property="Width" Value="16" />
+        <Setter Property="Height" Value="16" />
+    </Style>
+    <Style Selector="Button.icon-sm">
+        <Setter Property="Width" Value="24" />
+        <Setter Property="Height" Value="24" />
+        <Setter Property="MinWidth" Value="24" />
+        <Setter Property="MinHeight" Value="24" />
+        <Setter Property="Padding" Value="5" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+    </Style>
+    <Style Selector="Button.icon-sm:pointerover">
+        <Setter Property="Background" Value="{StaticResource SurfaceMutedBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+    </Style>
+    <Style Selector="Button.icon-sm PathIcon">
+        <Setter Property="Width" Value="12" />
+        <Setter Property="Height" Value="12" />
+    </Style>
+    <Style Selector="Button.compact">
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="Padding" Value="11,6" />
+    </Style>
+    <Style Selector="Button.full-width">
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+    </Style>
+
     <Style Selector="TextBox, ComboBox">
         <Setter Property="MinHeight" Value="40" />
         <Setter Property="CornerRadius" Value="9" />
@@ -70,6 +135,12 @@
         <Setter Property="CornerRadius" Value="12" />
         <Setter Property="Background" Value="{StaticResource SurfaceMutedBrush}" />
         <Setter Property="BorderBrush" Value="Transparent" />
+    </Style>
+    <Style Selector="TextBox.multiline">
+        <Setter Property="MinHeight" Value="120" />
+        <Setter Property="Padding" Value="12,10" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="AcceptsReturn" Value="True" />
     </Style>
 
     <Style Selector="ListBox.clean-list">
@@ -106,5 +177,16 @@
     </Style>
     <Style Selector="CheckBox:checked">
         <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+    </Style>
+
+    <Style Selector="TextBlock.validation-message">
+        <Setter Property="Foreground" Value="{StaticResource DangerBrush}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style Selector="TextBlock.status-message">
+        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="TextWrapping" Value="Wrap" />
     </Style>
 </Styles>

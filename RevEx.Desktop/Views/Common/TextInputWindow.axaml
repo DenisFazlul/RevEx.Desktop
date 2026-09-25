@@ -1,0 +1,25 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="RevEx.Desktop.Views.Common.TextInputWindow"
+        Title="{Binding WindowTitle}" Width="540" Height="360"
+        MinWidth="460" MinHeight="320" WindowStartupLocation="CenterOwner"
+        CanResize="False">
+    <Grid Margin="24" RowDefinitions="Auto,18,*,Auto">
+        <HeaderedContentControl Theme="{StaticResource DialogHeaderTheme}"
+                                Header="{Binding FormTitle}" Content="{Binding Hint}" />
+
+        <StackPanel Grid.Row="2" Spacing="9">
+            <HeaderedContentControl Theme="{StaticResource FormFieldTheme}" Header="{Binding FieldLabel}">
+                <TextBox x:Name="ValueBox" Text="{Binding InitialValue, Mode=OneTime}"
+                         Classes.multiline="{Binding IsMultiline}"
+                         MaxLength="{Binding MaximumLength}" />
+            </HeaderedContentControl>
+            <TextBlock x:Name="ValidationMessage" Classes="validation-message" />
+        </StackPanel>
+
+        <Grid Grid.Row="3" ColumnDefinitions="*,Auto,10,Auto">
+            <Button Grid.Column="1" Classes="secondary" Content="Отмена" Click="OnCancelClick" />
+            <Button Grid.Column="3" Classes="primary" Content="Сохранить" Click="OnSaveClick" />
+        </Grid>
+    </Grid>
+</Window>

@@ -4,7 +4,9 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using RevEx.Desktop.Configuration;
+using RevEx.Desktop.Core.Domain;
 using RevEx.Desktop.ViewModels.Contents;
+using RevEx.Desktop.Views.Tags;
 
 namespace RevEx.Desktop.Views.Contents;
 
@@ -50,5 +52,17 @@ public partial class ContentEditorTabView : UserControl
         var file = files.FirstOrDefault();
         if (file is not null && DataContext is ContentEditorTabViewModel viewModel)
             viewModel.SetSelectedPreview(file.Path.LocalPath, file.Name);
+    }
+
+    private async void OnAddTagClick(object? sender, RoutedEventArgs eventArgs)
+    {
+        if (DataContext is not ContentEditorTabViewModel viewModel ||
+            TopLevel.GetTopLevel(this) is not Window owner)
+            return;
+
+        var selector = new TagSelectionWindow(viewModel.GetAvailableTags());
+        var tag = await selector.ShowDialog<TagDto?>(owner);
+        if (tag is not null)
+            viewModel.AddTag(tag);
     }
 }

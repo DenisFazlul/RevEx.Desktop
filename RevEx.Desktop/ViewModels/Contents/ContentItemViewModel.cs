@@ -12,7 +12,8 @@ namespace RevEx.Desktop.ViewModels.Contents;
 public partial class ContentItemViewModel : ViewModelBase, IDisposable
 {
     public int Id { get; }
-    public int CategoryId { get; }
+    [ObservableProperty]
+    private int _categoryId;
     public int ContentStatusId { get; }
     public IReadOnlyCollection<int> TagIds { get; }
     public IReadOnlyCollection<string> VisibleTags { get; }
@@ -34,7 +35,7 @@ public partial class ContentItemViewModel : ViewModelBase, IDisposable
         byte[]? previewBytes = null)
     {
         Id = dto.Id;
-        CategoryId = dto.CategoryId;
+        _categoryId = dto.CategoryId;
         ContentStatusId = dto.ContentStatusId;
         TagIds = dto.TagIds;
         _name = dto.Name;
