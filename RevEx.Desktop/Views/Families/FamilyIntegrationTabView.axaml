@@ -1,0 +1,76 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RevEx.Desktop.ViewModels.Families"
+             x:Class="RevEx.Desktop.Views.Families.FamilyIntegrationTabView"
+             x:DataType="vm:FamilyIntegrationTabViewModel">
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+        <Grid Margin="32,30" RowDefinitions="Auto,22,Auto,16,Auto,Auto" MaxWidth="880"
+              HorizontalAlignment="Center">
+            <HeaderedContentControl Theme="{StaticResource PageHeaderTheme}"
+                                    Header="Revit-семейства"
+                                    Content="Получение информации и загрузка RFA в активный проект" />
+
+            <Border Grid.Row="2" Classes="card section-card">
+                <StackPanel Spacing="16">
+                    <HeaderedContentControl Theme="{StaticResource FormFieldTheme}"
+                                            Header="Connector">
+                        <Grid ColumnDefinitions="*,12,Auto">
+                            <ComboBox ItemsSource="{Binding Connectors}"
+                                      SelectedItem="{Binding SelectedConnector}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <TextBlock Text="{Binding Name}" />
+                                            <TextBlock Classes="caption" Text="{Binding ActiveDocument}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                            <Button Grid.Column="2" Content="Обновить"
+                                    Command="{Binding RefreshConnectorsCommand}" />
+                        </Grid>
+                    </HeaderedContentControl>
+
+                    <HeaderedContentControl Theme="{StaticResource FormFieldTheme}"
+                                            Header="Файл семейства">
+                        <Grid ColumnDefinitions="*,12,Auto">
+                            <TextBox Text="{Binding FamilyPath}"
+                                     Watermark="C:\Families\Example.rfa" />
+                            <Button Grid.Column="2" Content="Выбрать…"
+                                    Click="OnChooseFamilyClick"
+                                    IsEnabled="{Binding !IsBusy}" />
+                        </Grid>
+                    </HeaderedContentControl>
+
+                    <Grid ColumnDefinitions="Auto,12,Auto,*">
+                        <Button Classes="secondary" Content="Получить информацию"
+                                Command="{Binding InspectCommand}"
+                                IsEnabled="{Binding CanRunRequest}" />
+                        <Button Grid.Column="2" Classes="primary" Content="Загрузить в проект"
+                                Command="{Binding LoadCommand}"
+                                IsEnabled="{Binding CanRunRequest}" />
+                        <ProgressBar Grid.Column="3" Margin="18,0,0,0"
+                                     IsVisible="{Binding IsBusy}" IsIndeterminate="True"
+                                     VerticalAlignment="Center" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Row="4" Classes="card section-card" IsVisible="{Binding HasFamilyInfo}">
+                <Grid RowDefinitions="Auto,16,Auto" ColumnDefinitions="*,24,*">
+                    <TextBlock Grid.ColumnSpan="3" Classes="h2" Text="Информация о семействе" />
+                    <HeaderedContentControl Grid.Row="2" Theme="{StaticResource InfoFieldTheme}"
+                                            Header="Название" Content="{Binding FamilyName}" />
+                    <HeaderedContentControl Grid.Row="2" Grid.Column="2"
+                                            Theme="{StaticResource InfoFieldTheme}"
+                                            Header="Категория" Content="{Binding FamilyCategory}" />
+                </Grid>
+            </Border>
+
+            <StackPanel Grid.Row="5" Margin="2,12,0,0" Spacing="4">
+                <TextBlock Classes="status-message" Text="{Binding Message}" />
+                <TextBlock Classes="validation-message" Text="{Binding ErrorMessage}" />
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

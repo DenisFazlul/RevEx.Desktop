@@ -3,14 +3,111 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:RevEx.Desktop.ViewModels.Settings"
+             xmlns:connectorVm="using:RevEx.Desktop.ViewModels.Connectors"
              mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="650"
              x:DataType="vm:SettingsTabViewModel" x:Class="RevEx.Desktop.Views.Settings.SettingsTabView">
     <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-        <Grid Margin="32,30" RowDefinitions="Auto,22,Auto" MaxWidth="880" HorizontalAlignment="Center">
+        <Grid Margin="32,30" RowDefinitions="Auto,22,Auto,16,Auto" MaxWidth="880"
+              HorizontalAlignment="Center">
             <HeaderedContentControl Theme="{StaticResource PageHeaderTheme}" Header="Настройки"
                                     Content="Подключение и параметры рабочего пространства" />
-            <HeaderedContentControl Grid.Row="2" Theme="{StaticResource ApiSettingsCardTheme}"
-                                    Header="API-сервер" Content="{Binding ApiPath}" />
+            <Border Grid.Row="2" Classes="card settings-card">
+                <Grid RowDefinitions="Auto,18,Auto,14,Auto,18,Auto,Auto">
+                    <StackPanel Spacing="4">
+                        <TextBlock Classes="h2" Text="Подключения" />
+                        <TextBlock Classes="caption"
+                                   Text="Адрес основного API и точка регистрации Revit Connector" />
+                    </StackPanel>
+
+                    <HeaderedContentControl Grid.Row="2" Theme="{StaticResource FormFieldTheme}"
+                                            Header="API-сервер">
+                        <TextBox Text="{Binding ApiServerAddress}"
+                                 Watermark="http://localhost:8080/" />
+                    </HeaderedContentControl>
+
+                    <HeaderedContentControl Grid.Row="4" Theme="{StaticResource FormFieldTheme}"
+                                            Header="Адрес регистрации Revit Connector">
+                        <TextBox Text="{Binding ConnectorRegistrationAddress}"
+                                 Watermark="http://127.0.0.1:5060/" />
+                    </HeaderedContentControl>
+
+                    <Button Grid.Row="6" Classes="primary" HorizontalAlignment="Left"
+                            Content="Сохранить подключения"
+                            Command="{Binding SaveConnectionsCommand}" />
+
+                    <StackPanel Grid.Row="7" Margin="0,10,0,0" Spacing="4">
+                        <TextBlock Classes="status-message" Text="{Binding SettingsMessage}" />
+                        <TextBlock Classes="validation-message" Text="{Binding SettingsErrorMessage}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Border Grid.Row="4" Classes="card settings-card">
+                <Grid RowDefinitions="Auto,18,Auto">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel Spacing="4">
+                            <TextBlock Classes="h2" Text="Подключённые Connector" />
+                            <TextBlock Classes="caption"
+                                       Text="Экземпляры Revit, AutoCAD и тестовые Connector" />
+                        </StackPanel>
+                        <Button Grid.Column="1" Classes="secondary" Content="Проверить все"
+                                Command="{Binding RefreshConnectorsCommand}"
+                                IsEnabled="{Binding !IsLoadingConnectors}" />
+                    </Grid>
+
+                    <Grid Grid.Row="2" MinHeight="90">
+                        <ProgressBar IsVisible="{Binding IsLoadingConnectors}" IsIndeterminate="True"
+                                     VerticalAlignment="Top" />
+                        <TextBlock IsVisible="{Binding HasNoConnectors}" Classes="caption"
+                                   Text="Подключённых Connector пока нет."
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+                        <ItemsControl ItemsSource="{Binding Connectors}"
+                                      IsVisible="{Binding HasConnectors}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="connectorVm:ConnectorItemViewModel">
+                                    <Border Classes="value-box" Margin="0,0,0,10">
+                                        <Grid ColumnDefinitions="*,Auto,8,Auto"
+                                              RowDefinitions="Auto,8,Auto,8,Auto">
+                                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                                <TextBlock Classes="h2" Text="{Binding Name}" />
+                                                <TextBlock Classes="caption"
+                                                           Text="{Binding Product, StringFormat='Продукт: {0}'}" />
+                                                <TextBlock Classes="caption"
+                                                           Text="{Binding ProductVersion, StringFormat='Версия: {0}'}" />
+                                            </StackPanel>
+
+                                            <Button Grid.Column="1" Classes="secondary compact"
+                                                    Content="Пинг" Command="{Binding PingCommand}"
+                                                    IsEnabled="{Binding !IsChecking}" />
+                                            <Button Grid.Column="3" Classes="danger compact"
+                                                    Content="Удалить" Command="{Binding RemoveCommand}"
+                                                    IsEnabled="{Binding !IsChecking}" />
+
+                                            <Grid Grid.Row="2" Grid.ColumnSpan="4"
+                                                  ColumnDefinitions="Auto,18,*">
+                                                <TextBlock Classes="label" Text="Документ" />
+                                                <TextBlock Grid.Column="2" Text="{Binding ActiveDocument}" />
+                                            </Grid>
+
+                                            <Grid Grid.Row="4" Grid.ColumnSpan="4"
+                                                  ColumnDefinitions="Auto,18,*,24,Auto,12,Auto">
+                                                <TextBlock Classes="label" Text="Адрес" />
+                                                <TextBlock Grid.Column="2" FontFamily="monospace"
+                                                           Text="{Binding Address}" />
+                                                <TextBlock Grid.Column="4" Classes="caption"
+                                                           Text="{Binding ProcessId, StringFormat='PID {0}'}" />
+                                                <TextBlock Grid.Column="6" FontWeight="SemiBold"
+                                                           Text="{Binding Status}" />
+                                            </Grid>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Grid>
+                </Grid>
+            </Border>
         </Grid>
     </ScrollViewer>
 </UserControl>

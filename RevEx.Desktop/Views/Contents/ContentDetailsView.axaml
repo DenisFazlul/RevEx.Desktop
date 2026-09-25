@@ -2,156 +2,206 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:domain="using:RevEx.Desktop.Core.Domain"
              xmlns:vm="using:RevEx.Desktop.ViewModels.Contents"
-             x:Class="RevEx.Desktop.Views.Contents.ContentDetailsView" x:DataType="vm:ContentDetailsViewModel">
-    <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-        <Grid Margin="32,30" RowDefinitions="Auto,22,Auto,16,Auto" MaxWidth="980" HorizontalAlignment="Center">
-            <HeaderedContentControl Theme="{StaticResource EyebrowHeaderTheme}"
-                                    Header="{Binding Title}" Content="Карточка материала из базы знаний" />
-            <Grid Grid.Row="2" ColumnDefinitions="2*,18,3*">
-                <Border Classes="card section-card">
-                    <StackPanel Spacing="14">
-                        <Grid ColumnDefinitions="*,Auto">
-                            <TextBlock Classes="h2" Text="Изображение" />
-                            <Button Grid.Column="1" Classes="icon"
-                                    Click="OnUpdatePreviewClick" IsEnabled="{Binding !IsUpdatingPreview}"
-                                    ToolTip.Tip="Обновить изображение">
-                                <PathIcon Data="M13,5 L13,1 L11.5,2.5 A6,6 0 1 0 13.5,9 M13,1 L9,1" />
-                            </Button>
-                        </Grid>
-                        <ProgressBar IsVisible="{Binding IsUpdatingPreview}" IsIndeterminate="True" />
-                        <Border Classes="image-frame" MinHeight="300">
-                            <Grid>
-                                <TextBlock IsVisible="{Binding HasNoPreview}" Text="Изображение пока не загружено."
-                                           Foreground="{StaticResource TextSecondaryBrush}"
-                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                <Image Source="{Binding PreviewImage}" Stretch="Uniform"
-                                       IsVisible="{Binding HasPreview}" MaxHeight="480" />
-                            </Grid>
-                        </Border>
-                        <TextBlock Text="{Binding PreviewMessage}" Classes="status-message" />
-                    </StackPanel>
-                </Border>
+             x:Class="RevEx.Desktop.Views.Contents.ContentDetailsView"
+             x:DataType="vm:ContentDetailsViewModel">
+    <Grid Margin="32" RowDefinitions="Auto,24,*" MaxWidth="1120" HorizontalAlignment="Stretch">
+        <HeaderedContentControl Theme="{StaticResource EyebrowHeaderTheme}"
+                                Header="{Binding Title}" Content="Карточка материала из базы знаний" />
 
-                <StackPanel Grid.Column="2" Spacing="16">
-                    <Border Classes="card section-card">
-                        <StackPanel Spacing="14">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <TextBlock Classes="h2" Text="Основная информация" />
-                                <Button Grid.Column="1" Classes="icon danger"
-                                        Click="OnDeleteContentClick" IsEnabled="{Binding !IsDeleting}"
-                                        ToolTip.Tip="Удалить контент">
-                                    <PathIcon Data="M3,4 L13,4 M5,4 L5,14 L11,14 L11,4 M6,2 L10,2 L11,4 L5,4 Z M7,7 L7,12 M9,7 L9,12" />
-                                </Button>
-                            </Grid>
-                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,6,Auto">
-                                <HeaderedContentControl Grid.RowSpan="3" Theme="{StaticResource InfoFieldTheme}"
-                                                        Header="Название" Content="{Binding Name}" />
-                                <Button Grid.Column="1" Grid.RowSpan="3" Classes="icon"
-                                        Click="OnEditNameClick" IsEnabled="{Binding !IsSavingContent}"
-                                        ToolTip.Tip="Изменить название">
-                                    <PathIcon Data="M3,11 L3,14 L6,14 L14,6 L11,3 Z M10,4 L13,7 M3,14 L7,13" />
-                                </Button>
-                            </Grid>
-                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,6,Auto">
-                                <HeaderedContentControl Grid.RowSpan="3" Theme="{StaticResource InfoFieldTheme}"
-                                                        Header="Описание" Content="{Binding Description}" />
-                                <Button Grid.Column="1" Grid.RowSpan="3" Classes="icon"
-                                        Click="OnEditDescriptionClick" IsEnabled="{Binding !IsSavingContent}"
-                                        ToolTip.Tip="Изменить описание">
-                                    <PathIcon Data="M3,11 L3,14 L6,14 L14,6 L11,3 Z M10,4 L13,7 M3,14 L7,13" />
-                                </Button>
-                            </Grid>
-                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,6,Auto">
-                                <HeaderedContentControl Grid.RowSpan="3" Theme="{StaticResource InfoFieldTheme}"
-                                                        Header="Категория" Content="{Binding CategoryName}" />
-                                <Button Grid.Column="1" Grid.RowSpan="3" Classes="icon"
-                                        Click="OnEditCategoryClick" IsEnabled="{Binding !IsSavingContent}"
-                                        ToolTip.Tip="Изменить категорию">
-                                    <PathIcon Data="M3,11 L3,14 L6,14 L14,6 L11,3 Z M10,4 L13,7 M3,14 L7,13" />
-                                </Button>
-                            </Grid>
-                            <ProgressBar IsVisible="{Binding IsSavingContent}" IsIndeterminate="True" />
-                            <TextBlock Text="{Binding ContentMessage}" Classes="status-message" />
-                        </StackPanel>
-                    </Border>
-                    <Border Classes="card section-card">
-                        <StackPanel Spacing="14">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <StackPanel Spacing="4">
-                                    <TextBlock Classes="h2" Text="Теги контента" />
-                                    <TextBlock Classes="caption" Text="Только уже добавленные метки" />
+        <TabControl Grid.Row="2">
+            <TabItem Header="Основное">
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                    <Grid Margin="0,16,0,0" ColumnDefinitions="2*,16,3*">
+                        <Border Classes="card section-card">
+                            <StackPanel Spacing="14">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Classes="h2" Text="Изображение" />
+                                    <Button Grid.Column="1" Classes="icon" Click="OnUpdatePreviewClick"
+                                            IsEnabled="{Binding !IsUpdatingPreview}" ToolTip.Tip="Обновить изображение">
+                                        <PathIcon Data="M13,5 L13,1 L11.5,2.5 A6,6 0 1 0 13.5,9 M13,1 L9,1" />
+                                    </Button>
+                                </Grid>
+                                <ProgressBar IsVisible="{Binding IsUpdatingPreview}" IsIndeterminate="True" />
+                                <Border Classes="image-frame" MinHeight="300">
+                                    <Grid>
+                                        <TextBlock IsVisible="{Binding HasNoPreview}" Text="Изображение пока не загружено."
+                                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        <Image Source="{Binding PreviewImage}" Stretch="Uniform"
+                                               IsVisible="{Binding HasPreview}" MaxHeight="480" />
+                                    </Grid>
+                                </Border>
+                                <TextBlock Text="{Binding PreviewMessage}" Classes="status-message" />
+                            </StackPanel>
+                        </Border>
+
+                        <StackPanel Grid.Column="2" Spacing="16">
+                            <Border Classes="card section-card">
+                                <StackPanel Spacing="14">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <TextBlock Classes="h2" Text="Основная информация" />
+                                        <Button Grid.Column="1" Classes="icon danger" Click="OnDeleteContentClick"
+                                                IsEnabled="{Binding !IsDeleting}" ToolTip.Tip="Удалить контент">
+                                            <PathIcon Data="M3,4 L13,4 M5,4 L5,14 L11,14 L11,4 M6,2 L10,2 L11,4 L5,4 Z M7,7 L7,12 M9,7 L9,12" />
+                                        </Button>
+                                    </Grid>
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <HeaderedContentControl Theme="{StaticResource InfoFieldTheme}"
+                                                                Header="Название" Content="{Binding Name}" />
+                                        <Button Grid.Column="1" Classes="icon" Click="OnEditNameClick"
+                                                IsEnabled="{Binding !IsSavingContent}" ToolTip.Tip="Изменить название">
+                                            <PathIcon Data="M3,11 L3,14 L6,14 L14,6 L11,3 Z M10,4 L13,7 M3,14 L7,13" />
+                                        </Button>
+                                    </Grid>
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <HeaderedContentControl Theme="{StaticResource InfoFieldTheme}"
+                                                                Header="Описание" Content="{Binding Description}" />
+                                        <Button Grid.Column="1" Classes="icon" Click="OnEditDescriptionClick"
+                                                IsEnabled="{Binding !IsSavingContent}" ToolTip.Tip="Изменить описание">
+                                            <PathIcon Data="M3,11 L3,14 L6,14 L14,6 L11,3 Z M10,4 L13,7 M3,14 L7,13" />
+                                        </Button>
+                                    </Grid>
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <HeaderedContentControl Theme="{StaticResource InfoFieldTheme}"
+                                                                Header="Категория" Content="{Binding CategoryName}" />
+                                        <Button Grid.Column="1" Classes="icon" Click="OnEditCategoryClick"
+                                                IsEnabled="{Binding !IsSavingContent}" ToolTip.Tip="Изменить категорию">
+                                            <PathIcon Data="M3,11 L3,14 L6,14 L14,6 L11,3 Z M10,4 L13,7 M3,14 L7,13" />
+                                        </Button>
+                                    </Grid>
+                                    <ProgressBar IsVisible="{Binding IsSavingContent}" IsIndeterminate="True" />
+                                    <TextBlock Text="{Binding ContentMessage}" Classes="status-message" />
                                 </StackPanel>
-                                <Button Grid.Column="1" Classes="primary" Content="Добавить тег"
-                                        Click="OnAddTagClick" IsEnabled="{Binding !IsSavingTags}" />
-                            </Grid>
-                            <ProgressBar IsVisible="{Binding IsSavingTags}" IsIndeterminate="True" />
-                            <TextBlock IsVisible="{Binding HasNoTags}" Text="У контента пока нет тегов."
-                                       Foreground="{StaticResource TextSecondaryBrush}" />
-                            <ItemsControl ItemsSource="{Binding Tags}" IsVisible="{Binding HasTags}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate x:DataType="vm:ContentTagItemViewModel">
-                                        <Border Classes="tag">
-                                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                                <TextBlock Text="{Binding Name, StringFormat='#{0}'}" VerticalAlignment="Center" />
-                                                <Button Classes="icon-sm"
-                                                        Command="{Binding RemoveCommand}" ToolTip.Tip="Удалить тег">
-                                                    <PathIcon Data="M2,3 L3,2 L10,9 L9,10 Z M9,2 L10,3 L3,10 L2,9 Z" />
-                                                </Button>
-                                            </StackPanel>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                            <TextBlock Text="{Binding TagMessage}" Foreground="{StaticResource TextSecondaryBrush}" />
+                            </Border>
+
+                            <Border Classes="card section-card">
+                                <StackPanel Spacing="14">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <TextBlock Classes="h2" Text="Теги" />
+                                        <Button Grid.Column="1" Classes="primary" Content="Добавить тег"
+                                                Click="OnAddTagClick" IsEnabled="{Binding !IsSavingTags}" />
+                                    </Grid>
+                                    <ProgressBar IsVisible="{Binding IsSavingTags}" IsIndeterminate="True" />
+                                    <TextBlock IsVisible="{Binding HasNoTags}" Text="У контента пока нет тегов."
+                                               Foreground="{StaticResource TextSecondaryBrush}" />
+                                    <ItemsControl ItemsSource="{Binding Tags}" IsVisible="{Binding HasTags}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:ContentTagItemViewModel">
+                                                <Border Classes="tag">
+                                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                                        <TextBlock Text="{Binding Name, StringFormat='#{0}'}" VerticalAlignment="Center" />
+                                                        <Button Classes="icon-sm" Command="{Binding RemoveCommand}" ToolTip.Tip="Удалить тег">
+                                                            <PathIcon Data="M2,3 L3,2 L10,9 L9,10 Z M9,2 L10,3 L3,10 L2,9 Z" />
+                                                        </Button>
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <TextBlock Text="{Binding TagMessage}" Classes="status-message" />
+                                </StackPanel>
+                            </Border>
                             <TextBlock Text="{Binding ErrorMessage}" TextWrapping="Wrap"
                                        Foreground="{StaticResource TextSecondaryBrush}" />
                         </StackPanel>
-                    </Border>
-                </StackPanel>
-            </Grid>
-
-            <Border Grid.Row="4" Classes="card section-card">
-                <StackPanel Spacing="14">
-                    <Grid ColumnDefinitions="*,Auto">
-                        <StackPanel Spacing="3">
-                            <TextBlock Classes="h2" Text="Версии" />
-                            <TextBlock Classes="caption" Text="Дважды нажмите на версию, чтобы открыть детали" />
-                        </StackPanel>
-                        <Button Grid.Column="1" Classes="primary"
-                                Content="Добавить версию"
-                                Command="{Binding AddVersionCommand}" />
                     </Grid>
+                </ScrollViewer>
+            </TabItem>
 
-                    <ProgressBar IsVisible="{Binding IsLoading}" IsIndeterminate="True" />
-                    <TextBlock IsVisible="{Binding HasNoVersions}"
-                               Text="У контента пока нет версий."
-                               Foreground="{StaticResource TextSecondaryBrush}" />
-                    <TextBlock Text="{Binding ErrorMessage}" TextWrapping="Wrap"
-                               Foreground="{StaticResource TextSecondaryBrush}" />
+            <TabItem Header="Версии">
+                <Grid Margin="0,16,0,0" ColumnDefinitions="300,16,*">
+                    <Border Classes="card section-card">
+                        <Grid RowDefinitions="Auto,14,*">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBlock Classes="h2" Text="Версии" VerticalAlignment="Center" />
+                                <Button Grid.Column="1" Classes="primary compact" Content="Добавить"
+                                        Command="{Binding AddVersionCommand}" />
+                            </Grid>
+                            <TextBlock Grid.Row="2" IsVisible="{Binding HasNoVersions}"
+                                       Text="У контента пока нет версий."
+                                       Foreground="{StaticResource TextSecondaryBrush}" />
+                            <ScrollViewer Grid.Row="2" IsVisible="{Binding HasVersions}">
+                                <ItemsControl ItemsSource="{Binding Versions}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="domain:ContentVersionDto">
+                                            <Button Margin="0,0,0,8" Padding="12" HorizontalContentAlignment="Stretch"
+                                                    Click="OnVersionClick">
+                                                <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,5,Auto">
+                                                    <TextBlock FontWeight="SemiBold" Text="{Binding Name}" />
+                                                    <TextBlock Grid.Column="1" Text="{Binding ApplicationVersion, StringFormat='Revit {0}'}" />
+                                                    <TextBlock Grid.Row="2" Grid.ColumnSpan="2" Classes="caption"
+                                                               Text="{Binding Status}" />
+                                                </Grid>
+                                            </Button>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </Grid>
+                    </Border>
 
-                    <ItemsControl ItemsSource="{Binding Versions}" IsVisible="{Binding HasVersions}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="domain:ContentVersionDto">
-                                <Border Classes="value-box" Margin="0,0,0,8"
-                                        DoubleTapped="OnVersionDoubleTapped">
-                                    <Grid ColumnDefinitions="2*,*,*,Auto,24">
-                                        <TextBlock FontWeight="SemiBold" Text="{Binding Name}" />
-                                        <TextBlock Grid.Column="1" Text="{Binding ApplicationVersion, StringFormat='Revit {0}'}" />
-                                        <TextBlock Grid.Column="2" Text="{Binding Status}" />
-                                        <TextBlock Grid.Column="3" Text="{Binding FileIds.Count, StringFormat='Файлов: {0}'}" />
-                                        <PathIcon Grid.Column="4" Width="13" Height="13" HorizontalAlignment="Right"
-                                                  Foreground="{StaticResource TextTertiaryBrush}"
-                                                  Data="M5,2 L11,8 L5,14" />
+                    <ScrollViewer Grid.Column="2" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Spacing="16" IsVisible="{Binding HasSelectedVersion}">
+                            <Border Classes="card section-card">
+                                <StackPanel Spacing="14">
+                                    <TextBlock Classes="h2" Text="{Binding SelectedVersion.Name}" />
+                                    <Grid ColumnDefinitions="*,18,*" RowDefinitions="Auto,14,Auto,14,Auto">
+                                        <HeaderedContentControl Theme="{StaticResource InfoFieldTheme}"
+                                                                Header="Версия Revit" Content="{Binding SelectedVersion.ApplicationVersion}" />
+                                        <HeaderedContentControl Grid.Column="2" Theme="{StaticResource InfoFieldTheme}"
+                                                                Header="Статус" Content="{Binding SelectedVersion.Status}" />
+                                        <HeaderedContentControl Grid.Row="2" Theme="{StaticResource InfoFieldTheme}"
+                                                                Header="Дата версии" Content="{Binding SelectedVersionDateText}" />
+                                        <HeaderedContentControl Grid.Row="2" Grid.Column="2" Theme="{StaticResource InfoFieldTheme}"
+                                                                Header="Файлов" Content="{Binding VersionFiles.Count}" />
+                                        <HeaderedContentControl Grid.Row="4" Theme="{StaticResource InfoFieldTheme}"
+                                                                Header="Создано" Content="{Binding SelectedVersionCreatedAtText}" />
+                                        <HeaderedContentControl Grid.Row="4" Grid.Column="2" Theme="{StaticResource InfoFieldTheme}"
+                                                                Header="Обновлено" Content="{Binding SelectedVersionUpdatedAtText}" />
                                     </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </StackPanel>
-            </Border>
-        </Grid>
-    </ScrollViewer>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Classes="card section-card">
+                                <StackPanel Spacing="14">
+                                    <Grid ColumnDefinitions="*,180,12,Auto">
+                                        <TextBlock Classes="h2" Text="Файлы версии" VerticalAlignment="Center" />
+                                        <ComboBox Grid.Column="1" ItemsSource="{Binding FileRoles}"
+                                                  SelectedItem="{Binding SelectedFileRole}"
+                                                  DisplayMemberBinding="{Binding Name}" />
+                                        <Button Grid.Column="3" Classes="secondary" Content="Добавить файл"
+                                                Click="OnAddVersionFileClick" IsEnabled="{Binding !IsVersionBusy}" />
+                                    </Grid>
+                                    <ProgressBar IsVisible="{Binding IsVersionBusy}" IsIndeterminate="True" />
+                                    <TextBlock IsVisible="{Binding HasNoVersionFiles}" Classes="caption"
+                                               Text="У версии нет прикреплённых файлов." />
+                                    <TextBlock Classes="validation-message" Text="{Binding VersionErrorMessage}" TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding VersionMessage}" Classes="status-message" />
+                                    <ItemsControl ItemsSource="{Binding VersionFiles}" IsVisible="{Binding HasVersionFiles}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:ContentVersionFileItemViewModel">
+                                                <Border Classes="value-box" Margin="0,0,0,8">
+                                                    <Grid ColumnDefinitions="*,Auto,14,Auto,10,Auto">
+                                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold"
+                                                                   TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                                        <TextBlock Grid.Column="1" Classes="caption" Text="{Binding RoleName}" />
+                                                        <TextBlock Grid.Column="3" Classes="caption" Text="{Binding SizeText}" />
+                                                        <Button Grid.Column="5" Classes="compact danger" Content="Удалить"
+                                                                Click="OnDeleteVersionFileClick" />
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
 </UserControl>

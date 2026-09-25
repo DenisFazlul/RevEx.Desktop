@@ -10,6 +10,9 @@ using RevEx.Desktop.Services;
 using RevEx.Desktop.ViewModels;
 using RevEx.Desktop.Views;
 using RevEx.Desktop.Views.MainMenu;
+using RevEx.Connector.Contracts;
+using RevEx.Desktop.Connectors;
+using RevEx.Configuration;
 
 namespace RevEx.Desktop.DI;
 
@@ -24,6 +27,12 @@ public static class ServiceExtensions
         services.AddSingleton<AppSettings>(appSettings);
         services.AddSingleton<IAppSettings>(appSettings);
         services.AddRevExtApiConnection(appSettings);
+        services.AddSingleton<IConnectorRegistry, ConnectorRegistry>();
+        services.AddSingleton(provider => new DesktopConnectorServer(
+            provider.GetRequiredService<IConnectorRegistry>(),
+            new Uri(appSettings.ConnectorRegistrationAddress)));
+        services.AddHttpClient<IConnectorClient, ConnectorClient>(httpClient =>
+            httpClient.Timeout = TimeSpan.FromMinutes(2));
 
         services.AddUIServices();
         return services;
@@ -41,6 +50,17 @@ public static class ServiceExtensions
         {
             throw new InvalidOperationException(
                 "Настройка AppSettings:ApiPath должна содержать абсолютный HTTP(S)-адрес.");
+        }
+
+        if (!Uri.TryCreate(
+                settings.ConnectorRegistrationAddress,
+                UriKind.Absolute,
+                out var connectorRegistrationUri) ||
+            connectorRegistrationUri.Scheme != Uri.UriSchemeHttp ||
+            !connectorRegistrationUri.IsLoopback)
+        {
+            throw new InvalidOperationException(
+                "AppSettings:ConnectorRegistrationAddress должен содержать loopback HTTP-адрес.");
         }
 
         ValidateAuthenticationSettings(settings.Authentication);
@@ -101,6 +121,7 @@ public static class ServiceExtensions
     private static IServiceCollection AddUIServices(this IServiceCollection services)
     {
         services.AddSingleton<IApplicationShutdownService, ApplicationShutdownService>();
+        services.AddSingleton<IRevExUserSettingsStore, RevExUserSettingsStore>();
         services.AddSingleton<IMainMenuProvider, MainMenuProvider>();
         services.AddTransient<IWorkspaceTabFactory, WorkspaceTabFactory>();
 

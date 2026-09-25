@@ -54,6 +54,10 @@ public interface IRevExApiService
         string fileName,
         string role,
         CancellationToken cancellationToken = default);
+    Task DeleteContentVersionFileAsync(
+        int versionId,
+        int fileId,
+        CancellationToken cancellationToken = default);
 
     Task<IReadOnlyCollection<ContentFileDto>> GetContentFilesAsync(CancellationToken cancellationToken = default);
     Task<ContentFileDto?> GetContentFileAsync(int id, CancellationToken cancellationToken = default);

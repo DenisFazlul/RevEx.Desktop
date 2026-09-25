@@ -131,6 +131,12 @@ public sealed class RevExApiService(HttpClient httpClient) : IRevExApiService
             role,
             cancellationToken);
 
+    public Task DeleteContentVersionFileAsync(
+        int versionId,
+        int fileId,
+        CancellationToken cancellationToken = default) =>
+        DeleteAsync($"api/content-versions/{versionId}/files/{fileId}", cancellationToken);
+
     public Task<IReadOnlyCollection<ContentFileDto>> GetContentFilesAsync(
         CancellationToken cancellationToken = default) =>
         GetAllAsync<ContentFileDto>("api/content-files", cancellationToken);

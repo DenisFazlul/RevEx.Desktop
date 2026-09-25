@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <ProjectReference Include="..\RevEx.Connector.Contracts\RevEx.Connector.Contracts.csproj" />
+    <ProjectReference Include="..\RevEx.Configuration\RevEx.Configuration.csproj" />
+  </ItemGroup>
+</Project>

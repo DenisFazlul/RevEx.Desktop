@@ -30,6 +30,9 @@
     <ItemGroup>
       <ProjectReference Include="..\RevEx.Desktop.Auth\RevEx.Desktop.Auth.csproj" />
       <ProjectReference Include="..\RevEx.Desktop.Core\RevEx.Desktop.Core.csproj" />
+      <ProjectReference Include="..\RevEx.Connector.Contracts\RevEx.Connector.Contracts.csproj" />
+      <ProjectReference Include="..\RevEx.Desktop.Connectors\RevEx.Desktop.Connectors.csproj" />
+      <ProjectReference Include="..\RevEx.Configuration\RevEx.Configuration.csproj" />
     </ItemGroup>
 
     <ItemGroup>

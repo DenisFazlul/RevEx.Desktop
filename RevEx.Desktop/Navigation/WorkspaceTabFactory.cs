@@ -5,9 +5,14 @@ using RevEx.Desktop.Core.Domain;
 using RevEx.Desktop.ViewModels.Catalog;
 using RevEx.Desktop.ViewModels.Categories;
 using RevEx.Desktop.ViewModels.Contents;
+using RevEx.Desktop.ViewModels.Families;
 using RevEx.Desktop.ViewModels.Settings;
 using RevEx.Desktop.ViewModels.Tabs;
 using RevEx.Desktop.ViewModels.Tags;
+using RevEx.Connector.Contracts;
+using RevEx.Desktop.Connectors;
+using RevEx.Desktop.Services;
+using RevEx.Configuration;
 
 namespace RevEx.Desktop.Navigation;
 
@@ -15,27 +20,47 @@ public sealed class WorkspaceTabFactory : IWorkspaceTabFactory
 {
     private readonly IRevExApiService _revExApiService;
     private readonly IAppSettings _settings;
+    private readonly IConnectorClient _connectorClient;
+    private readonly IConnectorRegistry _connectorRegistry;
+    private readonly IRevExUserSettingsStore _userSettingsStore;
     private readonly IReadOnlyDictionary<Type, Func<WorkspaceTabContext, object?, WorkspaceTabViewModel>> _factories;
 
-    public WorkspaceTabFactory(IRevExApiService revExApiService, IAppSettings settings)
+    public WorkspaceTabFactory(
+        IRevExApiService revExApiService,
+        IConnectorClient connectorClient,
+        IConnectorRegistry connectorRegistry,
+        IRevExUserSettingsStore userSettingsStore,
+        IAppSettings settings)
     {
         _revExApiService = revExApiService;
+        _connectorClient = connectorClient;
+        _connectorRegistry = connectorRegistry;
+        _userSettingsStore = userSettingsStore;
         _settings = settings;
         _factories = new Dictionary<Type, Func<WorkspaceTabContext, object?, WorkspaceTabViewModel>>
         {
             [typeof(CatalogTabViewModel)] = CreateCatalogTab,
             [typeof(CategoryAdminTabViewModel)] = CreateCategoryAdminTab,
             [typeof(ContentDetailsViewModel)] = CreateContentDetailsTab,
-            [typeof(ContentVersionDetailsViewModel)] = CreateContentVersionDetailsTab,
             [typeof(ContentEditorTabViewModel)] = CreateContentEditorTab,
+            [typeof(FamilyIntegrationTabViewModel)] = CreateFamilyIntegrationTab,
             [typeof(TagAdminTabViewModel)] = CreateTagAdminTab,
             [typeof(SettingsTabViewModel)] = CreateSettings
         };
     }
 
+    private WorkspaceTabViewModel CreateFamilyIntegrationTab(WorkspaceTabContext _, object? __) =>
+        new FamilyIntegrationTabViewModel(_connectorClient, _connectorRegistry);
+
     private WorkspaceTabViewModel CreateSettings(WorkspaceTabContext arg1, object? arg2)
     {
-        return new SettingsTabViewModel(_settings, "settings", true);
+        return new SettingsTabViewModel(
+            _settings,
+            _connectorRegistry,
+            _connectorClient,
+            _userSettingsStore,
+            "settings",
+            true);
     }
 
     private WorkspaceTabViewModel CreateTagAdminTab(WorkspaceTabContext _, object? __) =>
@@ -84,10 +109,6 @@ public sealed class WorkspaceTabFactory : IWorkspaceTabFactory
                 typeof(ContentEditorTabViewModel),
                 content.Id,
                 new ContentVersionEditorParameter(content, details!.AddOrUpdateVersion))),
-            version => context.OpenTab(new WorkspaceTabRequest(
-                typeof(ContentVersionDetailsViewModel),
-                version.Id,
-                version)),
             () => context.CloseTab(details!),
             (name, description, categoryId) =>
             {
@@ -97,11 +118,6 @@ public sealed class WorkspaceTabFactory : IWorkspaceTabFactory
             });
         return details;
     }
-
-    private ContentVersionDetailsViewModel CreateContentVersionDetailsTab(
-        WorkspaceTabContext _,
-        object? parameter) =>
-        new(GetRequiredParameter<ContentVersionDto>(parameter), _revExApiService);
 
     private static T GetRequiredParameter<T>(object? parameter) where T : class =>
         parameter as T

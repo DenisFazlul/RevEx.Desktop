@@ -7,6 +7,7 @@ using RevEx.Desktop.Services;
 using RevEx.Desktop.ViewModels.Catalog;
 using RevEx.Desktop.ViewModels.Categories;
 using RevEx.Desktop.ViewModels.Contents;
+using RevEx.Desktop.ViewModels.Families;
 using RevEx.Desktop.ViewModels.MainMenu;
 using RevEx.Desktop.ViewModels.Settings;
 using RevEx.Desktop.ViewModels.Tags;
@@ -22,6 +23,7 @@ public sealed class MainMenuProvider : IMainMenuProvider
     [
         WorkspaceTabDescriptor.Create<CatalogTabViewModel>("Каталог", "⌕"),
         WorkspaceTabDescriptor.Create<ContentEditorTabViewModel>("Добавить контент", "+"),
+        WorkspaceTabDescriptor.Create<FamilyIntegrationTabViewModel>("Revit-семейства", "R"),
         WorkspaceTabDescriptor.Create<CategoryAdminTabViewModel>("Категории", "▦"),
         WorkspaceTabDescriptor.Create<TagAdminTabViewModel>("Группы тегов", "#"),
         WorkspaceTabDescriptor.Create<SettingsTabViewModel>("Настройки", "⚙")

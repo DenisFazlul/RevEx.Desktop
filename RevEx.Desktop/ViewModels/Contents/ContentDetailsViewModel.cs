@@ -16,7 +16,6 @@ namespace RevEx.Desktop.ViewModels.Contents;
 public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
 {
     private readonly Action _openVersionEditor;
-    private readonly Action<ContentVersionDto> _openVersionDetails;
     private readonly Action _close;
     private readonly Action<string, string, int> _contentUpdated;
     private readonly IRevExApiService _apiService;
@@ -37,14 +36,35 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
     [ObservableProperty] private string _description;
     [ObservableProperty] private string _categoryName = string.Empty;
     [ObservableProperty] private Bitmap? _previewImage;
+    [ObservableProperty] private ContentVersionDto? _selectedVersion;
+    [ObservableProperty] private FileRoleOption _selectedFileRole;
+    [ObservableProperty] private bool _isLoadingVersion;
+    [ObservableProperty] private bool _isSavingVersionFile;
+    [ObservableProperty] private string? _versionErrorMessage;
+    [ObservableProperty] private string? _versionMessage;
 
     public int Id { get; }
     public ObservableCollection<ContentVersionDto> Versions { get; } = [];
+    public ObservableCollection<ContentVersionFileItemViewModel> VersionFiles { get; } = [];
     public ObservableCollection<ContentTagItemViewModel> Tags { get; } = [];
+    public IReadOnlyList<FileRoleOption> FileRoles { get; } =
+    [
+        new("primary", "Основной RFA"),
+        new("type-catalog", "Каталог типов TXT"),
+        new("lookup-table", "Таблица поиска CSV"),
+        new("attachment", "Вложение")
+    ];
     public IReadOnlyCollection<TagDto> AvailableTags =>
         _allTags.Where(tag => Tags.All(assigned => assigned.Id != tag.Id)).OrderBy(tag => tag.Name).ToArray();
     public bool HasVersions => Versions.Count > 0;
     public bool HasNoVersions => !HasVersions && !IsLoading;
+    public bool HasSelectedVersion => SelectedVersion is not null;
+    public bool HasVersionFiles => VersionFiles.Count > 0;
+    public bool HasNoVersionFiles => HasSelectedVersion && !HasVersionFiles && !IsLoadingVersion;
+    public bool IsVersionBusy => IsLoadingVersion || IsSavingVersionFile;
+    public string SelectedVersionDateText => SelectedVersion?.Date.ToLocalTime().ToString("dd.MM.yyyy HH:mm") ?? string.Empty;
+    public string SelectedVersionCreatedAtText => SelectedVersion?.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm") ?? string.Empty;
+    public string SelectedVersionUpdatedAtText => SelectedVersion?.UpdatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm") ?? string.Empty;
     public bool HasTags => Tags.Count > 0;
     public bool HasNoTags => !HasTags && !IsLoading;
     public bool HasPreview => PreviewImage is not null;
@@ -54,7 +74,6 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         ContentItemViewModel content,
         IRevExApiService apiService,
         Action openVersionEditor,
-        Action<ContentVersionDto> openVersionDetails,
         Action close,
         Action<string, string, int> contentUpdated)
         : base(
@@ -64,12 +83,12 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
     {
         _apiService = apiService;
         _openVersionEditor = openVersionEditor;
-        _openVersionDetails = openVersionDetails;
         _close = close;
         _contentUpdated = contentUpdated;
         Id = content.Id;
         _name = content.Name;
         _description = content.Description;
+        _selectedFileRole = FileRoles[0];
     }
 
     public override async Task ActivateAsync()
@@ -89,6 +108,7 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
                 ?? throw new HttpRequestException($"Контент {Id} не найден.");
             ApplyContent(content, await versionsTask, await tagsTask, await categoriesTask);
             await LoadPreviewAsync(content.PreviewFileId);
+            await SelectInitialVersionAsync();
 
             NotifyCollectionStateChanged();
         }
@@ -142,9 +162,90 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
 
         Versions.Insert(0, version);
         NotifyCollectionStateChanged();
+        _ = SelectVersionAsync(version);
     }
 
-    public void OpenVersion(ContentVersionDto version) => _openVersionDetails(version);
+    [RelayCommand]
+    private async Task SelectVersionAsync(ContentVersionDto version)
+    {
+        try
+        {
+            IsLoadingVersion = true;
+            VersionErrorMessage = null;
+            VersionMessage = null;
+            SelectedVersion = version;
+            var files = await _apiService.GetContentFilesAsync();
+            ReplaceVersionFiles(files.Where(item => item.ContentVersionId == version.Id));
+        }
+        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
+        {
+            VersionFiles.Clear();
+            VersionErrorMessage = $"Не удалось загрузить файлы версии: {exception.Message}";
+        }
+        finally
+        {
+            IsLoadingVersion = false;
+            NotifyVersionStateChanged();
+        }
+    }
+
+    public async Task AddVersionFileAsync(string path, string fileName)
+    {
+        if (SelectedVersion is null)
+            return;
+
+        try
+        {
+            IsSavingVersionFile = true;
+            VersionErrorMessage = null;
+            VersionMessage = null;
+            await using var stream = File.OpenRead(path);
+            var updated = await _apiService.UploadContentVersionFileAsync(
+                SelectedVersion.Id, stream, fileName, SelectedFileRole.Value);
+            ReplaceVersion(updated);
+            await SelectVersionAsync(updated);
+            VersionMessage = "Файл добавлен в версию.";
+        }
+        catch (Exception exception) when (exception is HttpRequestException or IOException or UnauthorizedAccessException)
+        {
+            VersionErrorMessage = $"Не удалось добавить файл: {exception.Message}";
+        }
+        finally
+        {
+            IsSavingVersionFile = false;
+            NotifyVersionStateChanged();
+        }
+    }
+
+    public async Task DeleteVersionFileAsync(ContentVersionFileItemViewModel file)
+    {
+        if (SelectedVersion is null)
+            return;
+
+        try
+        {
+            IsSavingVersionFile = true;
+            VersionErrorMessage = null;
+            VersionMessage = null;
+            await _apiService.DeleteContentVersionFileAsync(SelectedVersion.Id, file.Id);
+            VersionFiles.Remove(file);
+            SelectedVersion = SelectedVersion with
+            {
+                FileIds = SelectedVersion.FileIds.Where(id => id != file.Id).ToArray()
+            };
+            ReplaceVersion(SelectedVersion);
+            VersionMessage = "Файл удалён из версии.";
+        }
+        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
+        {
+            VersionErrorMessage = $"Не удалось удалить файл: {exception.Message}";
+        }
+        finally
+        {
+            IsSavingVersionFile = false;
+            NotifyVersionStateChanged();
+        }
+    }
 
     public async Task UpdatePreviewAsync(string path, string fileName)
     {
@@ -314,6 +415,9 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
 
     partial void OnIsLoadingChanged(bool value) => NotifyCollectionStateChanged();
     partial void OnPreviewImageChanged(Bitmap? value) => NotifyCollectionStateChanged();
+    partial void OnSelectedVersionChanged(ContentVersionDto? value) => NotifyVersionStateChanged();
+    partial void OnIsLoadingVersionChanged(bool value) => NotifyVersionStateChanged();
+    partial void OnIsSavingVersionFileChanged(bool value) => NotifyVersionStateChanged();
 
     private async Task LoadPreviewAsync(int? fileId)
     {
@@ -358,6 +462,39 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
             Versions.Add(version);
     }
 
+    private async Task SelectInitialVersionAsync()
+    {
+        var selected = SelectedVersion is null
+            ? Versions.FirstOrDefault()
+            : Versions.FirstOrDefault(item => item.Id == SelectedVersion.Id) ?? Versions.FirstOrDefault();
+
+        if (selected is not null)
+            await SelectVersionAsync(selected);
+        else
+        {
+            SelectedVersion = null;
+            VersionFiles.Clear();
+            NotifyVersionStateChanged();
+        }
+    }
+
+    private void ReplaceVersion(ContentVersionDto version)
+    {
+        var existing = Versions.FirstOrDefault(item => item.Id == version.Id);
+        if (existing is null)
+            return;
+
+        var index = Versions.IndexOf(existing);
+        Versions[index] = version;
+    }
+
+    private void ReplaceVersionFiles(IEnumerable<ContentFileDto> files)
+    {
+        VersionFiles.Clear();
+        foreach (var file in files.OrderBy(item => item.Role).ThenBy(item => item.OriginalFileName))
+            VersionFiles.Add(new ContentVersionFileItemViewModel(file));
+    }
+
     private void ReplaceTags(IReadOnlyCollection<int> assignedTagIds)
     {
         Tags.Clear();
@@ -378,6 +515,17 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         OnPropertyChanged(nameof(HasNoPreview));
     }
 
+    private void NotifyVersionStateChanged()
+    {
+        OnPropertyChanged(nameof(HasSelectedVersion));
+        OnPropertyChanged(nameof(HasVersionFiles));
+        OnPropertyChanged(nameof(HasNoVersionFiles));
+        OnPropertyChanged(nameof(IsVersionBusy));
+        OnPropertyChanged(nameof(SelectedVersionDateText));
+        OnPropertyChanged(nameof(SelectedVersionCreatedAtText));
+        OnPropertyChanged(nameof(SelectedVersionUpdatedAtText));
+    }
+
     private UpdateContentDto CreateUpdateRequest(
         string name,
         string description,
@@ -391,4 +539,33 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
             ContentStatusId = _content!.ContentStatusId,
             TagIds = tagIds
         };
+}
+
+public sealed record FileRoleOption(string Value, string Name);
+
+public sealed class ContentVersionFileItemViewModel
+{
+    public int Id { get; }
+    public string Name { get; }
+    public string RoleName { get; }
+    public string SizeText { get; }
+
+    public ContentVersionFileItemViewModel(ContentFileDto file)
+    {
+        Id = file.Id;
+        Name = file.OriginalFileName;
+        RoleName = file.Role switch
+        {
+            "primary" => "Основной RFA",
+            "type-catalog" => "Каталог типов",
+            "lookup-table" => "Таблица поиска",
+            _ => "Вложение"
+        };
+        SizeText = file.SizeBytes switch
+        {
+            < 1024 => $"{file.SizeBytes} Б",
+            < 1024 * 1024 => $"{file.SizeBytes / 1024d:0.#} КБ",
+            _ => $"{file.SizeBytes / (1024d * 1024d):0.#} МБ"
+        };
+    }
 }

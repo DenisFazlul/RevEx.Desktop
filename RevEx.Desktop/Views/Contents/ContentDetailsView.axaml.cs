@@ -1,5 +1,4 @@
 using Avalonia.Controls;
-using Avalonia.Input;
 using Avalonia.Platform.Storage;
 using System.Collections.Generic;
 using System.Linq;
@@ -97,13 +96,6 @@ public partial class ContentDetailsView : UserControl
             await viewModel.UpdateContentDescriptionAsync(description);
     }
 
-    private void OnVersionDoubleTapped(object? sender, TappedEventArgs eventArgs)
-    {
-        if (DataContext is ContentDetailsViewModel viewModel &&
-            sender is Control { DataContext: ContentVersionDto version })
-            viewModel.OpenVersion(version);
-    }
-
     private async void OnEditCategoryClick(object? sender, Avalonia.Interactivity.RoutedEventArgs eventArgs)
     {
         if (DataContext is not ContentDetailsViewModel viewModel ||
@@ -114,5 +106,45 @@ public partial class ContentDetailsView : UserControl
         var category = await selector.ShowDialog<CategoryDto?>(owner);
         if (category is not null)
             await viewModel.UpdateContentCategoryAsync(category);
+    }
+
+    private async void OnAddVersionFileClick(object? sender, Avalonia.Interactivity.RoutedEventArgs eventArgs)
+    {
+        var topLevel = TopLevel.GetTopLevel(this);
+        if (topLevel?.StorageProvider is null || DataContext is not ContentDetailsViewModel viewModel)
+            return;
+
+        var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "Выберите файл версии",
+            AllowMultiple = false,
+            FileTypeFilter = new List<FilePickerFileType>
+            {
+                new("Файлы версии") { Patterns = ["*.rfa", "*.txt", "*.csv", "*.pdf"] }
+            }
+        });
+        var file = files.FirstOrDefault();
+        if (file is not null)
+            await viewModel.AddVersionFileAsync(file.Path.LocalPath, file.Name);
+    }
+
+    private async void OnVersionClick(object? sender, Avalonia.Interactivity.RoutedEventArgs eventArgs)
+    {
+        if (sender is Control { DataContext: ContentVersionDto version } &&
+            DataContext is ContentDetailsViewModel viewModel)
+            await viewModel.SelectVersionCommand.ExecuteAsync(version);
+    }
+
+    private async void OnDeleteVersionFileClick(object? sender, Avalonia.Interactivity.RoutedEventArgs eventArgs)
+    {
+        if (sender is not Control { DataContext: ContentVersionFileItemViewModel file } ||
+            DataContext is not ContentDetailsViewModel viewModel ||
+            TopLevel.GetTopLevel(this) is not Window owner)
+            return;
+
+        var confirmation = new DeleteConfirmationWindow(
+            $"Файл «{file.Name}» будет удалён из версии. Продолжить?");
+        if (await confirmation.ShowDialog<bool>(owner))
+            await viewModel.DeleteVersionFileAsync(file);
     }
 }

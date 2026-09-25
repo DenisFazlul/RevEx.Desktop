@@ -362,6 +362,25 @@ public sealed class MockRevExApiService : IRevExApiService
         return Task.FromResult(version);
     }
 
+    public Task DeleteContentVersionFileAsync(
+        int versionId,
+        int fileId,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var index = ContentVersions.FindIndex(item => item.Id == versionId);
+        if (index < 0 || ContentFiles.All(item => item.Id != fileId || item.ContentVersionId != versionId))
+            throw new HttpRequestException($"File {fileId} was not found in version {versionId}.");
+
+        ContentFiles.RemoveAll(item => item.Id == fileId);
+        ContentVersions[index] = ContentVersions[index] with
+        {
+            FileIds = ContentVersions[index].FileIds.Where(id => id != fileId).ToArray(),
+            UpdatedAt = DateTimeOffset.UtcNow
+        };
+        return Task.CompletedTask;
+    }
+
     public Task<IReadOnlyCollection<ContentFileDto>> GetContentFilesAsync(
         CancellationToken cancellationToken = default) =>
         FromCollection(ContentFiles, cancellationToken);

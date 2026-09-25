@@ -10,9 +10,12 @@ using RevEx.Desktop.Core.Interfaces;
 using RevEx.Desktop.Core.Services;
 using RevEx.Desktop.DI;
 using RevEx.Desktop.Navigation;
+using RevEx.Desktop.Services;
 using RevEx.Desktop.ViewModels;
 using RevEx.Desktop.Views;
 using RevEx.Desktop.Views.MainMenu;
+using RevEx.Desktop.Connectors;
+using RevEx.Configuration;
 
 namespace RevEx.Desktop;
 
@@ -40,6 +43,8 @@ public partial class App : Application
         {
             desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
             desktop.Startup += async (_, _) => await StartDesktopAsync(desktop);
+            desktop.Exit += (_, _) =>
+                Services.GetRequiredService<DesktopConnectorServer>().StopAsync().GetAwaiter().GetResult();
         }
 
         base.OnFrameworkInitializationCompleted();
@@ -49,6 +54,7 @@ public partial class App : Application
     {
         try
         {
+            await Services.GetRequiredService<DesktopConnectorServer>().StartAsync();
             var authenticationService = Services.GetRequiredService<IAuthenticationService>();
             await authenticationService.GetAccessTokenAsync();
 
@@ -73,6 +79,7 @@ public partial class App : Application
         var configuration = new ConfigurationBuilder()
             .SetBasePath(AppContext.BaseDirectory)
             .AddJsonFile("appsettings.json", optional: false)
+            .AddJsonFile(RevExSettingsPaths.UserSettingsFile, optional: true)
             .Build();
         return configuration;
     }
