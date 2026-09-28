@@ -93,17 +93,30 @@
 <main class="card">
     <div class="status" aria-hidden="true">✓</div>
     <h1>Авторизация завершена</h1>
-    <p>Вы успешно вошли в RevEx. Закройте это окно и вернитесь в приложение.</p>
-    <button type="button" onclick="closePage()">Закрыть окно</button>
+    <p>Вы успешно вошли в RevEx. Вернитесь в приложение после закрытия этой вкладки.</p>
+    <button id="close-button" type="button" onclick="closePage()">Закрыть вкладку</button>
     <div class="hint" id="hint" aria-live="polite"></div>
 </main>
 <script>
     function closePage() {
+        const button = document.getElementById('close-button');
+        const hint = document.getElementById('hint');
+
+        // Browsers may only allow scripts to close windows opened by another script.
+        // The _self call still works in some Safari versions, so try it before showing
+        // the platform-specific manual fallback.
+        window.open('', '_self');
         window.close();
+
         window.setTimeout(() => {
-            document.getElementById('hint').textContent =
-                'Если окно не закрылось, закройте его средствами браузера.';
-        }, 300);
+            const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform) ||
+                /Mac OS X/.test(navigator.userAgent);
+            hint.textContent = isMac
+                ? 'Safari запретил автоматическое закрытие. Нажмите ⌘W.'
+                : 'Браузер запретил автоматическое закрытие. Нажмите Ctrl+W.';
+            button.textContent = 'Закройте вкладку вручную';
+            button.disabled = true;
+        }, 250);
     }
 </script>
 </body>

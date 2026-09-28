@@ -43,22 +43,9 @@ public partial class App : Application
         {
             desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
             desktop.Startup += async (_, _) => await StartDesktopAsync(desktop);
-            desktop.Exit += (_, _) => StopConnectorServer();
         }
 
         base.OnFrameworkInitializationCompleted();
-    }
-
-    private static void StopConnectorServer()
-    {
-        try
-        {
-            Services.GetRequiredService<DesktopConnectorServer>().StopAsync().GetAwaiter().GetResult();
-        }
-        catch (Exception exception)
-        {
-            Console.Error.WriteLine($"Не удалось корректно остановить Connector API: {exception}");
-        }
     }
 
     private static async Task StartDesktopAsync(IClassicDesktopStyleApplicationLifetime desktop)
