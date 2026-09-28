@@ -65,6 +65,10 @@ public sealed class MainMenuProvider : IMainMenuProvider
         {
             await _authenticationService.LogoutAsync();
         }
+        catch (Exception exception)
+        {
+            Console.Error.WriteLine($"Не удалось отозвать OIDC-сессию при выходе: {exception}");
+        }
         finally
         {
             _applicationShutdownService.Shutdown();

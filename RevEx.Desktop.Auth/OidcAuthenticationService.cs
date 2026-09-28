@@ -112,10 +112,10 @@ public sealed class OidcAuthenticationService : IAuthenticationService
                     $"OIDC refresh token revocation failed ({(int)response.StatusCode}): {details}");
             }
 
-            ClearTokens();
         }
         finally
         {
+            ClearTokens();
             _loginLock.Release();
         }
     }
