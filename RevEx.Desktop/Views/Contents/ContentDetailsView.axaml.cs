@@ -160,6 +160,6 @@ public partial class ContentDetailsView : UserControl
         var selector = new ConnectorSelectionWindow(viewModel.GetAvailableConnectors());
         var connector = await selector.ShowDialog<RevEx.Connector.Contracts.ConnectorDescriptor?>(owner);
         if (connector is not null)
-            await viewModel.LoadVersionIntoProjectAsync(connector);
+            viewModel.QueueVersionForLoading(connector);
     }
 }

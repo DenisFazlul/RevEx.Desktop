@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Net;
 using System.Text;
+using System.Text.Json;
 using Duende.IdentityModel.Client;
 using Duende.IdentityModel.OidcClient;
 using RevEx.Desktop.Core.Interfaces;
@@ -21,6 +22,11 @@ public sealed class OidcAuthenticationService : IAuthenticationService
     private string? _accessToken;
     private string? _refreshToken;
     private DateTimeOffset _accessTokenExpiration;
+    private IReadOnlySet<string> _roles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+    public IReadOnlySet<string> Roles => _roles;
+
+    public bool IsInRole(string role) => _roles.Contains(role);
 
     public OidcAuthenticationService(
         IAppSettings settings,
@@ -122,6 +128,7 @@ public sealed class OidcAuthenticationService : IAuthenticationService
         _accessToken = null;
         _refreshToken = null;
         _accessTokenExpiration = default;
+        _roles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
     }
 
     private async Task<bool> TryRefreshTokenAsync(CancellationToken cancellationToken)
@@ -138,6 +145,7 @@ public sealed class OidcAuthenticationService : IAuthenticationService
         }
 
         _accessToken = result.AccessToken;
+        _roles = ReadRoles(result.AccessToken);
         _refreshToken = result.RefreshToken ?? _refreshToken;
         _accessTokenExpiration = result.AccessTokenExpiration;
         return true;
@@ -167,6 +175,7 @@ public sealed class OidcAuthenticationService : IAuthenticationService
 
             _refreshToken = result.RefreshToken;
             _accessTokenExpiration = result.AccessTokenExpiration;
+            _roles = ReadRoles(result.AccessToken);
             return result.AccessToken;
         }
         finally
@@ -221,5 +230,33 @@ public sealed class OidcAuthenticationService : IAuthenticationService
         using var reader = new StreamReader(stream, Encoding.UTF8);
 
         return reader.ReadToEnd();
+    }
+
+    private static IReadOnlySet<string> ReadRoles(string accessToken)
+    {
+        var parts = accessToken.Split('.');
+        if (parts.Length != 3)
+            return new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        try
+        {
+            var payload = parts[1].Replace('-', '+').Replace('_', '/');
+            payload = payload.PadRight(payload.Length + (4 - payload.Length % 4) % 4, '=');
+            using var document = JsonDocument.Parse(Convert.FromBase64String(payload));
+            if (!document.RootElement.TryGetProperty("roles", out var roles) ||
+                roles.ValueKind != JsonValueKind.Array)
+                return new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            return roles.EnumerateArray()
+                .Where(item => item.ValueKind == JsonValueKind.String)
+                .Select(item => item.GetString())
+                .Where(role => !string.IsNullOrWhiteSpace(role))
+                .Select(role => role!)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        }
+        catch (Exception exception) when (exception is FormatException or JsonException)
+        {
+            return new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        }
     }
 }

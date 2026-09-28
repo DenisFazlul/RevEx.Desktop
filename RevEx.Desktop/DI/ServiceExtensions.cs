@@ -13,6 +13,7 @@ using RevEx.Desktop.Views.MainMenu;
 using RevEx.Connector.Contracts;
 using RevEx.Desktop.Connectors;
 using RevEx.Configuration;
+using RevEx.LoadingQueue;
 
 namespace RevEx.Desktop.DI;
 
@@ -28,8 +29,10 @@ public static class ServiceExtensions
         services.AddSingleton<IAppSettings>(appSettings);
         services.AddRevExtApiConnection(appSettings);
         services.AddSingleton<IConnectorRegistry, ConnectorRegistry>();
+        services.AddSingleton<IFileLoadingQueue, FileLoadingQueue>();
         services.AddSingleton(provider => new DesktopConnectorServer(
             provider.GetRequiredService<IConnectorRegistry>(),
+            provider.GetRequiredService<IFileLoadingQueue>(),
             new Uri(appSettings.ConnectorRegistrationAddress)));
         services.AddHttpClient<IConnectorClient, ConnectorClient>(httpClient =>
             httpClient.Timeout = TimeSpan.FromMinutes(2));

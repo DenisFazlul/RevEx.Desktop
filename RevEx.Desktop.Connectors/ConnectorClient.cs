@@ -15,42 +15,17 @@ public sealed class ConnectorClient(HttpClient httpClient) : IConnectorClient
             ?? throw new HttpRequestException("Connector вернул пустой ответ health.");
     }
 
-    public async Task<InspectFamilyResponse> InspectAsync(
-        ConnectorDescriptor connector,
-        string path,
-        CancellationToken cancellationToken = default)
-    {
-        await GetHealthAsync(connector, cancellationToken);
-        return await PostAsync<InspectFamilyRequest, InspectFamilyResponse>(
-            connector,
-            "api/v1/families/inspect",
-            new InspectFamilyRequest(path),
-            cancellationToken);
-    }
-
-    public async Task<LoadFamilyResponse> LoadAsync(
-        ConnectorDescriptor connector,
-        string path,
-        CancellationToken cancellationToken = default)
-    {
-        await GetHealthAsync(connector, cancellationToken);
-        return await PostAsync<LoadFamilyRequest, LoadFamilyResponse>(
-            connector,
-            "api/v1/projects/active/families/load",
-            new LoadFamilyRequest(path),
-            cancellationToken);
-    }
-
     public async Task<LoadContentVersionResponse> LoadContentVersionAsync(
         ConnectorDescriptor connector,
-        IReadOnlyCollection<string> paths,
+        IReadOnlyCollection<ContentVersionLoadFile> files,
+        Uri statusCallbackAddress,
         CancellationToken cancellationToken = default)
     {
         await GetHealthAsync(connector, cancellationToken);
         return await PostAsync<LoadContentVersionRequest, LoadContentVersionResponse>(
             connector,
             "api/v1/projects/active/content-versions/load",
-            new LoadContentVersionRequest(paths),
+            new LoadContentVersionRequest(files, statusCallbackAddress),
             cancellationToken);
     }
 

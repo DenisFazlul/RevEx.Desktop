@@ -6,18 +6,9 @@ public interface IConnectorClient
         ConnectorDescriptor connector,
         CancellationToken cancellationToken = default);
 
-    Task<InspectFamilyResponse> InspectAsync(
-        ConnectorDescriptor connector,
-        string path,
-        CancellationToken cancellationToken = default);
-
-    Task<LoadFamilyResponse> LoadAsync(
-        ConnectorDescriptor connector,
-        string path,
-        CancellationToken cancellationToken = default);
-
     Task<LoadContentVersionResponse> LoadContentVersionAsync(
         ConnectorDescriptor connector,
-        IReadOnlyCollection<string> paths,
+        IReadOnlyCollection<ContentVersionLoadFile> files,
+        Uri statusCallbackAddress,
         CancellationToken cancellationToken = default);
 }

@@ -7,10 +7,11 @@ using RevEx.Desktop.Services;
 using RevEx.Desktop.ViewModels.Catalog;
 using RevEx.Desktop.ViewModels.Categories;
 using RevEx.Desktop.ViewModels.Contents;
-using RevEx.Desktop.ViewModels.Families;
 using RevEx.Desktop.ViewModels.MainMenu;
 using RevEx.Desktop.ViewModels.Settings;
 using RevEx.Desktop.ViewModels.Tags;
+using RevEx.Desktop.ViewModels.Loading;
+using RevEx.Desktop.Core.Services;
 
 namespace RevEx.Desktop.Navigation;
 
@@ -18,16 +19,6 @@ public sealed class MainMenuProvider : IMainMenuProvider
 {
     private readonly IAuthenticationService _authenticationService;
     private readonly IApplicationShutdownService _applicationShutdownService;
-
-    private readonly IReadOnlyList<WorkspaceTabDescriptor> _items =
-    [
-        WorkspaceTabDescriptor.Create<CatalogTabViewModel>("Каталог", "⌕"),
-        WorkspaceTabDescriptor.Create<ContentEditorTabViewModel>("Добавить контент", "+"),
-        WorkspaceTabDescriptor.Create<FamilyIntegrationTabViewModel>("Revit-семейства", "R"),
-        WorkspaceTabDescriptor.Create<CategoryAdminTabViewModel>("Категории", "▦"),
-        WorkspaceTabDescriptor.Create<TagAdminTabViewModel>("Группы тегов", "#"),
-        WorkspaceTabDescriptor.Create<SettingsTabViewModel>("Настройки", "⚙")
-    ];
 
     public MainMenuProvider(
         IAuthenticationService authenticationService,
@@ -39,7 +30,23 @@ public sealed class MainMenuProvider : IMainMenuProvider
 
     public MainMenuViewModel Create(Action<WorkspaceTabRequest> openTab)
     {
-        var links = _items.Select(item => new BtnLink(
+        var items = new List<WorkspaceTabDescriptor>
+        {
+            WorkspaceTabDescriptor.Create<CatalogTabViewModel>("Каталог", "⌕")
+        };
+        if (CanEditContent())
+        {
+            items.Add(WorkspaceTabDescriptor.Create<ContentEditorTabViewModel>("Добавить контент", "+"));
+            items.Add(WorkspaceTabDescriptor.Create<LoadingQueueTabViewModel>("Загрузки", "⇩"));
+        }
+        if (_authenticationService.IsInRole(RevExRoles.Administrator))
+        {
+            items.Add(WorkspaceTabDescriptor.Create<CategoryAdminTabViewModel>("Категории", "▦"));
+            items.Add(WorkspaceTabDescriptor.Create<TagAdminTabViewModel>("Группы тегов", "#"));
+        }
+        items.Add(WorkspaceTabDescriptor.Create<SettingsTabViewModel>("Настройки", "⚙"));
+
+        var links = items.Select(item => new BtnLink(
             item.Title,
             item.Symbol,
             new WorkspaceTabRequest(item.TabType),
@@ -47,6 +54,10 @@ public sealed class MainMenuProvider : IMainMenuProvider
 
         return new MainMenuViewModel(links, LogoutAsync);
     }
+
+    private bool CanEditContent() =>
+        _authenticationService.IsInRole(RevExRoles.Moderator) ||
+        _authenticationService.IsInRole(RevExRoles.Administrator);
 
     private async Task LogoutAsync()
     {

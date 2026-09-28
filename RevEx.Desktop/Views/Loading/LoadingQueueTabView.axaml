@@ -1,0 +1,39 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RevEx.Desktop.ViewModels.Loading"
+             x:Class="RevEx.Desktop.Views.Loading.LoadingQueueTabView"
+             x:DataType="vm:LoadingQueueTabViewModel">
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+        <Grid Margin="32,30" RowDefinitions="Auto,22,*" MaxWidth="960"
+              HorizontalAlignment="Center">
+            <HeaderedContentControl Theme="{StaticResource PageHeaderTheme}"
+                                    Header="Загрузки"
+                                    Content="Состояние передачи файлов в активный проект Connector" />
+
+            <Border Grid.Row="2" Classes="card section-card">
+                <StackPanel Spacing="14">
+                    <TextBlock IsVisible="{Binding HasNoItems}"
+                               Text="Очередь загрузки пока пуста."
+                               Foreground="{StaticResource TextSecondaryBrush}" />
+                    <ItemsControl ItemsSource="{Binding Items}" IsVisible="{Binding HasItems}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:LoadingQueueItemViewModel">
+                                <Border Classes="value-box" Margin="0,0,0,8">
+                                    <Grid ColumnDefinitions="*,20,190,20,150" RowDefinitions="Auto,5,Auto">
+                                        <TextBlock Text="{Binding FileName}" FontWeight="SemiBold"
+                                                   TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Grid.Column="2" Text="{Binding StatusText}" />
+                                        <TextBlock Grid.Column="4" Classes="caption"
+                                                   Text="{Binding UpdatedAtText}" />
+                                        <TextBlock Grid.Row="2" Grid.ColumnSpan="5" Classes="caption"
+                                                   Text="{Binding Id}" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

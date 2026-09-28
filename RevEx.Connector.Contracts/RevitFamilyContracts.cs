@@ -1,18 +1,21 @@
 namespace RevEx.Connector.Contracts;
 
-public sealed record InspectFamilyRequest(string Path);
+public enum FileLoadingStatus
+{
+    Accepted,
+    Started,
+    Completed
+}
 
-public sealed record InspectFamilyResponse(FamilyInfoDto Family);
+public sealed record ContentVersionLoadFile(Guid Id, string Name, string Path);
 
-public sealed record LoadFamilyRequest(string Path);
-
-public sealed record LoadFamilyResponse(bool Success, FamilyInfoDto Family);
-
-public sealed record LoadContentVersionRequest(IReadOnlyCollection<string> Paths);
+public sealed record LoadContentVersionRequest(
+    IReadOnlyCollection<ContentVersionLoadFile> Files,
+    Uri StatusCallbackAddress);
 
 public sealed record LoadContentVersionResponse(bool Success, int LoadedFileCount);
 
-public sealed record FamilyInfoDto(string Name, string Category);
+public sealed record FileLoadingStatusUpdate(Guid Id, FileLoadingStatus Status);
 
 public sealed record RevitApiErrorResponse(RevitApiError Error);
 

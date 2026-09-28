@@ -1,5 +1,6 @@
 using RevEx.Connector.Contracts;
 using RevEx.Connector.Host;
+using System.Net.Http.Json;
 
 await using var connector = new ConnectorHost(new ConnectorHostOptions(
     "Connector Mock",
@@ -7,35 +8,32 @@ await using var connector = new ConnectorHost(new ConnectorHostOptions(
     "1.0",
     ConnectorHostOptions.DefaultDesktopRegistrationAddress,
     "Mock Project.rvt"));
+using var statusClient = new HttpClient();
 
-connector.InspectRequested += (request, _) =>
+connector.ContentVersionLoadRequested += async (request, cancellationToken) =>
 {
-    Validate(request.Path);
-    return Task.FromResult(new InspectFamilyResponse(CreateFamilyInfo(request.Path)));
-};
-
-connector.LoadRequested += (request, _) =>
-{
-    Validate(request.Path);
-    return Task.FromResult(new LoadFamilyResponse(true, CreateFamilyInfo(request.Path)));
-};
-
-connector.ContentVersionLoadRequested += (request, _) =>
-{
-    if (request.Paths.Count == 0)
+    if (request.Files.Count == 0)
         throw new ArgumentException("Список файлов версии пуст.");
 
-    foreach (var path in request.Paths)
+    foreach (var file in request.Files)
     {
-        if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
-            throw new FileNotFoundException("Файл версии не найден.", path);
+        if (file.Id == Guid.Empty || string.IsNullOrWhiteSpace(file.Name))
+            throw new ArgumentException("Файл версии не содержит идентификатор или имя.");
+        if (string.IsNullOrWhiteSpace(file.Path) || !File.Exists(file.Path))
+            throw new FileNotFoundException("Файл версии не найден.", file.Path);
+
+        await SendStatusAsync(
+            statusClient,
+            request.StatusCallbackAddress,
+            file.Id,
+            FileLoadingStatus.Accepted,
+            cancellationToken);
     }
 
-    Console.WriteLine($"Mock-загрузка в проект: {request.Paths.Count} файл(ов)");
-    foreach (var path in request.Paths)
-        Console.WriteLine($"  {path}");
+    Console.WriteLine($"Mock принял загрузку: {request.Files.Count} файл(ов)");
+    _ = SimulateLoadingAsync(statusClient, request);
 
-    return Task.FromResult(new LoadContentVersionResponse(true, request.Paths.Count));
+    return new LoadContentVersionResponse(true, request.Files.Count);
 };
 
 connector.PingReceived += (_, _) =>
@@ -60,31 +58,47 @@ catch (OperationCanceledException)
     // Штатное завершение: await using вызовет unregister и остановит HTTP Host.
 }
 
-static void Validate(string? path)
+static async Task SimulateLoadingAsync(HttpClient client, LoadContentVersionRequest request)
 {
-    if (string.IsNullOrWhiteSpace(path))
-        throw new ArgumentException("Путь к семейству не указан.");
-    if (!string.Equals(Path.GetExtension(path), ".rfa", StringComparison.OrdinalIgnoreCase))
-        throw new ArgumentException("Можно обрабатывать только файлы *.rfa.");
+    try
+    {
+        foreach (var file in request.Files)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(13));
+            await SendStatusAsync(
+                client,
+                request.StatusCallbackAddress,
+                file.Id,
+                FileLoadingStatus.Started,
+                CancellationToken.None);
+            Console.WriteLine($"Начата загрузка: {file.Name}");
+
+            await Task.Delay(TimeSpan.FromSeconds(13));
+            await SendStatusAsync(
+                client,
+                request.StatusCallbackAddress,
+                file.Id,
+                FileLoadingStatus.Completed,
+                CancellationToken.None);
+            Console.WriteLine($"Загрузка завершена: {file.Name}");
+        }
+    }
+    catch (Exception exception)
+    {
+        Console.Error.WriteLine($"Не удалось передать статус загрузки: {exception.Message}");
+    }
 }
 
-static FamilyInfoDto CreateFamilyInfo(string path)
+static async Task SendStatusAsync(
+    HttpClient client,
+    Uri callbackAddress,
+    Guid id,
+    FileLoadingStatus status,
+    CancellationToken cancellationToken)
 {
-    var normalizedPath = path.Replace('\\', '/');
-    var name = Path.GetFileNameWithoutExtension(normalizedPath);
-    return new FamilyInfoDto(name, GetMockCategory(name));
-}
-
-static string GetMockCategory(string familyName)
-{
-    if (familyName.Contains("door", StringComparison.OrdinalIgnoreCase) ||
-        familyName.Contains("двер", StringComparison.OrdinalIgnoreCase))
-        return "Doors";
-    if (familyName.Contains("window", StringComparison.OrdinalIgnoreCase) ||
-        familyName.Contains("окн", StringComparison.OrdinalIgnoreCase))
-        return "Windows";
-    if (familyName.Contains("chair", StringComparison.OrdinalIgnoreCase) ||
-        familyName.Contains("стул", StringComparison.OrdinalIgnoreCase))
-        return "Furniture";
-    return "Generic Models";
+    using var response = await client.PostAsJsonAsync(
+        callbackAddress,
+        new FileLoadingStatusUpdate(id, status),
+        cancellationToken);
+    response.EnsureSuccessStatusCode();
 }

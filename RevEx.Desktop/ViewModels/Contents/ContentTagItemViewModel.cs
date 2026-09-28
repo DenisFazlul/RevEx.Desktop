@@ -13,11 +13,16 @@ public partial class ContentTagItemViewModel : ViewModelBase
     public int Id { get; }
 
     public string Name { get; }
+    public bool CanEdit { get; }
 
-    public ContentTagItemViewModel(TagDto dto, Func<ContentTagItemViewModel, Task> remove)
+    public ContentTagItemViewModel(
+        TagDto dto,
+        Func<ContentTagItemViewModel, Task> remove,
+        bool canEdit = true)
     {
         Id = dto.Id;
         Name = dto.Name;
+        CanEdit = canEdit;
         _remove = remove;
     }
 

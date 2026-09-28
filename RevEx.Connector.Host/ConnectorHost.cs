@@ -17,8 +17,6 @@ public sealed class ConnectorHost(ConnectorHostOptions options) : IAsyncDisposab
     private WebApplication? _application;
     private readonly HttpClient _registrationClient = new();
 
-    public event Func<InspectFamilyRequest, CancellationToken, Task<InspectFamilyResponse>>? InspectRequested;
-    public event Func<LoadFamilyRequest, CancellationToken, Task<LoadFamilyResponse>>? LoadRequested;
     public event Func<LoadContentVersionRequest, CancellationToken, Task<LoadContentVersionResponse>>?
         ContentVersionLoadRequested;
     public event EventHandler? PingReceived;
@@ -39,26 +37,6 @@ public sealed class ConnectorHost(ConnectorHostOptions options) : IAsyncDisposab
         {
             PingReceived?.Invoke(this, EventArgs.Empty);
             return new ConnectorHealthResponse("ready", InstanceId, options.ActiveDocument);
-        });
-
-        app.MapPost("/api/v1/families/inspect", async (
-            InspectFamilyRequest request,
-            CancellationToken token) =>
-        {
-            var handler = InspectRequested;
-            return handler is null
-                ? Results.Problem("Обработчик чтения семейства не зарегистрирован.", statusCode: 503)
-                : Results.Ok(await handler(request, token));
-        });
-
-        app.MapPost("/api/v1/projects/active/families/load", async (
-            LoadFamilyRequest request,
-            CancellationToken token) =>
-        {
-            var handler = LoadRequested;
-            return handler is null
-                ? Results.Problem("Обработчик загрузки семейства не зарегистрирован.", statusCode: 503)
-                : Results.Ok(await handler(request, token));
         });
 
         app.MapPost("/api/v1/projects/active/content-versions/load", async (

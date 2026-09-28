@@ -3,10 +3,14 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using RevEx.Connector.Contracts;
+using RevEx.LoadingQueue;
 
 namespace RevEx.Desktop.Connectors;
 
-public sealed class DesktopConnectorServer(IConnectorRegistry registry, Uri address) : IAsyncDisposable
+public sealed class DesktopConnectorServer(
+    IConnectorRegistry registry,
+    IFileLoadingQueue loadingQueue,
+    Uri address) : IAsyncDisposable
 {
     private WebApplication? _application;
 
@@ -45,6 +49,24 @@ public sealed class DesktopConnectorServer(IConnectorRegistry registry, Uri addr
 
         app.MapDelete("/api/v1/connectors/{instanceId:guid}", (Guid instanceId) =>
             registry.Remove(instanceId) ? Results.NoContent() : Results.NotFound());
+
+        app.MapPost("/api/v1/loading/status", (FileLoadingStatusUpdate update) =>
+        {
+            try
+            {
+                loadingQueue.UpdateStatus(update.Id, update.Status);
+                return Results.NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return Results.NotFound();
+            }
+            catch (ArgumentOutOfRangeException exception)
+            {
+                return Results.BadRequest(new RevitApiErrorResponse(
+                    new RevitApiError("INVALID_LOADING_STATUS", exception.Message)));
+            }
+        });
 
         await app.StartAsync(cancellationToken);
         _application = app;

@@ -5,8 +5,6 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <ProjectReference Include="..\RevEx.Connector.Contracts\RevEx.Connector.Contracts.csproj" />
-    <ProjectReference Include="..\RevEx.LoadingQueue\RevEx.LoadingQueue.csproj" />
   </ItemGroup>
 </Project>

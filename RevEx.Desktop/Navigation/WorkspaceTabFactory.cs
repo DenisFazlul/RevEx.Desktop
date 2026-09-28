@@ -5,7 +5,6 @@ using RevEx.Desktop.Core.Domain;
 using RevEx.Desktop.ViewModels.Catalog;
 using RevEx.Desktop.ViewModels.Categories;
 using RevEx.Desktop.ViewModels.Contents;
-using RevEx.Desktop.ViewModels.Families;
 using RevEx.Desktop.ViewModels.Settings;
 using RevEx.Desktop.ViewModels.Tabs;
 using RevEx.Desktop.ViewModels.Tags;
@@ -13,6 +12,9 @@ using RevEx.Connector.Contracts;
 using RevEx.Desktop.Connectors;
 using RevEx.Desktop.Services;
 using RevEx.Configuration;
+using RevEx.LoadingQueue;
+using RevEx.Desktop.ViewModels.Loading;
+using RevEx.Desktop.Core.Services;
 
 namespace RevEx.Desktop.Navigation;
 
@@ -23,6 +25,8 @@ public sealed class WorkspaceTabFactory : IWorkspaceTabFactory
     private readonly IConnectorClient _connectorClient;
     private readonly IConnectorRegistry _connectorRegistry;
     private readonly IRevExUserSettingsStore _userSettingsStore;
+    private readonly IFileLoadingQueue _fileLoadingQueue;
+    private readonly IAuthenticationService _authenticationService;
     private readonly IReadOnlyDictionary<Type, Func<WorkspaceTabContext, object?, WorkspaceTabViewModel>> _factories;
 
     public WorkspaceTabFactory(
@@ -30,12 +34,16 @@ public sealed class WorkspaceTabFactory : IWorkspaceTabFactory
         IConnectorClient connectorClient,
         IConnectorRegistry connectorRegistry,
         IRevExUserSettingsStore userSettingsStore,
+        IFileLoadingQueue fileLoadingQueue,
+        IAuthenticationService authenticationService,
         IAppSettings settings)
     {
         _revExApiService = revExApiService;
         _connectorClient = connectorClient;
         _connectorRegistry = connectorRegistry;
         _userSettingsStore = userSettingsStore;
+        _fileLoadingQueue = fileLoadingQueue;
+        _authenticationService = authenticationService;
         _settings = settings;
         _factories = new Dictionary<Type, Func<WorkspaceTabContext, object?, WorkspaceTabViewModel>>
         {
@@ -43,14 +51,14 @@ public sealed class WorkspaceTabFactory : IWorkspaceTabFactory
             [typeof(CategoryAdminTabViewModel)] = CreateCategoryAdminTab,
             [typeof(ContentDetailsViewModel)] = CreateContentDetailsTab,
             [typeof(ContentEditorTabViewModel)] = CreateContentEditorTab,
-            [typeof(FamilyIntegrationTabViewModel)] = CreateFamilyIntegrationTab,
+            [typeof(LoadingQueueTabViewModel)] = CreateLoadingQueueTab,
             [typeof(TagAdminTabViewModel)] = CreateTagAdminTab,
             [typeof(SettingsTabViewModel)] = CreateSettings
         };
     }
 
-    private WorkspaceTabViewModel CreateFamilyIntegrationTab(WorkspaceTabContext _, object? __) =>
-        new FamilyIntegrationTabViewModel(_connectorClient, _connectorRegistry);
+    private WorkspaceTabViewModel CreateLoadingQueueTab(WorkspaceTabContext _, object? __) =>
+        new LoadingQueueTabViewModel(_fileLoadingQueue);
 
     private WorkspaceTabViewModel CreateSettings(WorkspaceTabContext arg1, object? arg2)
     {
@@ -107,6 +115,9 @@ public sealed class WorkspaceTabFactory : IWorkspaceTabFactory
             _revExApiService,
             _connectorClient,
             _connectorRegistry,
+            _fileLoadingQueue,
+            new Uri(new Uri(_settings.ConnectorRegistrationAddress), "api/v1/loading/status"),
+            CanEditContent(),
             () => context.OpenTab(new WorkspaceTabRequest(
                 typeof(ContentEditorTabViewModel),
                 content.Id,
@@ -120,6 +131,10 @@ public sealed class WorkspaceTabFactory : IWorkspaceTabFactory
             });
         return details;
     }
+
+    private bool CanEditContent() =>
+        _authenticationService.IsInRole(RevExRoles.Moderator) ||
+        _authenticationService.IsInRole(RevExRoles.Administrator);
 
     private static T GetRequiredParameter<T>(object? parameter) where T : class =>
         parameter as T
