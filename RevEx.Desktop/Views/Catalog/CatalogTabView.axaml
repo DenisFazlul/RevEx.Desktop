@@ -20,43 +20,39 @@
 
         <Grid Grid.Row="2" ColumnDefinitions="250,24,*">
             <Border Classes="side-panel">
-                <Grid RowDefinitions="Auto,14,*,18,Auto,14,*">
-                    <Grid ColumnDefinitions="*,Auto">
-                        <TextBlock Classes="h2" Text="Категории" />
-                        <Border Grid.Column="1" Width="28" Height="28" CornerRadius="8" Background="{StaticResource SurfaceBrush}">
-                            <PathIcon Width="14" Height="14" Foreground="{StaticResource TextSecondaryBrush}"
-                                      Data="M3,5 L15,5 M5,9 L13,9 M7,13 L11,13" />
-                        </Border>
-                    </Grid>
-                    <Grid Grid.Row="2">
-                        <ProgressBar IsVisible="{Binding IsLoading}" IsIndeterminate="True" VerticalAlignment="Top" />
-                        <ListBox Classes="clean-list category-list" ItemsSource="{Binding Categories}"
-                                 IsVisible="{Binding !IsLoading}">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate x:DataType="categoryVm:CategoryItemViewModel">
-                                    <CheckBox Padding="8" Content="{Binding Name}" IsChecked="{Binding IsSelected}"
-                                              HorizontalAlignment="Stretch" />
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-                    </Grid>
+                <TabControl Classes="catalog-filter-tabs">
+                    <TabItem Header="Категории">
+                        <Grid Margin="0,14,0,0">
+                            <ProgressBar IsVisible="{Binding IsLoading}" IsIndeterminate="True"
+                                         VerticalAlignment="Top" />
+                            <ListBox Classes="clean-list category-list" ItemsSource="{Binding Categories}"
+                                     IsVisible="{Binding !IsLoading}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate x:DataType="categoryVm:CategoryItemViewModel">
+                                        <CheckBox Padding="8" Content="{Binding Name}" IsChecked="{Binding IsSelected}"
+                                                  HorizontalAlignment="Stretch" />
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
+                    </TabItem>
 
-                    <Border Grid.Row="3" Classes="section-separator" />
-                    <Grid Grid.Row="4" ColumnDefinitions="*,Auto">
-                        <TextBlock Classes="h2" Text="Теги" />
-                        <TextBlock Grid.Column="1" Classes="caption" Text="необязательно" />
-                    </Grid>
-                    <Grid Grid.Row="6">
-                        <ListBox Classes="clean-list category-list" ItemsSource="{Binding Tags}">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate x:DataType="tagVm:TagFilterItemViewModel">
-                                    <CheckBox Padding="8" Content="{Binding Name}" IsChecked="{Binding IsSelected}"
-                                              HorizontalAlignment="Stretch" />
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-                    </Grid>
-                </Grid>
+                    <TabItem Header="Теги">
+                        <Grid Margin="0,14,0,0">
+                            <ProgressBar IsVisible="{Binding IsLoading}" IsIndeterminate="True"
+                                         VerticalAlignment="Top" />
+                            <ListBox Classes="clean-list category-list" ItemsSource="{Binding Tags}"
+                                     IsVisible="{Binding !IsLoading}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate x:DataType="tagVm:TagFilterItemViewModel">
+                                        <CheckBox Padding="8" Content="{Binding Name}" IsChecked="{Binding IsSelected}"
+                                                  HorizontalAlignment="Stretch" />
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
+                    </TabItem>
+                </TabControl>
             </Border>
 
             <Border Grid.Column="2" Classes="content-pane">
