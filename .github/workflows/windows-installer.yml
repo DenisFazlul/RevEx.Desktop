@@ -1,4 +1,4 @@
-name: Windows installer
+name: Desktop installers
 
 on:
   push:
@@ -63,5 +63,48 @@ jobs:
         with:
           name: RevEx-Windows-Installer-${{ env.APP_VERSION }}
           path: artifacts/installer/*.exe
+          if-no-files-found: error
+          retention-days: 90
+
+  macos-installer:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-15-intel
+            rid: osx-x64
+          - os: macos-15
+            rid: osx-arm64
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Set build version
+        run: echo "APP_VERSION=1.0.$GITHUB_RUN_NUMBER" >> "$GITHUB_ENV"
+      - name: Publish self-contained desktop
+        run: >-
+          dotnet publish RevEx.Desktop/RevEx.Desktop.csproj
+          -c Release -r ${{ matrix.rid }} --self-contained true
+          -p:Version="$APP_VERSION" -o artifacts/publish
+      - name: Build macOS application and installer
+        run: bash packaging/macos/build-installer.sh "$APP_VERSION" '${{ matrix.rid }}'
+      - name: Verify package installation
+        run: |
+          test ! -e /Applications/RevEx.app
+          sudo installer -pkg "artifacts/installer/RevEx-Setup-$APP_VERSION-${{ matrix.rid }}.pkg" -target /
+          test -x /Applications/RevEx.app/Contents/MacOS/RevEx.Desktop
+          test -f /Applications/RevEx.app/Contents/MacOS/appsettings.json
+          test -f /Applications/RevEx.app/Contents/MacOS/libcoreclr.dylib
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' /Applications/RevEx.app/Contents/Info.plist)" = "$APP_VERSION"
+          codesign --verify --deep --strict /Applications/RevEx.app
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RevEx-macOS-Installer-${{ matrix.rid }}-${{ env.APP_VERSION }}
+          path: artifacts/installer/*.pkg
           if-no-files-found: error
           retention-days: 90

@@ -1,13 +1,13 @@
 # Установщик Windows
 
 Каждый push в ветку `realese`, включая merge pull request, запускает workflow
-`Windows installer`. Результат — установочный `RevEx-Setup-1.0.N-win-x64.exe`,
+`Desktop installers`. Результат — установочный `RevEx-Setup-1.0.N-win-x64.exe`,
 где N — номер запуска workflow. Автообновления в приложение не добавляются.
 
 ## Как получить установщик
 
 1. Создайте pull request с целевой веткой `realese` и выполните merge.
-2. Откройте GitHub → Actions → Windows installer → соответствующий запуск.
+2. Откройте GitHub → Actions → Desktop installers → соответствующий запуск.
 3. После успешной сборки скачайте `RevEx-Windows-Installer-1.0.N` из Artifacts.
 4. Распакуйте скачанный ZIP: внутри находится установочный `.exe`.
 
@@ -25,7 +25,8 @@ GitHub Releases этим workflow не создаются. Артефакт хр
 и авторизации и не проверяется этим workflow.
 
 Установщик пока не подписан сертификатом; Windows может показывать предупреждение
-SmartScreen. Это сборка Windows x64; установщик macOS здесь не создаётся.
+SmartScreen. Установщики macOS собираются отдельными заданиями того же workflow;
+инструкция находится в `packaging/macos/README.md`.
 
 ## Локальная сборка на Windows
 
