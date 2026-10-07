@@ -135,13 +135,13 @@
                                 <ItemsControl ItemsSource="{Binding Versions}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate x:DataType="domain:ContentVersionDto">
-                                            <Button Margin="0,0,0,8" Padding="12" HorizontalContentAlignment="Stretch"
+                                            <Button Margin="0,0,0,4" Padding="8,6" HorizontalContentAlignment="Stretch"
                                                     Click="OnVersionClick">
-                                                <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,5,Auto">
-                                                    <TextBlock FontWeight="SemiBold" Text="{Binding Name}" />
-                                                    <TextBlock Grid.Column="1" Text="{Binding ApplicationVersion, StringFormat='Revit {0}'}" />
-                                                    <TextBlock Grid.Row="2" Grid.ColumnSpan="2" Classes="caption"
-                                                               Text="{Binding Status}" />
+                                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                                    <TextBlock FontWeight="SemiBold" Text="{Binding Name}"
+                                                               VerticalAlignment="Center" />
+                                                    <TextBlock Grid.Column="1" Classes="caption"
+                                                               Text="{Binding Status}" VerticalAlignment="Center" />
                                                 </Grid>
                                             </Button>
                                         </DataTemplate>
@@ -215,6 +215,47 @@
                         </StackPanel>
                     </ScrollViewer>
                 </Grid>
+            </TabItem>
+
+            <TabItem Header="История изменений">
+                <Border Margin="0,16,0,0" Classes="card section-card">
+                    <Grid RowDefinitions="Auto,14,*">
+                        <TextBlock Classes="h2" Text="История изменений контента и версий" />
+                        <TextBlock Grid.Row="2" IsVisible="{Binding HasNoHistory}"
+                                   Text="История изменений пока пуста."
+                                   Foreground="{StaticResource TextSecondaryBrush}" />
+                        <Grid Grid.Row="2" IsVisible="{Binding HasHistory}" RowDefinitions="Auto,*">
+                            <Border Classes="value-box" Padding="12">
+                                <Grid ColumnDefinitions="180,*,180,150">
+                                    <TextBlock FontWeight="SemiBold" Text="Время" />
+                                    <TextBlock Grid.Column="1" FontWeight="SemiBold" Text="Описание" />
+                                    <TextBlock Grid.Column="2" FontWeight="SemiBold" Text="Автор" />
+                                    <TextBlock Grid.Column="3" FontWeight="SemiBold" Text="Действия" />
+                                </Grid>
+                            </Border>
+                            <ScrollViewer Grid.Row="1">
+                                <ItemsControl ItemsSource="{Binding History}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="domain:ContentHistoryEventDto">
+                                            <Border Classes="value-box" Margin="0,8,0,0" Padding="12">
+                                                <Grid ColumnDefinitions="180,*,180,150">
+                                                    <TextBlock Text="{Binding OccurredAtText}" />
+                                                    <TextBlock Grid.Column="1" Text="{Binding Description}"
+                                                               TextTrimming="CharacterEllipsis" MaxLines="2" Margin="12,0" />
+                                                    <TextBlock Grid.Column="2" Text="{Binding Author}"
+                                                               TextTrimming="CharacterEllipsis" />
+                                                    <Button Grid.Column="3" Classes="secondary compact"
+                                                            Content="Показать детали"
+                                                            Click="OnShowHistoryDetailsClick" />
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </Grid>
+                    </Grid>
+                </Border>
             </TabItem>
         </TabControl>
     </Grid>

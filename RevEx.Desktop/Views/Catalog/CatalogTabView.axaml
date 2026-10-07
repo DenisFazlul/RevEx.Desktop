@@ -1,15 +1,15 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:RevEx.Desktop.ViewModels.Catalog"
-             xmlns:categoryVm="using:RevEx.Desktop.ViewModels.Categories"
              xmlns:contentVm="using:RevEx.Desktop.ViewModels.Contents"
-             xmlns:tagVm="using:RevEx.Desktop.ViewModels.Tags"
              x:Class="RevEx.Desktop.Views.Catalog.CatalogTabView" x:DataType="vm:CatalogTabViewModel">
     <Grid Margin="28" RowDefinitions="Auto,22,*">
-        <Grid ColumnDefinitions="*,340">
+        <Grid ColumnDefinitions="*,Auto,12,304">
             <HeaderedContentControl Theme="{StaticResource PageHeaderTheme}" Header="Каталог"
                                     Content="Материалы, инструкции и документы команды" />
-            <Grid Grid.Column="1" VerticalAlignment="Center">
+            <Button Grid.Column="1" Classes="secondary" VerticalAlignment="Center"
+                    Content="⚙  Категории и теги" Click="OnOpenCatalogSettingsClick" />
+            <Grid Grid.Column="3" VerticalAlignment="Center">
                 <TextBox Classes="search" Watermark="Поиск по названию…"
                          Text="{Binding ContentNameQuery}" />
                 <PathIcon Width="16" Height="16" Margin="14,0,0,0" HorizontalAlignment="Left"
@@ -18,44 +18,8 @@
             </Grid>
         </Grid>
 
-        <Grid Grid.Row="2" ColumnDefinitions="250,24,*">
-            <Border Classes="side-panel">
-                <TabControl Classes="catalog-filter-tabs">
-                    <TabItem Header="Категории">
-                        <Grid Margin="0,14,0,0">
-                            <ProgressBar IsVisible="{Binding IsLoading}" IsIndeterminate="True"
-                                         VerticalAlignment="Top" />
-                            <ListBox Classes="clean-list category-list" ItemsSource="{Binding Categories}"
-                                     IsVisible="{Binding !IsLoading}">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate x:DataType="categoryVm:CategoryItemViewModel">
-                                        <CheckBox Padding="8" Content="{Binding Name}" IsChecked="{Binding IsSelected}"
-                                                  HorizontalAlignment="Stretch" />
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
-                        </Grid>
-                    </TabItem>
-
-                    <TabItem Header="Теги">
-                        <Grid Margin="0,14,0,0">
-                            <ProgressBar IsVisible="{Binding IsLoading}" IsIndeterminate="True"
-                                         VerticalAlignment="Top" />
-                            <ListBox Classes="clean-list category-list" ItemsSource="{Binding Tags}"
-                                     IsVisible="{Binding !IsLoading}">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate x:DataType="tagVm:TagFilterItemViewModel">
-                                        <CheckBox Padding="8" Content="{Binding Name}" IsChecked="{Binding IsSelected}"
-                                                  HorizontalAlignment="Stretch" />
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
-                        </Grid>
-                    </TabItem>
-                </TabControl>
-            </Border>
-
-            <Border Grid.Column="2" Classes="content-pane">
+        <Grid Grid.Row="2">
+            <Border Classes="content-pane">
                 <Grid RowDefinitions="Auto,14,*">
                     <Grid ColumnDefinitions="*,Auto">
                         <StackPanel Spacing="3">

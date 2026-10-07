@@ -22,6 +22,13 @@ public interface IRevExApiService
         string fileName,
         CancellationToken cancellationToken = default);
     Task<byte[]> DownloadContentFileAsync(int id, CancellationToken cancellationToken = default);
+    Task<IReadOnlyCollection<ContentHistoryEventDto>> GetContentHistoryAsync(
+        int contentId,
+        CancellationToken cancellationToken = default);
+    Task<ContentHistoryEventDto> AddContentHistoryEventAsync(
+        int contentId,
+        CreateContentHistoryEventDto request,
+        CancellationToken cancellationToken = default);
 
     Task<IReadOnlyCollection<CategoryDto>> GetCategoriesAsync(CancellationToken cancellationToken = default);
     Task<CategoryDto?> GetCategoryAsync(int id, CancellationToken cancellationToken = default);

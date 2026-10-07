@@ -54,6 +54,7 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
     public int Id { get; }
     public bool CanEdit { get; }
     public ObservableCollection<ContentVersionDto> Versions { get; } = [];
+    public ObservableCollection<ContentHistoryEventDto> History { get; } = [];
     public ObservableCollection<ContentVersionFileItemViewModel> VersionFiles { get; } = [];
     public ObservableCollection<ContentTagItemViewModel> Tags { get; } = [];
     public IReadOnlyList<FileRoleOption> FileRoles { get; } =
@@ -67,6 +68,8 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         _allTags.Where(tag => Tags.All(assigned => assigned.Id != tag.Id)).OrderBy(tag => tag.Name).ToArray();
     public bool HasVersions => Versions.Count > 0;
     public bool HasNoVersions => !HasVersions && !IsLoading;
+    public bool HasHistory => History.Count > 0;
+    public bool HasNoHistory => !HasHistory && !IsLoading;
     public bool HasSelectedVersion => SelectedVersion is not null;
     public bool HasVersionFiles => VersionFiles.Count > 0;
     public bool HasNoVersionFiles => HasSelectedVersion && !HasVersionFiles && !IsLoadingVersion;
@@ -122,11 +125,13 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
             var versionsTask = _apiService.GetContentVersionsAsync();
             var tagsTask = _apiService.GetTagsAsync();
             var categoriesTask = _apiService.GetCategoriesAsync();
-            await Task.WhenAll(contentTask, versionsTask, tagsTask, categoriesTask);
+            var historyTask = _apiService.GetContentHistoryAsync(Id);
+            await Task.WhenAll(contentTask, versionsTask, tagsTask, categoriesTask, historyTask);
 
             var content = await contentTask
                 ?? throw new HttpRequestException($"Контент {Id} не найден.");
             ApplyContent(content, await versionsTask, await tagsTask, await categoriesTask);
+            ReplaceHistory(await historyTask);
             await LoadPreviewAsync(content.PreviewFileId);
             await SelectInitialVersionAsync();
 
@@ -344,6 +349,7 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
             await using var stream = File.OpenRead(path);
             _content = await _apiService.UploadContentPreviewAsync(Id, stream, fileName);
             await LoadPreviewAsync(_content.PreviewFileId);
+            await RefreshHistoryAsync();
             PreviewMessage = "Изображение обновлено.";
         }
         catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException or IOException or UnauthorizedAccessException)
@@ -381,6 +387,7 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
             Description = description;
             Title = name;
             _contentUpdated(name, description, _content.CategoryId);
+            await RefreshHistoryAsync();
             ContentMessage = "Изменения сохранены.";
         }
         catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
@@ -418,6 +425,7 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
             _content = _content with { CategoryId = category.Id, UpdatedAt = DateTimeOffset.UtcNow };
             CategoryName = category.Name;
             _contentUpdated(_content.Name, _content.Description, category.Id);
+            await RefreshHistoryAsync();
             ContentMessage = "Категория изменена.";
         }
         catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
@@ -476,6 +484,20 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
             Id,
             CreateUpdateRequest(_content.Name, _content.Description, tagIds));
         _content = _content with { TagIds = tagIds, UpdatedAt = DateTimeOffset.UtcNow };
+        await RefreshHistoryAsync();
+    }
+
+    private async Task RefreshHistoryAsync()
+    {
+        try
+        {
+            ReplaceHistory(await _apiService.GetContentHistoryAsync(Id));
+            NotifyCollectionStateChanged();
+        }
+        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
+        {
+            ErrorMessage = $"Изменения сохранены, но историю не удалось обновить: {exception.Message}";
+        }
     }
 
     private async Task RunTagActionAsync(Func<Task> action)
@@ -546,6 +568,13 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
             Versions.Add(version);
     }
 
+    private void ReplaceHistory(IEnumerable<ContentHistoryEventDto> history)
+    {
+        History.Clear();
+        foreach (var item in history.OrderByDescending(entry => entry.OccurredAt).ThenByDescending(entry => entry.Id))
+            History.Add(item);
+    }
+
     private async Task SelectInitialVersionAsync()
     {
         var selected = SelectedVersion is null
@@ -592,6 +621,8 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
     {
         OnPropertyChanged(nameof(HasVersions));
         OnPropertyChanged(nameof(HasNoVersions));
+        OnPropertyChanged(nameof(HasHistory));
+        OnPropertyChanged(nameof(HasNoHistory));
         OnPropertyChanged(nameof(HasTags));
         OnPropertyChanged(nameof(HasNoTags));
         OnPropertyChanged(nameof(AvailableTags));

@@ -162,4 +162,16 @@ public partial class ContentDetailsView : UserControl
         if (connector is not null)
             viewModel.QueueVersionForLoading(connector);
     }
+
+    private async void OnShowHistoryDetailsClick(
+        object? sender,
+        Avalonia.Interactivity.RoutedEventArgs eventArgs)
+    {
+        if (sender is not Control { DataContext: ContentHistoryEventDto historyEvent } ||
+            TopLevel.GetTopLevel(this) is not Window owner)
+            return;
+
+        var window = new ContentHistoryDetailsWindow(historyEvent);
+        await window.ShowDialog(owner);
+    }
 }

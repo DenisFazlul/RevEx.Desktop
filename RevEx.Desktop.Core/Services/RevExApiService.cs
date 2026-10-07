@@ -47,6 +47,20 @@ public sealed class RevExApiService(HttpClient httpClient) : IRevExApiService
     public Task<byte[]> DownloadContentFileAsync(int id, CancellationToken cancellationToken = default) =>
         httpClient.GetByteArrayAsync($"api/content-files/{id}/content", cancellationToken);
 
+    public Task<IReadOnlyCollection<ContentHistoryEventDto>> GetContentHistoryAsync(
+        int contentId,
+        CancellationToken cancellationToken = default) =>
+        GetAllAsync<ContentHistoryEventDto>($"api/content/{contentId}/history", cancellationToken);
+
+    public Task<ContentHistoryEventDto> AddContentHistoryEventAsync(
+        int contentId,
+        CreateContentHistoryEventDto request,
+        CancellationToken cancellationToken = default) =>
+        PostAsJsonAsync<CreateContentHistoryEventDto, ContentHistoryEventDto>(
+            $"api/content/{contentId}/history",
+            request,
+            cancellationToken);
+
     public Task<IReadOnlyCollection<CategoryDto>> GetCategoriesAsync(
         CancellationToken cancellationToken = default) =>
         GetAllAsync<CategoryDto>("api/categories", cancellationToken);

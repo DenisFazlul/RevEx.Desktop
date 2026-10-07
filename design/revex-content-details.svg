@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="780" viewBox="0 0 1240 780">
+  <style>text{font-family:Inter,Arial,sans-serif;fill:#2D2D2D}.h1{font-size:26px;font-weight:700}.h2{font-size:18px;font-weight:650}.body{font-size:14px}.small{font-size:12px;fill:#6B6B6B}.tiny{font-size:10px;fill:#8F8F8F}.medium{font-weight:600}.white{fill:#fff}.danger{fill:#C13D3D}</style>
+  <rect width="1240" height="780" fill="#FFFFFF"/>
+  <g id="App-Shell">
+    <rect width="264" height="780" fill="#F7F7F8"/><rect x="263" width="1" height="780" fill="#E5E5E5"/>
+    <rect x="264" width="976" height="52" fill="#FFFFFF"/><rect x="264" y="51" width="976" height="1" fill="#E5E5E5"/>
+    <rect x="14" y="14" width="30" height="30" rx="8" fill="#111"/><text x="29" y="35" class="body medium white" text-anchor="middle">R</text><text x="54" y="27" class="body medium">RevEx</text><text x="54" y="42" class="tiny">База знаний</text>
+    <text x="16" y="82" class="tiny medium">ОСНОВНОЕ</text>
+    <g transform="translate(8 100)" class="body"><rect width="248" height="44" rx="9" fill="#E9E9E9"/><text x="16" y="28">◫   Каталог</text><text x="16" y="74">＋   Добавить материал</text><text x="16" y="120">≡   Категории</text><text x="16" y="166">#   Теги</text><text x="16" y="212">⇧   Очередь загрузки</text><text x="16" y="258">⚙   Настройки</text></g>
+    <text x="18" y="680" class="body danger">↪  Выйти из профиля</text><rect x="21" y="727" width="30" height="30" rx="9" fill="#111"/><text x="36" y="747" class="body medium white" text-anchor="middle">R</text><text x="61" y="740" class="small medium">RevEx Desktop</text><text x="61" y="755" class="tiny">Локальное пространство</text><circle cx="235" cy="742" r="4" fill="#1F8A5B"/>
+    <rect x="276" y="6" width="128" height="40" rx="9" fill="transparent"/><text x="290" y="31" class="small">Каталог</text><rect x="408" y="6" width="244" height="40" rx="9" fill="#E9E9E9"/><text x="422" y="31" class="small medium">Шаблон архитектурного проекта</text><text x="634" y="31" class="small">×</text><rect x="1138" y="15" width="88" height="22" rx="6" fill="#fff" stroke="#E5E5E5"/><text x="1182" y="30" class="tiny" text-anchor="middle">Ctrl / ⌘ W</text>
+  </g>
+  <g id="Content-Details" transform="translate(296 80)">
+    <text x="0" y="28" class="h1">Шаблон архитектурного проекта</text><text x="0" y="52" class="small">Карточка материала из базы знаний</text>
+    <g id="Tabs" transform="translate(0 78)"><text x="14" y="24" class="body medium">Основное</text><text x="112" y="24" class="body">Версии</text><text x="190" y="24" class="body">История изменений</text><rect x="0" y="37" width="856" height="1" fill="#E5E5E5"/><rect x="0" y="36" width="84" height="2" fill="#111"/></g>
+    <g transform="translate(0 138)">
+      <g id="Image-Card"><rect width="336" height="470" rx="12" fill="#fff" stroke="#E5E5E5"/><text x="18" y="34" class="h2">Изображение</text><rect x="290" y="14" width="28" height="28" rx="8" fill="#fff"/><text x="304" y="33" class="body" text-anchor="middle">↻</text><rect x="18" y="56" width="300" height="360" rx="10" fill="#F7F7F8"/><text x="168" y="240" class="small" text-anchor="middle">Изображение пока не загружено.</text></g>
+      <g transform="translate(352 0)">
+        <g id="Info-Card"><rect width="504" height="294" rx="12" fill="#fff" stroke="#E5E5E5"/><text x="18" y="34" class="h2">Основная информация</text><text x="472" y="34" class="body danger">⌫</text>
+          <text x="18" y="74" class="small">Название</text><text x="18" y="96" class="body medium">Шаблон архитектурного проекта</text><text x="470" y="91" class="body">✎</text><rect x="18" y="108" width="468" height="1" fill="#E5E5E5"/>
+          <text x="18" y="138" class="small">Описание</text><text x="18" y="160" class="body">Базовый шаблон для новых проектов RevEx.</text><text x="470" y="155" class="body">✎</text><rect x="18" y="172" width="468" height="1" fill="#E5E5E5"/>
+          <text x="18" y="202" class="small">Категория</text><text x="18" y="224" class="body medium">Архитектура</text><text x="470" y="219" class="body">✎</text>
+        </g>
+        <g id="Tags-Card" transform="translate(0 310)"><rect width="504" height="160" rx="12" fill="#fff" stroke="#E5E5E5"/><text x="18" y="36" class="h2">Теги</text><rect x="374" y="14" width="112" height="36" rx="9" fill="#111"/><text x="430" y="37" class="small white medium" text-anchor="middle">Добавить тег</text><rect x="18" y="72" width="78" height="30" rx="8" fill="#ECECEC"/><text x="57" y="92" class="small" text-anchor="middle">#revit  ×</text><rect x="104" y="72" width="68" height="30" rx="8" fill="#ECECEC"/><text x="138" y="92" class="small" text-anchor="middle">#bim  ×</text></g>
+      </g>
+    </g>
+  </g>
+</svg>

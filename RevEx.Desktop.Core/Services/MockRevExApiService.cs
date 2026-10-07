@@ -49,6 +49,11 @@ public sealed class MockRevExApiService : IRevExApiService
         new(2, "Рабочий документ", "Материал без превью.", 2, 1, null, [2], CreatedAt, UpdatedAt)
     ];
 
+    private static readonly List<ContentHistoryEventDto> ContentHistory =
+    [
+        new(1, 1, UpdatedAt, "Изменены данные контента.", "revex")
+    ];
+
     public Task<IReadOnlyCollection<ContentDto>> GetContentsAsync(
         ContentQueryDto query,
         CancellationToken cancellationToken = default)
@@ -161,6 +166,27 @@ public sealed class MockRevExApiService : IRevExApiService
 
         return Task.FromResult(Convert.FromBase64String(
             "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="));
+    }
+
+    public Task<IReadOnlyCollection<ContentHistoryEventDto>> GetContentHistoryAsync(
+        int contentId,
+        CancellationToken cancellationToken = default) =>
+        FromCollection(ContentHistory.Where(item => item.ContentId == contentId), cancellationToken);
+
+    public Task<ContentHistoryEventDto> AddContentHistoryEventAsync(
+        int contentId,
+        CreateContentHistoryEventDto request,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var item = new ContentHistoryEventDto(
+            ContentHistory.Count == 0 ? 1 : ContentHistory.Max(entry => entry.Id) + 1,
+            contentId,
+            DateTimeOffset.UtcNow,
+            request.Description,
+            "mock-user");
+        ContentHistory.Add(item);
+        return Task.FromResult(item);
     }
 
     public Task<IReadOnlyCollection<CategoryDto>> GetCategoriesAsync(CancellationToken cancellationToken = default) =>

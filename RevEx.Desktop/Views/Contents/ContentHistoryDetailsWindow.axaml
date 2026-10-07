@@ -1,0 +1,32 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:domain="using:RevEx.Desktop.Core.Domain"
+        x:Class="RevEx.Desktop.Views.Contents.ContentHistoryDetailsWindow"
+        x:DataType="domain:ContentHistoryEventDto"
+        Title="Детали изменения" Width="720" Height="520"
+        MinWidth="560" MinHeight="400" WindowStartupLocation="CenterOwner">
+    <Grid Margin="24" RowDefinitions="Auto,20,Auto,18,*,20,Auto">
+        <HeaderedContentControl Theme="{StaticResource DialogHeaderTheme}"
+                                Header="Детали изменения"
+                                Content="Полная информация о событии в истории контента" />
+
+        <Grid Grid.Row="2" ColumnDefinitions="*,24,*">
+            <HeaderedContentControl Theme="{StaticResource InfoFieldTheme}"
+                                    Header="Время" Content="{Binding OccurredAtText}" />
+            <HeaderedContentControl Grid.Column="2" Theme="{StaticResource InfoFieldTheme}"
+                                    Header="Автор" Content="{Binding Author}" />
+        </Grid>
+
+        <Border Grid.Row="4" Classes="value-box" Padding="16">
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                <StackPanel Spacing="10">
+                    <TextBlock Classes="caption" Text="ОПИСАНИЕ ИЗМЕНЕНИЯ" />
+                    <TextBlock Text="{Binding Description}" TextWrapping="Wrap" />
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+
+        <Button Grid.Row="6" HorizontalAlignment="Right" Classes="primary"
+                Content="Закрыть" Click="OnCloseClick" />
+    </Grid>
+</Window>

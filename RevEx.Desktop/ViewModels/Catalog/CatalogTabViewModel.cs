@@ -108,9 +108,13 @@ public partial class CatalogTabViewModel : WorkspaceTabViewModel
         Contents.Clear();
         IsContentLoading = false;
 
-        var categoryIds = Categories.Where(category => category.IsSelected).Select(category => category.Id).ToArray();
-        if (categoryIds.Length == 0)
-            return;
+        var selectedCategoryIds = Categories
+            .Where(category => category.IsSelected)
+            .Select(category => category.Id)
+            .ToArray();
+        var categoryIds = selectedCategoryIds.Length > 0
+            ? selectedCategoryIds
+            : Categories.Select(category => category.Id).ToArray();
 
         var tagIds = Tags.Where(tag => tag.IsSelected).Select(tag => tag.Id).ToArray();
         var query = new ContentQueryDto { CategoryIds = categoryIds, TagIds = tagIds, Name = ContentNameQuery };

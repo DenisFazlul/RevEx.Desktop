@@ -1,0 +1,64 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RevEx.Desktop.ViewModels.Catalog"
+        xmlns:categories="using:RevEx.Desktop.ViewModels.Categories"
+        xmlns:tags="using:RevEx.Desktop.ViewModels.Tags"
+        x:Class="RevEx.Desktop.Views.Catalog.CatalogSettingsWindow"
+        x:DataType="vm:CatalogTabViewModel"
+        Title="Категории и теги"
+        Width="680" Height="560"
+        MinWidth="560" MinHeight="460"
+        WindowStartupLocation="CenterOwner">
+    <Grid RowDefinitions="Auto,*,Auto">
+        <StackPanel Margin="24,22,24,18" Spacing="5">
+            <TextBlock Classes="h2" Text="Фильтр каталога" />
+            <TextBlock Classes="caption"
+                       Text="Выберите категории и теги материалов, которые нужно показать" />
+        </StackPanel>
+
+        <Grid Grid.Row="1" Margin="24,0" ColumnDefinitions="*,16,*">
+            <Border Classes="content-pane">
+                <Grid RowDefinitions="Auto,12,*">
+                    <StackPanel Spacing="3">
+                        <TextBlock FontSize="15" FontWeight="SemiBold" Text="Категории" />
+                        <TextBlock Classes="caption" Text="Можно выбрать несколько" />
+                    </StackPanel>
+                    <ListBox Grid.Row="2" Classes="clean-list" ItemsSource="{Binding Categories}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:DataType="categories:CategoryItemViewModel">
+                                <CheckBox Margin="4,7" Content="{Binding Name}"
+                                          IsChecked="{Binding IsSelected}" />
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="2" Classes="content-pane">
+                <Grid RowDefinitions="Auto,12,*">
+                    <StackPanel Spacing="3">
+                        <TextBlock FontSize="15" FontWeight="SemiBold" Text="Теги" />
+                        <TextBlock Classes="caption" Text="Материал должен содержать все выбранные теги" />
+                    </StackPanel>
+                    <ListBox Grid.Row="2" Classes="clean-list" ItemsSource="{Binding Tags}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:DataType="tags:TagFilterItemViewModel">
+                                <CheckBox Margin="4,7" Content="{Binding Name}"
+                                          IsChecked="{Binding IsSelected}" />
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="2" Margin="0,18,0,0" BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,1,0,0" Padding="24,14">
+            <Grid ColumnDefinitions="Auto,*,Auto,10,Auto">
+                <Button Classes="secondary" Content="Сбросить" Click="OnResetClick" />
+                <Button Grid.Column="2" Classes="secondary" Content="Отмена" Click="OnCancelClick" />
+                <Button Grid.Column="4" Classes="primary" Content="Применить" Click="OnApplyClick" />
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
