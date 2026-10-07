@@ -19,7 +19,7 @@ app_bundle="$repo_root/artifacts/macos/RevEx.app"
 output_dir="$repo_root/artifacts/installer"
 
 test -f "$publish_dir/RevEx.Desktop"
-lipo -verify_arch "$architecture" "$publish_dir/RevEx.Desktop"
+lipo "$publish_dir/RevEx.Desktop" -verify_arch "$architecture"
 # Refuse to mix a previous bundle with the new publish output.
 test ! -e "$app_bundle"
 mkdir -p "$app_bundle/Contents/MacOS" "$app_bundle/Contents/Resources" "$output_dir"
