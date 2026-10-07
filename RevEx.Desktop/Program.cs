@@ -15,7 +15,8 @@ sealed class Program
     [STAThread]
     public static void Main(string[] args)
     {
-        VelopackApp.Build().Run();
+        // Even an already downloaded update requires the user's startup decision.
+        VelopackApp.Build().SetAutoApplyOnStartup(false).Run();
 
         using var instanceLock = TryAcquireInstanceLock();
         if (instanceLock is null)
