@@ -1,5 +1,13 @@
 # Установщик Windows
 
+> Ниже сохранена инструкция прежнего ручного процесса Inno Setup. Текущий CI
+> использует Velopack: `RevEx.Desktop-win-x64-Setup.exe`, артефакт
+> `desktop-win-x64-1.0.N`. Для публикации обновлений используйте общий архив
+> `RevEx-Desktop-Release-1.0.N`. Актуальная инструкция: [RELEASING.md](../RELEASING.md).
+> Старую установку необходимо один раз заменить установкой Velopack.
+
+## Архивная инструкция (не текущий CI)
+
 Каждый push в ветку `realese`, включая merge pull request, запускает workflow
 `Desktop installers`. Результат — установочный `RevEx-Setup-1.0.N-win-x64.exe`,
 где N — номер запуска workflow. Автообновления в приложение не добавляются.

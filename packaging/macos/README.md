@@ -1,5 +1,14 @@
 # Установщики macOS
 
+> Ниже сохранена инструкция прежней упаковки без updater. Текущий CI использует
+> Velopack: `RevEx.Desktop-osx-x64-Setup.pkg` и `RevEx.Desktop-osx-arm64-Setup.pkg`.
+> Для публикации обновлений используйте общий архив `RevEx-Desktop-Release-1.0.N`.
+> Актуальная инструкция: [RELEASING.md](../RELEASING.md).
+> Для рабочего распространения в закрытом контуре нужны Developer ID,
+> notarization и stapling до передачи пакетов заказчику. Сертификаты пока не настроены.
+
+## Архивная инструкция (не текущий CI)
+
 После merge или push в `realese` workflow `Desktop installers` собирает вместе:
 
 - Windows x64: установочный `.exe`.
