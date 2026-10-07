@@ -1,0 +1,68 @@
+name: Windows installer
+
+on:
+  push:
+    branches: [realese]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  installer:
+    runs-on: windows-2022
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Set build version
+        run: |
+          "APP_VERSION=1.0.$env:GITHUB_RUN_NUMBER" >> $env:GITHUB_ENV
+      - name: Publish self-contained desktop
+        run: |
+          dotnet publish RevEx.Desktop/RevEx.Desktop.csproj `
+            -c Release -r win-x64 --self-contained true `
+            -p:Version=$env:APP_VERSION -o artifacts/publish
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Ensure Inno Setup is installed
+        run: |
+          $compiler = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (!(Test-Path $compiler)) {
+            choco install innosetup --yes --no-progress
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+          if (!(Test-Path $compiler)) { throw 'Inno Setup compiler not found' }
+      - name: Build setup executable
+        run: |
+          $compiler = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          & $compiler "/DAppVersion=$env:APP_VERSION" `
+            "/DPublishDir=$env:GITHUB_WORKSPACE\artifacts\publish" `
+            "/DInstallerOutputDir=$env:GITHUB_WORKSPACE\artifacts\installer" `
+            packaging/windows/RevEx.Desktop.iss
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify installation and uninstallation
+        run: |
+          $setup = Get-Item "artifacts/installer/RevEx-Setup-$env:APP_VERSION-win-x64.exe"
+          $installDir = Join-Path $env:RUNNER_TEMP 'RevEx-install-check'
+          $install = Start-Process $setup.FullName -ArgumentList @(
+            '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/SP-',
+            "/DIR=`"$installDir`"", "/LOG=`"$env:RUNNER_TEMP\revex-install.log`""
+          ) -Wait -PassThru
+          if ($install.ExitCode -ne 0) { throw "Install failed: $($install.ExitCode)" }
+          foreach ($file in @('RevEx.Desktop.exe', 'appsettings.json', 'coreclr.dll')) {
+            if (!(Test-Path (Join-Path $installDir $file))) { throw "Missing installed file: $file" }
+          }
+          $uninstall = Start-Process (Join-Path $installDir 'unins000.exe') `
+            -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART' -Wait -PassThru
+          if ($uninstall.ExitCode -ne 0) { throw "Uninstall failed: $($uninstall.ExitCode)" }
+          if (Test-Path (Join-Path $installDir 'RevEx.Desktop.exe')) { throw 'Uninstall did not remove desktop' }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RevEx-Windows-Installer-${{ env.APP_VERSION }}
+          path: artifacts/installer/*.exe
+          if-no-files-found: error
+          retention-days: 90
