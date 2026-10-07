@@ -1,7 +1,6 @@
 ﻿using Avalonia;
 using System;
 using System.IO;
-using Velopack;
 
 namespace RevEx.Desktop;
 
@@ -15,9 +14,6 @@ sealed class Program
     [STAThread]
     public static void Main(string[] args)
     {
-        // Even an already downloaded update requires the user's startup decision.
-        VelopackApp.Build().SetAutoApplyOnStartup(false).Run();
-
         using var instanceLock = TryAcquireInstanceLock();
         if (instanceLock is null)
         {

@@ -14,7 +14,6 @@ using RevEx.Connector.Contracts;
 using RevEx.Desktop.Connectors;
 using RevEx.Configuration;
 using RevEx.LoadingQueue;
-using RevEx.Desktop.Services.Updates;
 
 namespace RevEx.Desktop.DI;
 
@@ -28,9 +27,6 @@ public static class ServiceExtensions
 
         services.AddSingleton<AppSettings>(appSettings);
         services.AddSingleton<IAppSettings>(appSettings);
-        services.AddSingleton(configuration.GetSection("Updates").Get<UpdateSettings>() ?? new UpdateSettings());
-        services.AddSingleton<IAppUpdateService, AppUpdateService>();
-        services.AddSingleton<IStartupUpdateCoordinator, StartupUpdateCoordinator>();
         services.AddRevExtApiConnection(appSettings);
         services.AddSingleton<IConnectorRegistry, ConnectorRegistry>();
         services.AddSingleton<IFileLoadingQueue, FileLoadingQueue>();
