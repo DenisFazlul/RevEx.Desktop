@@ -1,0 +1,30 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RevEx.Desktop.ViewModels.Updates"
+        x:Class="RevEx.Desktop.Views.Updates.StartupUpdateWindow"
+        x:DataType="vm:StartupUpdateViewModel"
+        Title="Запуск RevEx" Width="620" SizeToContent="Height" CanResize="False"
+        WindowStartupLocation="CenterScreen">
+    <Border Margin="24" Classes="card section-card">
+        <StackPanel Spacing="14">
+            <TextBlock Classes="h2" Text="Подключение и обновление RevEx"/>
+            <TextBlock Text="{Binding CurrentVersion, StringFormat='Текущая версия: {0}'}"/>
+            <TextBlock Text="{Binding RecommendedVersion, StringFormat='Рекомендуемая версия: {0}'}" IsVisible="{Binding HasUpdate}"/>
+            <TextBlock Text="{Binding Status}" TextWrapping="Wrap"/>
+            <TextBlock Text="{Binding Notes}" TextWrapping="Wrap" MaxHeight="160"/>
+            <StackPanel IsEnabled="{Binding !IsBusy}" Spacing="8">
+                <TextBlock Text="Адрес API сервера"/>
+                <TextBox Text="{Binding ServerAddress}"/>
+                <Button Classes="secondary" Content="Проверить / повторить" Command="{Binding CheckCommand}" HorizontalAlignment="Left"/>
+            </StackPanel>
+            <ProgressBar Minimum="0" Maximum="100" Value="{Binding Progress}" IsVisible="{Binding IsDownloading}"/>
+            <TextBlock Classes="validation-message" Text="{Binding Error}" TextWrapping="Wrap"/>
+            <WrapPanel HorizontalAlignment="Right">
+                <Button Margin="4" Classes="secondary" Content="Продолжить без обновления"
+                        IsVisible="{Binding CanContinue}" Command="{Binding ContinueWithoutUpdateCommand}"/>
+                <Button Margin="4" Classes="primary" Content="Обновить и перезапустить"
+                        IsVisible="{Binding HasUpdate}" IsEnabled="{Binding !IsBusy}" Command="{Binding UpdateCommand}"/>
+            </WrapPanel>
+        </StackPanel>
+    </Border>
+</Window>
