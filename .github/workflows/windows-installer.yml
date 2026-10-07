@@ -3,7 +3,6 @@ name: Windows installer
 on:
   push:
     branches: [realese]
-  workflow_dispatch:
 
 permissions:
   contents: read

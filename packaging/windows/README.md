@@ -11,7 +11,6 @@
 3. После успешной сборки скачайте `RevEx-Windows-Installer-1.0.N` из Artifacts.
 4. Распакуйте скачанный ZIP: внутри находится установочный `.exe`.
 
-Для ручного запуска: Actions → Windows installer → Run workflow → выберите `realese`.
 GitHub Releases этим workflow не создаются. Артефакт хранится 90 дней.
 
 Установщик включает .NET runtime: отдельная установка .NET на компьютере пользователя
