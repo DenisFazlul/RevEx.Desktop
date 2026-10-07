@@ -16,6 +16,7 @@ using RevEx.Desktop.Views;
 using RevEx.Desktop.Views.MainMenu;
 using RevEx.Desktop.Connectors;
 using RevEx.Configuration;
+using RevEx.Desktop.Services.Updates;
 
 namespace RevEx.Desktop;
 
@@ -52,6 +53,9 @@ public partial class App : Application
     {
         try
         {
+            if (!await Services.GetRequiredService<IStartupUpdateCoordinator>().RunAsync())
+                return;
+
             await Services.GetRequiredService<DesktopConnectorServer>().StartAsync();
             var authenticationService = Services.GetRequiredService<IAuthenticationService>();
             await authenticationService.GetAccessTokenAsync();

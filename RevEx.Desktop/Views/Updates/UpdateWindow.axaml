@@ -1,0 +1,31 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RevEx.Desktop.ViewModels.Updates"
+        x:Class="RevEx.Desktop.Views.Updates.UpdateWindow"
+        x:DataType="vm:UpdateWindowViewModel"
+        Title="Обновление RevEx" Width="540" SizeToContent="Height"
+        CanResize="False" WindowStartupLocation="CenterScreen">
+    <Border Margin="24" Classes="card section-card">
+        <StackPanel Spacing="16">
+            <TextBlock Classes="h2" Text="Доступно обновление RevEx" />
+            <TextBlock Text="Можно обновить приложение сейчас или продолжить работу на текущей версии."
+                       TextWrapping="Wrap" />
+            <StackPanel Spacing="6">
+                <TextBlock Text="{Binding CurrentVersion, StringFormat='Текущая версия: {0}'}" />
+                <TextBlock Text="{Binding NewVersion, StringFormat='Новая версия: {0}'}" />
+            </StackPanel>
+            <StackPanel IsVisible="{Binding IsDownloading}" Spacing="6">
+                <TextBlock Text="Скачивание обновления…" />
+                <ProgressBar Minimum="0" Maximum="100" Value="{Binding Progress}" />
+                <TextBlock Text="{Binding Progress, StringFormat='{}{0}%'}" />
+            </StackPanel>
+            <TextBlock Classes="validation-message" Text="{Binding ErrorMessage}" TextWrapping="Wrap" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                <Button Classes="secondary" Content="Продолжить без обновления"
+                        Command="{Binding ContinueWithoutUpdateCommand}" />
+                <Button Classes="primary" Content="Обновить" IsEnabled="{Binding CanUpdate}"
+                        Command="{Binding UpdateCommand}" />
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</Window>
