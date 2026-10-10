@@ -47,6 +47,11 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Package installer and full update
         run: |
+          # Windows IL verification does not follow calls into the Updates assembly.
+          # Program.Main calls DesktopUpdates.Initialize before Avalonia or the instance lock.
+          if ('${{ runner.os }}' -eq 'Windows') {
+            $env:VPK_SKIP_VELO_APP_CHECK = 'true'
+          }
           vpk pack --packId RevEx.Desktop --packTitle RevEx `
             --packVersion $env:APP_VERSION --packDir artifacts/publish `
             --mainExe '${{ matrix.executable }}' --runtime '${{ matrix.rid }}' `

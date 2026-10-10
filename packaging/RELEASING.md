@@ -39,3 +39,7 @@ dotnet run --project tests/StartupUpdateChecks/StartupUpdateChecks.csproj
 
 Они покрывают совпадающую, совместимую и несовместимую версию, отказ пользователя,
 недоступный backend, некорректный диапазон и внешний источник обновления.
+
+Windows-проверка упаковщика на прямой вызов Velopack отключена: инициализация
+находится в отдельной сборке `RevEx.Desktop.Updates`. `Program.Main` обязан вызывать
+`DesktopUpdates.Initialize()` первым, до блокировки второго экземпляра и Avalonia.
