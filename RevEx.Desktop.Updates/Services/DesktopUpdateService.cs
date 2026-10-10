@@ -16,7 +16,7 @@ public sealed class DesktopUpdateService(HttpClient httpClient, DesktopInstallat
 {
     public bool IsInstalled => DesktopUpdates.InstalledVersion is not null;
     public string CurrentVersion => DesktopUpdates.InstalledVersion ?? DesktopClientVersion.Value;
-    private static string Platform => (OperatingSystem.IsWindows(), OperatingSystem.IsMacOS(), RuntimeInformation.ProcessArchitecture) switch
+    internal static string Platform => (OperatingSystem.IsWindows(), OperatingSystem.IsMacOS(), RuntimeInformation.ProcessArchitecture) switch
     {
         (true, _, Architecture.X64) => "win-x64",
         (_, true, Architecture.X64) => "osx-x64",

@@ -121,7 +121,10 @@ public static class ServiceExtensions
             {
                 httpClient.BaseAddress = new Uri(appSettings.ApiPath);
                 if (DesktopUpdates.InstalledVersion is { } version)
+                {
                     httpClient.DefaultRequestHeaders.Add("X-RevEx-Desktop-Version", version);
+                    httpClient.DefaultRequestHeaders.Add("X-RevEx-Desktop-Platform", DesktopUpdates.Platform);
+                }
             })
             .AddConfiguredAuthentication(appSettings.Authentication);
 

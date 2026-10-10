@@ -22,5 +22,7 @@ public static class DesktopUpdates
     }
 
     // Local installation metadata; no update source or network access is needed.
+    public static string Platform => DesktopUpdateService.Platform;
+
     public static string? InstalledVersion => VelopackLocator.Current.CurrentlyInstalledVersion?.ToString();
 }
