@@ -1,10 +1,10 @@
 using System.Threading.Tasks;
 using RevEx.Configuration;
 using RevEx.Desktop.Core.Interfaces;
-using RevEx.Desktop.ViewModels.Updates;
-using RevEx.Desktop.Views.Updates;
+using RevEx.Desktop.Updates.ViewModels;
+using RevEx.Desktop.Updates.Views;
 
-namespace RevEx.Desktop.Services.Updates;
+namespace RevEx.Desktop.Updates.Services;
 
 public sealed class StartupUpdateCoordinator(DesktopUpdateService updates, IAppSettings settings,
     IRevExUserSettingsStore userSettings)

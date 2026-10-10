@@ -6,9 +6,9 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using RevEx.Configuration;
 using RevEx.Desktop.Core.Interfaces;
-using RevEx.Desktop.Services.Updates;
+using RevEx.Desktop.Updates.Services;
 
-namespace RevEx.Desktop.ViewModels.Updates;
+namespace RevEx.Desktop.Updates.ViewModels;
 
 public partial class StartupUpdateViewModel(DesktopUpdateService updates, IAppSettings settings,
     IRevExUserSettingsStore userSettings) : ObservableObject
@@ -45,9 +45,9 @@ public partial class StartupUpdateViewModel(DesktopUpdateService updates, IAppSe
             var saved = userSettings.Load();
             userSettings.Save(new RevExUserSettings { ApiPath = settings.ApiPath, ConnectorRegistrationAddress = saved.ConnectorRegistrationAddress });
             CanContinue = _check.Compatible;
-            RecommendedVersion = _check.Release.RecommendedDesktopVersion;
-            Notes = _check.Release.Notes;
-            HasUpdate = RecommendedVersion != CurrentVersion;
+            RecommendedVersion = _check.Response.TargetVersion;
+            Notes = _check.Response.Notes;
+            HasUpdate = _check.HasUpdate;
             Status = CanContinue ? "Доступна рекомендованная версия. Можно обновиться или продолжить работу."
                 : "Текущая версия не поддерживается backend. Для работы требуется обновление.";
             if (CanContinue && !HasUpdate) _decision.TrySetResult(true);

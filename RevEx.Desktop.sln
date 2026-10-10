@@ -1,5 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
+#
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevEx.Desktop", "RevEx.Desktop\RevEx.Desktop.csproj", "{29C81B8B-2C95-4DC6-8F51-5D79A2A10139}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevEx.Desktop.Core", "RevEx.Desktop.Core\RevEx.Desktop.Core.csproj", "{784CC236-4167-40D6-BFBD-16D533AFFDC1}"
@@ -17,6 +18,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevEx.Configuration", "RevEx.Configuration\RevEx.Configuration.csproj", "{9A7B0D35-C8DB-4F68-8720-A4D906461367}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevEx.LoadingQueue", "RevEx.LoadingQueue\RevEx.LoadingQueue.csproj", "{972723A4-CA24-4166-A884-8CE1E37A96DC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevEx.Desktop.Updates", "RevEx.Desktop.Updates\RevEx.Desktop.Updates.csproj", "{1AD042BA-B7E4-4D1A-9487-3D81F4A046AB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -60,5 +63,9 @@ Global
 		{972723A4-CA24-4166-A884-8CE1E37A96DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{972723A4-CA24-4166-A884-8CE1E37A96DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{972723A4-CA24-4166-A884-8CE1E37A96DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1AD042BA-B7E4-4D1A-9487-3D81F4A046AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1AD042BA-B7E4-4D1A-9487-3D81F4A046AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1AD042BA-B7E4-4D1A-9487-3D81F4A046AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1AD042BA-B7E4-4D1A-9487-3D81F4A046AB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -1,7 +1,7 @@
 using Avalonia.Controls;
-using RevEx.Desktop.ViewModels.Updates;
+using RevEx.Desktop.Updates.ViewModels;
 
-namespace RevEx.Desktop.Views.Updates;
+namespace RevEx.Desktop.Updates.Views;
 
 public partial class StartupUpdateWindow : Window
 {

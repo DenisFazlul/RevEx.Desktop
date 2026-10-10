@@ -16,7 +16,7 @@ using RevEx.Desktop.Views;
 using RevEx.Desktop.Views.MainMenu;
 using RevEx.Desktop.Connectors;
 using RevEx.Configuration;
-using RevEx.Desktop.Services.Updates;
+using RevEx.Desktop.Updates.Services;
 
 namespace RevEx.Desktop;
 
@@ -60,7 +60,18 @@ public partial class App : Application
             }
             await Services.GetRequiredService<DesktopConnectorServer>().StartAsync();
             var authenticationService = Services.GetRequiredService<IAuthenticationService>();
-            await authenticationService.GetAccessTokenAsync();
+            var accessToken = await authenticationService.GetAccessTokenAsync();
+            try
+            {
+                using var timeout = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(10));
+                await Services.GetRequiredService<DesktopUpdateService>().ReportAuthenticatedAsync(
+                    Services.GetRequiredService<IAppSettings>().ApiPath, accessToken, timeout.Token);
+            }
+            catch (Exception trackingError)
+            {
+                // Retry on the next startup. Telemetry failure must not prevent authenticated work.
+                Console.Error.WriteLine($"Не удалось подтвердить версию десктопа: {trackingError.Message}");
+            }
 
             var mainWindow = Services.GetRequiredService<MainWindow>();
             desktop.MainWindow = mainWindow;

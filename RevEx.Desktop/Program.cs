@@ -1,7 +1,7 @@
-﻿using Avalonia;
+using Avalonia;
 using System;
 using System.IO;
-using Velopack;
+using RevEx.Desktop.Updates;
 
 namespace RevEx.Desktop;
 
@@ -15,7 +15,7 @@ sealed class Program
     [STAThread]
     public static void Main(string[] args)
     {
-        VelopackApp.Build().SetAutoApplyOnStartup(false).Run();
+        DesktopUpdates.Initialize();
         using var instanceLock = TryAcquireInstanceLock();
         if (instanceLock is null)
         {
