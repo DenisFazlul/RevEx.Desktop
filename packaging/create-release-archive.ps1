@@ -6,7 +6,7 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 if ($Platforms.Count -eq 0 -or @($Platforms | Select-Object -Unique).Count -ne $Platforms.Count) { throw 'Choose at least one unique platform' }
-$suffix = if ($Platforms.Count -eq 3) { '' } else { '-' + ($Platforms -join '-') }
+$suffix = if ($Platforms.Count -eq 3) { '' } elseif ($Platforms.Count -eq 2 -and $Platforms -contains 'osx-x64' -and $Platforms -contains 'osx-arm64') { '-macos' } else { '-' + ($Platforms -join '-') }
 $stage = Join-Path $OutputDirectory "release-$Version$suffix"
 if (Test-Path $stage) { throw 'Output staging directory already exists' }
 New-Item -ItemType Directory -Path $stage -Force | Out-Null

@@ -9,7 +9,9 @@ macOS Intel и Apple Silicon через Velopack 1.2.161. Код приложе�
 Скачайте артефакт `RevEx-Desktop-<platform>-<version>` и распакуйте **внешний ZIP
 GitHub Artifacts**. Внутренний `RevEx-Desktop-Release-<version>-<platform>.zip`
 загружается через админку. Windows и macOS загружаются и включаются отдельно;
-macOS Intel и Apple Silicon также можно загрузить отдельно.
+macOS Intel и Apple Silicon также можно загрузить отдельно. Общий артефакт
+`RevEx-Desktop-macos-<version>` содержит обе архитектуры macOS и создаётся,
+даже если Windows-сборка не удалась.
 
 Комплект платформы содержит release.json, установщик, полный .nupkg и
 releases.<platform>.json. Backend принимает одну или несколько платформ с одной

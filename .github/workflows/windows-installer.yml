@@ -77,3 +77,24 @@ jobs:
           path: artifacts/RevEx-Desktop-Release-*.zip
           if-no-files-found: error
           retention-days: 90
+
+  macos-archive:
+    needs: build
+    # A failed Windows job must not prevent a macOS-only archive.
+    if: ${{ always() && !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: desktop-osx-*
+          path: artifacts/platforms
+      - name: Create macOS upload archive
+        shell: pwsh
+        run: ./packaging/create-release-archive.ps1 -Version '1.0.${{ github.run_number }}' -Platforms osx-x64,osx-arm64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RevEx-Desktop-macos-1.0.${{ github.run_number }}
+          path: artifacts/RevEx-Desktop-Release-*-macos.zip
+          if-no-files-found: error
+          retention-days: 90
