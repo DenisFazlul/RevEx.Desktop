@@ -2,7 +2,7 @@ using System;
 using System.Net.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using RevEx.Desktop.Auth;
+using RevEx.Desktop.Core.Authentication;
 using RevEx.Desktop.Core.Interfaces;
 using RevEx.Desktop.Core.Services;
 using RevEx.Desktop.Navigation;

@@ -6,12 +6,12 @@ using Duende.IdentityModel.Client;
 using Duende.IdentityModel.OidcClient;
 using RevEx.Desktop.Core.Interfaces;
 
-namespace RevEx.Desktop.Auth;
+namespace RevEx.Desktop.Core.Authentication;
 
 public sealed class OidcAuthenticationService : IAuthenticationService
 {
     private const string AuthorizationPageResource =
-        "RevEx.Desktop.Auth.Assets.AuthorizationCompleted.html";
+        "RevEx.Desktop.Core.Authentication.Assets.AuthorizationCompleted.html";
 
     private readonly OidcClient _oidcClient;
     private readonly HttpClient _backchannelClient;

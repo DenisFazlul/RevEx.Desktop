@@ -1,7 +1,7 @@
 using System.Net.Http.Headers;
 using RevEx.Desktop.Core.Interfaces;
 
-namespace RevEx.Desktop.Auth;
+namespace RevEx.Desktop.Core.Authentication;
 
 public sealed class AuthenticationHandler(IAuthenticationService authenticationService) : DelegatingHandler
 {
