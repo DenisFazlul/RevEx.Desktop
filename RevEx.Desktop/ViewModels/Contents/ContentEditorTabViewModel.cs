@@ -104,8 +104,8 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
 
             if (IsCreatingContent)
             {
-                var categoriesTask = _apiService.GetCategoriesAsync();
-                var tagsTask = _apiService.GetTagsAsync();
+                var categoriesTask = _apiService.Categories.GetAllAsync();
+                var tagsTask = _apiService.Tags.GetAllAsync();
                 await Task.WhenAll(categoriesTask, tagsTask);
 
                 var categories = await categoriesTask;
@@ -272,7 +272,7 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
 
     private async Task<ContentDto> CreateContentWithPreviewAsync()
     {
-        var content = await _apiService.CreateContentAsync(new CreateContentDto
+        var content = await _apiService.Contents.CreateAsync(new CreateContentDto
         {
             Name = ContentName.Trim(),
             Description = Description.Trim(),
@@ -281,7 +281,7 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
         });
 
         await using var previewStream = File.OpenRead(SelectedPreviewPath!);
-        return await _apiService.UploadContentPreviewAsync(
+        return await _apiService.Contents.UploadPreviewAsync(
             content.Id,
             previewStream,
             SelectedPreviewName);
@@ -289,7 +289,7 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
 
     private async Task<ContentVersionDto> CreateVersionWithFamilyFileAsync(int contentId)
     {
-        var version = await _apiService.CreateContentVersionAsync(new CreateContentVersionDto
+        var version = await _apiService.ContentVersions.CreateAsync(new CreateContentVersionDto
         {
             ContentId = contentId,
             Name = VersionName.Trim(),
@@ -300,7 +300,7 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
         });
 
         await using var familyStream = File.OpenRead(SelectedFamilyFilePath!);
-        return await _apiService.UploadContentVersionFileAsync(
+        return await _apiService.ContentVersions.UploadFileAsync(
             version.Id,
             familyStream,
             SelectedFamilyFileName,

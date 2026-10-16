@@ -48,8 +48,8 @@ public partial class CatalogTabViewModel : WorkspaceTabViewModel
             IsLoading = true;
             var selectedCategoryIds = Categories.Where(item => item.IsSelected).Select(item => item.Id).ToHashSet();
             var selectedTagIds = Tags.Where(item => item.IsSelected).Select(item => item.Id).ToHashSet();
-            var categoriesTask = _revExApiService.GetCategoriesAsync();
-            var tagsTask = _revExApiService.GetTagsAsync();
+            var categoriesTask = _revExApiService.Categories.GetAllAsync();
+            var tagsTask = _revExApiService.Tags.GetAllAsync();
             await Task.WhenAll(categoriesTask, tagsTask);
             var categoryDtos = await categoriesTask;
             var tagDtos = await tagsTask;
@@ -129,7 +129,7 @@ public partial class CatalogTabViewModel : WorkspaceTabViewModel
         {
             IsContentLoading = true;
             await Task.Delay(250, cancellation.Token);
-            var contentDtos = await _revExApiService.GetContentsAsync(query, cancellation.Token);
+            var contentDtos = await _revExApiService.Contents.GetAllAsync(query, cancellation.Token);
             cancellation.Token.ThrowIfCancellationRequested();
 
             if (!ReferenceEquals(_contentLoadCancellation, cancellation))
@@ -172,7 +172,7 @@ public partial class CatalogTabViewModel : WorkspaceTabViewModel
         {
             try
             {
-                previewBytes = await _revExApiService.DownloadContentFileAsync(previewFileId, cancellationToken);
+                previewBytes = await _revExApiService.ContentFiles.DownloadAsync(previewFileId, cancellationToken);
             }
             catch (HttpRequestException)
             {

@@ -28,7 +28,7 @@ public partial class CategoryAdminTabViewModel(IRevExApiService apiService)
         {
             IsLoading = true;
             ErrorMessage = null;
-            var categories = await apiService.GetCategoriesAsync();
+            var categories = await apiService.Categories.GetAllAsync();
             Categories.Clear();
             foreach (var category in categories.OrderBy(item => item.Name))
                 Categories.Add(new CategoryItemViewModel(category));
@@ -47,7 +47,7 @@ public partial class CategoryAdminTabViewModel(IRevExApiService apiService)
 
     public Task<bool> CreateAsync(string name) => RunAsync(async () =>
     {
-        var created = await apiService.CreateCategoryAsync(new CreateCategoryDto { Name = name.Trim() });
+        var created = await apiService.Categories.CreateAsync(new CreateCategoryDto { Name = name.Trim() });
         Categories.Add(new CategoryItemViewModel(created));
         SortCategories();
         Message = "Категория создана.";
@@ -55,7 +55,7 @@ public partial class CategoryAdminTabViewModel(IRevExApiService apiService)
 
     public Task<bool> RenameAsync(CategoryItemViewModel category, string name) => RunAsync(async () =>
     {
-        await apiService.UpdateCategoryAsync(category.Id, new UpdateCategoryDto { Name = name.Trim() });
+        await apiService.Categories.UpdateAsync(category.Id, new UpdateCategoryDto { Name = name.Trim() });
         category.Name = name.Trim();
         SortCategories();
         Message = "Категория переименована.";
@@ -63,7 +63,7 @@ public partial class CategoryAdminTabViewModel(IRevExApiService apiService)
 
     public Task<bool> DeleteAsync(CategoryItemViewModel category) => RunAsync(async () =>
     {
-        await apiService.DeleteCategoryAsync(category.Id);
+        await apiService.Categories.DeleteAsync(category.Id);
         Categories.Remove(category);
         Message = "Категория удалена.";
         NotifyStateChanged();
