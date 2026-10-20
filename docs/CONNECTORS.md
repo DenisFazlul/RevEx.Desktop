@@ -38,7 +38,7 @@ Accepted → Started → Completed. При неизвестном ID Desktop в�
 Сначала запустите Desktop, затем из корня solution:
 
 ```powershell
-dotnet run --project RevEx.Connector.Mock/RevEx.Connector.Mock.csproj
+dotnet run --project ../RevEx.Connecter/RevEx.Connector.Mock/RevEx.Connector.Mock.csproj
 ```
 
 Mock выбирает порт и регистрируется в Desktop, имитирует обработку каждого файла
@@ -55,3 +55,6 @@ Mock выбирает порт и регистрируется в Desktop, им�
 Текущий соседний RevitPlugin — WPF-плагин Revit 2020 с ExternalEvent и информацией
 о документе. В его исходниках нет регистрации Connector.Host и HTTP-загрузки файлов.
 Наличие ProjectReference на Desktop.Core не означает реализацию этого протокола.
+
+
+Реализация Connector.Host, Connector.Mock, общие Contracts и Configuration вынесены в [RevEx.Connecter](https://github.com/DenisFazlul/RevEx.Connecter). Перед сборкой клонируйте его рядом с RevEx.Desktop: проекты используют относительные ProjectReference. Сервер регистрации Desktop и HTTP-клиент остаются здесь.

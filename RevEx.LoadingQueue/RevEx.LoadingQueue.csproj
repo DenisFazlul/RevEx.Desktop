@@ -5,6 +5,6 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\RevEx.Connector.Contracts\RevEx.Connector.Contracts.csproj" />
+    <ProjectReference Include="..\..\RevEx.Connecter\RevEx.Connector.Contracts\RevEx.Connector.Contracts.csproj" />
   </ItemGroup>
 </Project>

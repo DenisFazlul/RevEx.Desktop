@@ -28,6 +28,8 @@ jobs:
         shell: pwsh
     steps:
       - uses: actions/checkout@v4
+      - name: Checkout connector dependencies
+        run: git clone https://github.com/DenisFazlul/RevEx.Connecter.git ../RevEx.Connecter
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'

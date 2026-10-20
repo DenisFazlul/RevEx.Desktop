@@ -50,3 +50,6 @@ netstandard2.0; это существенно для совместимости 
 Режим ActiveDirectory предусмотрен отдельной веткой конфигурации;
 WindowsAuthenticationService не выдаёт OIDC-токен и содержит пустой набор ролей.
 Работа локального стенда проверялась только с Keycloak.
+
+
+Реализация Connector.Host, Connector.Mock, общие Contracts и Configuration вынесены в [RevEx.Connecter](https://github.com/DenisFazlul/RevEx.Connecter). Перед сборкой клонируйте его рядом с RevEx.Desktop: проекты используют относительные ProjectReference. Сервер регистрации Desktop и HTTP-клиент остаются здесь.

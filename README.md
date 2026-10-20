@@ -14,3 +14,6 @@ dotnet run --project RevEx.Desktop/RevEx.Desktop.csproj -c Release
 Перед запуском поднимите Web/API и Keycloak. Текущий API — `http://localhost:8082/`,
 Keycloak — `http://localhost:8081/realms/revex`.
 См. [настройку и запуск](docs/OPERATIONS.md) и [контракт коннекторов](docs/CONNECTORS.md).
+
+
+Реализация Connector.Host, Connector.Mock, общие Contracts и Configuration вынесены в [RevEx.Connecter](https://github.com/DenisFazlul/RevEx.Connecter). Перед сборкой клонируйте его рядом с RevEx.Desktop: проекты используют относительные ProjectReference. Сервер регистрации Desktop и HTTP-клиент остаются здесь.
