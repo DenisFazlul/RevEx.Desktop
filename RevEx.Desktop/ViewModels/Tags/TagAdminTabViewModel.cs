@@ -44,8 +44,8 @@ public partial class TagAdminTabViewModel(IRevExApiService apiService)
         {
             IsLoading = true;
             ErrorMessage = null;
-            var groupsTask = apiService.GetTagGroupsAsync();
-            var tagsTask = apiService.GetTagsAsync();
+            var groupsTask = apiService.TagGroups.GetAllAsync();
+            var tagsTask = apiService.Tags.GetAllAsync();
             await Task.WhenAll(groupsTask, tagsTask);
             Groups.Clear();
             foreach (var groupDto in (await groupsTask).OrderBy(item => item.Name))
@@ -82,13 +82,13 @@ public partial class TagAdminTabViewModel(IRevExApiService apiService)
         {
             if (SelectedGroup is null)
             {
-                var created = await apiService.CreateTagGroupAsync(new CreateTagGroupDto { Name = name });
+                var created = await apiService.TagGroups.CreateAsync(new CreateTagGroupDto { Name = name });
                 Groups.Add(CreateGroupItem(created));
                 Message = "Группа создана.";
             }
             else
             {
-                await apiService.UpdateTagGroupAsync(SelectedGroup.Id, new UpdateTagGroupDto { Name = name });
+                await apiService.TagGroups.UpdateAsync(SelectedGroup.Id, new UpdateTagGroupDto { Name = name });
                 SelectedGroup.Name = name;
                 Message = "Группа переименована.";
             }
@@ -120,7 +120,7 @@ public partial class TagAdminTabViewModel(IRevExApiService apiService)
         await RunAsync(async () =>
         {
             var group = SelectedGroup;
-            await apiService.DeleteTagGroupAsync(group.Id);
+            await apiService.TagGroups.DeleteAsync(group.Id);
             Groups.Remove(group);
             SelectedGroup = null;
             IsGroupEditorOpen = false;
@@ -137,7 +137,7 @@ public partial class TagAdminTabViewModel(IRevExApiService apiService)
         if (string.IsNullOrWhiteSpace(name)) { ErrorMessage = "Укажите название тега."; return; }
         await RunAsync(async () =>
         {
-            var created = await apiService.CreateTagAsync(new CreateTagDto { Name = name, TagGroupId = SelectedTagGroup.Id });
+            var created = await apiService.Tags.CreateAsync(new CreateTagDto { Name = name, TagGroupId = SelectedTagGroup.Id });
             var tag = new TagItemViewModel(created);
             SelectedTagGroup.Tags.Add(tag);
             SelectedTagGroup.NotifyTagCountChanged();
@@ -158,7 +158,7 @@ public partial class TagAdminTabViewModel(IRevExApiService apiService)
             var tag = SelectedTag;
             var targetGroup = SelectedTagGroup;
             var oldGroup = Groups.First(group => group.Id == tag.TagGroupId);
-            await apiService.UpdateTagAsync(tag.Id, new UpdateTagDto { Name = name, TagGroupId = targetGroup.Id });
+            await apiService.Tags.UpdateAsync(tag.Id, new UpdateTagDto { Name = name, TagGroupId = targetGroup.Id });
             tag.Name = name;
             if (oldGroup.Id != targetGroup.Id)
             {
@@ -188,7 +188,7 @@ public partial class TagAdminTabViewModel(IRevExApiService apiService)
         await RunAsync(async () =>
         {
             var tag = SelectedTag;
-            await apiService.DeleteTagAsync(tag.Id);
+            await apiService.Tags.DeleteAsync(tag.Id);
             var group = Groups.First(item => item.Id == tag.TagGroupId);
             group.Tags.Remove(tag);
             group.SelectedTag = null;
@@ -266,7 +266,7 @@ public partial class TagAdminTabViewModel(IRevExApiService apiService)
 
     public async Task<bool> AddGroupFromDialogAsync(string name) => await ExecuteDialogActionAsync(async () =>
     {
-        var created = await apiService.CreateTagGroupAsync(new CreateTagGroupDto { Name = name.Trim() });
+        var created = await apiService.TagGroups.CreateAsync(new CreateTagGroupDto { Name = name.Trim() });
         Groups.Add(CreateGroupItem(created));
         Message = "Группа создана.";
         NotifyStateChanged();
@@ -275,7 +275,7 @@ public partial class TagAdminTabViewModel(IRevExApiService apiService)
     public async Task<bool> EditGroupFromDialogAsync(TagGroupItemViewModel group, string name) =>
         await ExecuteDialogActionAsync(async () =>
         {
-            await apiService.UpdateTagGroupAsync(group.Id, new UpdateTagGroupDto { Name = name.Trim() });
+            await apiService.TagGroups.UpdateAsync(group.Id, new UpdateTagGroupDto { Name = name.Trim() });
             group.Name = name.Trim();
             Message = "Группа переименована.";
         });
@@ -284,7 +284,7 @@ public partial class TagAdminTabViewModel(IRevExApiService apiService)
         await ExecuteDialogActionAsync(async () =>
         {
             if (group.Tags.Count > 0) throw new InvalidOperationException("Сначала удалите или перенесите теги группы.");
-            await apiService.DeleteTagGroupAsync(group.Id);
+            await apiService.TagGroups.DeleteAsync(group.Id);
             Groups.Remove(group);
             Message = "Группа удалена.";
             NotifyStateChanged();
@@ -293,7 +293,7 @@ public partial class TagAdminTabViewModel(IRevExApiService apiService)
     public async Task<bool> AddTagFromDialogAsync(string name, TagGroupItemViewModel group) =>
         await ExecuteDialogActionAsync(async () =>
         {
-            var created = await apiService.CreateTagAsync(new CreateTagDto { Name = name.Trim(), TagGroupId = group.Id });
+            var created = await apiService.Tags.CreateAsync(new CreateTagDto { Name = name.Trim(), TagGroupId = group.Id });
             group.Tags.Add(new TagItemViewModel(created));
             group.NotifyTagCountChanged();
             Message = "Тег создан.";
@@ -305,7 +305,7 @@ public partial class TagAdminTabViewModel(IRevExApiService apiService)
         TagGroupItemViewModel targetGroup) => await ExecuteDialogActionAsync(async () =>
     {
         var oldGroup = Groups.First(group => group.Id == tag.TagGroupId);
-        await apiService.UpdateTagAsync(tag.Id, new UpdateTagDto { Name = name.Trim(), TagGroupId = targetGroup.Id });
+        await apiService.Tags.UpdateAsync(tag.Id, new UpdateTagDto { Name = name.Trim(), TagGroupId = targetGroup.Id });
         tag.Name = name.Trim();
         if (oldGroup.Id != targetGroup.Id)
         {
@@ -321,7 +321,7 @@ public partial class TagAdminTabViewModel(IRevExApiService apiService)
     public async Task<bool> DeleteTagFromDialogAsync(TagItemViewModel tag) =>
         await ExecuteDialogActionAsync(async () =>
         {
-            await apiService.DeleteTagAsync(tag.Id);
+            await apiService.Tags.DeleteAsync(tag.Id);
             var group = Groups.First(item => item.Id == tag.TagGroupId);
             group.Tags.Remove(tag);
             group.NotifyTagCountChanged();

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
         <TargetFramework>net8.0</TargetFramework>
@@ -28,7 +28,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\RevEx.Desktop.Auth\RevEx.Desktop.Auth.csproj" />
+      <ProjectReference Include="..\RevEx.Desktop.Updates\RevEx.Desktop.Updates.csproj" />
       <ProjectReference Include="..\RevEx.Desktop.Core\RevEx.Desktop.Core.csproj" />
       <ProjectReference Include="..\RevEx.Connector.Contracts\RevEx.Connector.Contracts.csproj" />
       <ProjectReference Include="..\RevEx.Desktop.Connectors\RevEx.Desktop.Connectors.csproj" />

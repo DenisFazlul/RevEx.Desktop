@@ -1,9 +1,18 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-</PropertyGroup>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Duende.IdentityModel.OidcClient" Version="7.1.0" />
+        <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.11" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <EmbeddedResource Include="Authentication\Assets\AuthorizationCompleted.html" />
+    </ItemGroup>
 
 </Project>

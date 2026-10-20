@@ -8,7 +8,7 @@ dotnet build RevEx.Desktop.sln -c Release --no-restore
 ```
 
 Release-сборка проверена без ошибок и предупреждений 20.10.2026.
-Отдельного тестового проекта в текущем solution нет. Не подменяйте smoke-проверку
+Проверки модуля обновления находятся в `tests/StartupUpdateChecks` и запускаются через `dotnet run --project tests/StartupUpdateChecks/StartupUpdateChecks.csproj -c Release`. Не подменяйте smoke-проверку
 приложения только успешной компиляцией: OIDC и каталог требуют запущенного сервера.
 
 Изменение UI проверяйте запуском соответствующей вкладки; изменение API DTO —
@@ -26,8 +26,7 @@ dotnet publish RevEx.Desktop/RevEx.Desktop.csproj -c Release -r win-x64 --self-c
 
 Это папка публикации, а не установщик и не ZIP-контракт релизного сервера.
 Упаковку, поддерживаемые платформы, публикацию и политику версий смотрите в
-`RevEx.Web/docs/DESKTOP_RELEASES.md`. Наличие серверного API обновлений не доказывает
-наличие автоматического обновления в текущем `Program.cs` Desktop.
+`RevEx.Web/docs/DESKTOP_RELEASES.md`. Текущий Program.cs вызывает DesktopUpdates.Initialize(); установленный клиент выполняет сценарий обновления по политике backend. См. [модуль обновления](UPDATES.md).
 
 ## Совместимость Revit 2020
 

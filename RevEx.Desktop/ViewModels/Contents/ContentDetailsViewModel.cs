@@ -121,11 +121,11 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
             IsLoading = true;
             ErrorMessage = null;
             TagMessage = null;
-            var contentTask = _apiService.GetContentAsync(Id);
-            var versionsTask = _apiService.GetContentVersionsAsync();
-            var tagsTask = _apiService.GetTagsAsync();
-            var categoriesTask = _apiService.GetCategoriesAsync();
-            var historyTask = _apiService.GetContentHistoryAsync(Id);
+            var contentTask = _apiService.Contents.GetByIdAsync(Id);
+            var versionsTask = _apiService.ContentVersions.GetAllAsync();
+            var tagsTask = _apiService.Tags.GetAllAsync();
+            var categoriesTask = _apiService.Categories.GetAllAsync();
+            var historyTask = _apiService.ContentHistory.GetAllAsync(Id);
             await Task.WhenAll(contentTask, versionsTask, tagsTask, categoriesTask, historyTask);
 
             var content = await contentTask
@@ -168,7 +168,7 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         try
         {
             ErrorMessage = null;
-            _allTags = await _apiService.GetTagsAsync();
+            _allTags = await _apiService.Tags.GetAllAsync();
             NotifyCollectionStateChanged();
             return AvailableTags;
         }
@@ -199,7 +199,7 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
             VersionErrorMessage = null;
             VersionMessage = null;
             SelectedVersion = version;
-            var files = await _apiService.GetContentFilesAsync();
+            var files = await _apiService.ContentFiles.GetAllAsync();
             ReplaceVersionFiles(files.Where(item => item.ContentVersionId == version.Id));
         }
         catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
@@ -225,7 +225,7 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
             VersionErrorMessage = null;
             VersionMessage = null;
             await using var stream = File.OpenRead(path);
-            var updated = await _apiService.UploadContentVersionFileAsync(
+            var updated = await _apiService.ContentVersions.UploadFileAsync(
                 SelectedVersion.Id, stream, fileName, SelectedFileRole.Value);
             ReplaceVersion(updated);
             await SelectVersionAsync(updated);
@@ -252,7 +252,7 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
             IsSavingVersionFile = true;
             VersionErrorMessage = null;
             VersionMessage = null;
-            await _apiService.DeleteContentVersionFileAsync(SelectedVersion.Id, file.Id);
+            await _apiService.ContentVersions.DeleteFileAsync(SelectedVersion.Id, file.Id);
             VersionFiles.Remove(file);
             SelectedVersion = SelectedVersion with
             {
@@ -314,7 +314,7 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
             var connectorFiles = new List<ContentVersionLoadFile>(queuedFiles.Count);
             foreach (var file in queuedFiles)
             {
-                var bytes = await _apiService.DownloadContentFileAsync(file.ContentFileId);
+                var bytes = await _apiService.ContentFiles.DownloadAsync(file.ContentFileId);
                 await File.WriteAllBytesAsync(file.Path, bytes);
                 connectorFiles.Add(new ContentVersionLoadFile(
                     file.LoadingId,
@@ -347,7 +347,7 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
             ErrorMessage = null;
             PreviewMessage = "Загружаем изображение…";
             await using var stream = File.OpenRead(path);
-            _content = await _apiService.UploadContentPreviewAsync(Id, stream, fileName);
+            _content = await _apiService.Contents.UploadPreviewAsync(Id, stream, fileName);
             await LoadPreviewAsync(_content.PreviewFileId);
             await RefreshHistoryAsync();
             PreviewMessage = "Изображение обновлено.";
@@ -381,7 +381,7 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
             ContentMessage = null;
             name = name.Trim();
             description = description.Trim();
-            await _apiService.UpdateContentAsync(Id, CreateUpdateRequest(name, description, _content.TagIds));
+            await _apiService.Contents.UpdateAsync(Id, CreateUpdateRequest(name, description, _content.TagIds));
             _content = _content with { Name = name, Description = description, UpdatedAt = DateTimeOffset.UtcNow };
             Name = name;
             Description = description;
@@ -419,7 +419,7 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
             IsSavingContent = true;
             ErrorMessage = null;
             ContentMessage = null;
-            await _apiService.UpdateContentAsync(
+            await _apiService.Contents.UpdateAsync(
                 Id,
                 CreateUpdateRequest(_content.Name, _content.Description, _content.TagIds, category.Id));
             _content = _content with { CategoryId = category.Id, UpdatedAt = DateTimeOffset.UtcNow };
@@ -444,7 +444,7 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         {
             IsDeleting = true;
             ErrorMessage = null;
-            await _apiService.DeleteContentAsync(Id);
+            await _apiService.Contents.DeleteAsync(Id);
             _close();
         }
         catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
@@ -480,7 +480,7 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         if (_content is null)
             return;
 
-        await _apiService.UpdateContentAsync(
+        await _apiService.Contents.UpdateAsync(
             Id,
             CreateUpdateRequest(_content.Name, _content.Description, tagIds));
         _content = _content with { TagIds = tagIds, UpdatedAt = DateTimeOffset.UtcNow };
@@ -491,7 +491,7 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
     {
         try
         {
-            ReplaceHistory(await _apiService.GetContentHistoryAsync(Id));
+            ReplaceHistory(await _apiService.ContentHistory.GetAllAsync(Id));
             NotifyCollectionStateChanged();
         }
         catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
@@ -530,7 +530,7 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         Bitmap? image = null;
         if (fileId is int id)
         {
-            var bytes = await _apiService.DownloadContentFileAsync(id);
+            var bytes = await _apiService.ContentFiles.DownloadAsync(id);
             using var stream = new MemoryStream(bytes);
             image = new Bitmap(stream);
         }

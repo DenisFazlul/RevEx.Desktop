@@ -2,7 +2,7 @@ using System;
 using System.Net.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using RevEx.Desktop.Auth;
+using RevEx.Desktop.Core.Authentication;
 using RevEx.Desktop.Core.Interfaces;
 using RevEx.Desktop.Core.Services;
 using RevEx.Desktop.Navigation;
@@ -14,6 +14,7 @@ using RevEx.Connector.Contracts;
 using RevEx.Desktop.Connectors;
 using RevEx.Configuration;
 using RevEx.LoadingQueue;
+using RevEx.Desktop.Updates;
 
 namespace RevEx.Desktop.DI;
 
@@ -27,7 +28,17 @@ public static class ServiceExtensions
 
         services.AddSingleton<AppSettings>(appSettings);
         services.AddSingleton<IAppSettings>(appSettings);
+        services.AddDesktopUpdates();
         services.AddRevExtApiConnection(appSettings);
+        services.AddTransient<IRevExApiService, RevExApiService>();
+        services.AddTransient<IContentRepository, ContentRepository>();
+        services.AddTransient<ICategoryRepository, CategoryRepository>();
+        services.AddTransient<ITagRepository, TagRepository>();
+        services.AddTransient<ITagGroupRepository, TagGroupRepository>();
+        services.AddTransient<IContentStatusRepository, ContentStatusRepository>();
+        services.AddTransient<IContentVersionRepository, ContentVersionRepository>();
+        services.AddTransient<IContentFileRepository, ContentFileRepository>();
+        services.AddTransient<IContentHistoryRepository, ContentHistoryRepository>();
         services.AddSingleton<IConnectorRegistry, ConnectorRegistry>();
         services.AddSingleton<IFileLoadingQueue, FileLoadingQueue>();
         services.AddSingleton(provider => new DesktopConnectorServer(
@@ -115,9 +126,14 @@ public static class ServiceExtensions
         this IServiceCollection services,
         AppSettings appSettings) =>
         services
-            .AddHttpClient<IRevExApiService, RevExApiService>(httpClient =>
+            .AddHttpClient<RevExApiTransport>(httpClient =>
             {
                 httpClient.BaseAddress = new Uri(appSettings.ApiPath);
+                if (DesktopUpdates.InstalledVersion is { } version)
+                {
+                    httpClient.DefaultRequestHeaders.Add("X-RevEx-Desktop-Version", version);
+                    httpClient.DefaultRequestHeaders.Add("X-RevEx-Desktop-Platform", DesktopUpdates.Platform);
+                }
             })
             .AddConfiguredAuthentication(appSettings.Authentication);
 

@@ -2,7 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using RevEx.Desktop.Core.Interfaces;
 using RevEx.Desktop.Core.Services;
 
-namespace RevEx.Desktop.Auth;
+namespace RevEx.Desktop.Core.Authentication;
 
 public static class AuthenticationServiceExtensions
 {
