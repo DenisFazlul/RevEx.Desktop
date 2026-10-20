@@ -58,3 +58,5 @@ Mock выбирает порт и регистрируется в Desktop, им�
 
 
 Реализация Connector.Host, Connector.Mock, общие Contracts и Configuration вынесены в [RevEx.Connecter](https://github.com/DenisFazlul/RevEx.Connecter). Перед сборкой клонируйте его рядом с RevEx.Desktop: проекты используют относительные ProjectReference. Сервер регистрации Desktop и HTTP-клиент остаются здесь.
+
+Для встроенного listener плагина Revit 2020 ConnectorClient буферизует JSON перед POST, чтобы отправить Content-Length. Chunked request body этот listener не поддерживает и отклоняет с HTTP 411. Проверка настоящего DesktopConnectorServer/ConnectorClient с отдельным процессом плагина находится в RevEx.RevitPlugin/tests/DesktopIntegrationChecks.

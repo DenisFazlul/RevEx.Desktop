@@ -35,9 +35,12 @@ public sealed class ConnectorClient(HttpClient httpClient) : IConnectorClient
         TRequest request,
         CancellationToken cancellationToken)
     {
-        using var response = await httpClient.PostAsJsonAsync(
+        // The in-process .NET Framework listener requires Content-Length, not chunked transfer.
+        using var content = JsonContent.Create(request);
+        await content.LoadIntoBufferAsync();
+        using var response = await httpClient.PostAsync(
             new Uri(connector.BaseAddress, route),
-            request,
+            content,
             cancellationToken);
 
         if (!response.IsSuccessStatusCode)
