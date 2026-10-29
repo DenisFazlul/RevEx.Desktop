@@ -3,7 +3,9 @@ using Avalonia.Platform.Storage;
 using System.Collections.Generic;
 using System.Linq;
 using RevEx.Desktop.Configuration;
-using RevEx.Desktop.Core.Domain;
+using RevEx.Domain.Contracts.Category;
+using RevEx.Domain.Contracts.ContentVersion;
+using RevEx.Domain.Contracts.Tag;
 using RevEx.Desktop.ViewModels.Contents;
 using RevEx.Desktop.Views.Categories;
 using RevEx.Desktop.Views.Common;
@@ -158,7 +160,7 @@ public partial class ContentDetailsView : UserControl
             return;
 
         var selector = new ConnectorSelectionWindow(viewModel.GetAvailableConnectors());
-        var connector = await selector.ShowDialog<RevEx.Connector.Contracts.ConnectorDescriptor?>(owner);
+        var connector = await selector.ShowDialog<RevEx.Domain.Contracts.Connectors.ConnectorDescriptor?>(owner);
         if (connector is not null)
             viewModel.QueueVersionForLoading(connector);
     }
@@ -167,11 +169,11 @@ public partial class ContentDetailsView : UserControl
         object? sender,
         Avalonia.Interactivity.RoutedEventArgs eventArgs)
     {
-        if (sender is not Control { DataContext: ContentHistoryEventDto historyEvent } ||
+        if (sender is not Control { DataContext: ContentHistoryEventViewModel historyEvent } ||
             TopLevel.GetTopLevel(this) is not Window owner)
             return;
 
-        var window = new ContentHistoryDetailsWindow(historyEvent);
+        var window = new ContentHistoryDetailsWindow(historyEvent.Value);
         await window.ShowDialog(owner);
     }
 }

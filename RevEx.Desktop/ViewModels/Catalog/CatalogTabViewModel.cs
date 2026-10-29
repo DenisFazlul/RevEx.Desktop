@@ -7,7 +7,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
-using RevEx.Desktop.Core.Domain;
+using RevEx.Domain.Contracts.Content;
 using RevEx.Desktop.Core.Interfaces;
 using RevEx.Desktop.ViewModels.Categories;
 using RevEx.Desktop.ViewModels.Contents;

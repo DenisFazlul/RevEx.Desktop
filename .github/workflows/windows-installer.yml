@@ -29,7 +29,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Checkout connector dependencies
-        run: git clone https://github.com/DenisFazlul/RevEx.Connecter.git ../RevEx.Connecter
+        uses: actions/checkout@v4
+        with:
+          repository: DenisFazlul/RevEx.Connecter
+          token: ${{ secrets.REVEX_DEPENDENCIES_TOKEN }}
+          path: .dependencies/RevEx.Connecter
+      - name: Checkout domain dependencies
+        uses: actions/checkout@v4
+        with:
+          repository: DenisFazlul/RevEx.Domain
+          token: ${{ secrets.REVEX_DEPENDENCIES_TOKEN }}
+          path: .dependencies/RevEx.Domain
+      - name: Arrange sibling dependencies
+        run: |
+          Move-Item .dependencies/RevEx.Connecter ../RevEx.Connecter
+          Move-Item .dependencies/RevEx.Domain ../RevEx.Domain
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
@@ -41,6 +55,8 @@ jobs:
         run: |
           dotnet run --project tests/StartupUpdateChecks/StartupUpdateChecks.csproj -c Release
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify shared domain UI templates
+        run: dotnet run --project tests/DomainUiChecks/DomainUiChecks.csproj -c Release
       - name: Publish desktop
         run: |
           dotnet publish RevEx.Desktop/RevEx.Desktop.csproj -c Release `

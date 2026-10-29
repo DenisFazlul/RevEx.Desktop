@@ -1,5 +1,6 @@
 using System.Net.Http.Json;
 using RevEx.Connector.Contracts;
+using RevEx.Domain.Contracts.Connectors;
 
 namespace RevEx.Desktop.Connectors;
 

@@ -2,7 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using Avalonia.Threading;
-using RevEx.Connector.Contracts;
+using RevEx.Domain.Contracts.Connectors;
 using RevEx.Desktop.ViewModels.Tabs;
 using RevEx.LoadingQueue;
 

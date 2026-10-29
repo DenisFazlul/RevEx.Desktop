@@ -1,3 +1,4 @@
+using RevEx.Domain.Contracts.DesktopReleases;
 using System.Net;
 using System.Security.Cryptography;
 using RevEx.Desktop.Updates;

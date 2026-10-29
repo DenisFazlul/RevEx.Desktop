@@ -1,6 +1,6 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:domain="using:RevEx.Desktop.Core.Domain"
+        xmlns:domain="using:RevEx.Domain.Contracts.Tag"
         xmlns:vm="using:RevEx.Desktop.ViewModels.Tags"
         x:Class="RevEx.Desktop.Views.Tags.TagSelectionWindow"
         x:DataType="vm:TagSelectionWindowViewModel"

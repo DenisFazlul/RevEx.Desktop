@@ -1,4 +1,4 @@
-using RevEx.Desktop.Core.Domain;
+using RevEx.Domain.Contracts.ContentStatus;
 using RevEx.Desktop.Core.Interfaces;
 
 namespace RevEx.Desktop.Core.Services;

@@ -1,4 +1,4 @@
-using RevEx.Desktop.Core.Domain;
+using RevEx.Domain.Contracts.ContentFile;
 
 namespace RevEx.Desktop.Core.Interfaces;
 

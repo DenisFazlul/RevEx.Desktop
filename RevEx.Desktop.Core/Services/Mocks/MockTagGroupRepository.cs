@@ -1,4 +1,4 @@
-using RevEx.Desktop.Core.Domain;
+using RevEx.Domain.Contracts.Tag;
 using RevEx.Desktop.Core.Interfaces;
 using static RevEx.Desktop.Core.Services.MockApiData;
 

@@ -4,7 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using RevEx.Desktop.Configuration;
-using RevEx.Desktop.Core.Domain;
+using RevEx.Domain.Contracts.Tag;
 using RevEx.Desktop.ViewModels.Contents;
 using RevEx.Desktop.Views.Tags;
 

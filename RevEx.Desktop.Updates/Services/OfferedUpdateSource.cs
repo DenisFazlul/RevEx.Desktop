@@ -1,3 +1,4 @@
+using RevEx.Domain.Contracts.DesktopReleases;
 using System.Net.Http;
 using System.Security.Cryptography;
 using Velopack;

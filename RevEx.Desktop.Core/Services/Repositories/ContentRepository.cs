@@ -1,4 +1,4 @@
-using RevEx.Desktop.Core.Domain;
+using RevEx.Domain.Contracts.Content;
 using RevEx.Desktop.Core.Interfaces;
 using System.Globalization;
 

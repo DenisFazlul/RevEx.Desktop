@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:domain="using:RevEx.Desktop.Core.Domain"
+             xmlns:domain="using:RevEx.Domain.Contracts.ContentVersion"
+        xmlns:history="using:RevEx.Desktop.ViewModels.Contents"
              xmlns:vm="using:RevEx.Desktop.ViewModels.Contents"
              x:Class="RevEx.Desktop.Views.Contents.ContentDetailsView"
              x:DataType="vm:ContentDetailsViewModel">
@@ -236,7 +237,7 @@
                             <ScrollViewer Grid.Row="1">
                                 <ItemsControl ItemsSource="{Binding History}">
                                     <ItemsControl.ItemTemplate>
-                                        <DataTemplate x:DataType="domain:ContentHistoryEventDto">
+                                        <DataTemplate x:DataType="history:ContentHistoryEventViewModel">
                                             <Border Classes="value-box" Margin="0,8,0,0" Padding="12">
                                                 <Grid ColumnDefinitions="180,*,180,150">
                                                     <TextBlock Text="{Binding OccurredAtText}" />

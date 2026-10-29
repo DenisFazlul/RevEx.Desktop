@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using RevEx.Connector.Contracts;
+using RevEx.Domain.Contracts.Connectors;
 
 namespace RevEx.Desktop.ViewModels.Connectors;
 

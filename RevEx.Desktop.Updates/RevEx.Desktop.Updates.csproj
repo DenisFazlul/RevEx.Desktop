@@ -12,4 +12,8 @@
     <ProjectReference Include="../RevEx.Desktop.Core/RevEx.Desktop.Core.csproj" />
     <ProjectReference Include="../../RevEx.Connecter/RevEx.Configuration/RevEx.Configuration.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../RevEx.Domain/src/RevEx.Domain/RevEx.Domain.csproj" Condition="'$(UseRevExDomainPackage)' != 'true'" />
+    <PackageReference Include="RevEx.Domain" Version="1.0.0" Condition="'$(UseRevExDomainPackage)' == 'true'" />
+  </ItemGroup>
 </Project>

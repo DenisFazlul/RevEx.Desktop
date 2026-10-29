@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Controls;
-using RevEx.Desktop.Core.Domain;
+using RevEx.Domain.Contracts.Category;
 
 namespace RevEx.Desktop.Views.Categories;
 

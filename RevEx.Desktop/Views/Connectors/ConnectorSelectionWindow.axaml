@@ -1,6 +1,6 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:contracts="using:RevEx.Connector.Contracts"
+        xmlns:contracts="using:RevEx.Domain.Contracts.Connectors"
         x:Class="RevEx.Desktop.Views.Connectors.ConnectorSelectionWindow"
         Title="Выбор Connector" Width="540" Height="330"
         MinWidth="480" MinHeight="300" WindowStartupLocation="CenterOwner"

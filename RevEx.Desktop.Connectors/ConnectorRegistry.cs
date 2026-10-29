@@ -1,5 +1,5 @@
 using System.Collections.Concurrent;
-using RevEx.Connector.Contracts;
+using RevEx.Domain.Contracts.Connectors;
 
 namespace RevEx.Desktop.Connectors;
 

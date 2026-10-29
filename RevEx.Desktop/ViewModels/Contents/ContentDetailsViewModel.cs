@@ -8,9 +8,15 @@ using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using RevEx.Desktop.Core.Domain;
+using RevEx.Domain.Contracts.Category;
+using RevEx.Domain.Contracts.Content;
+using RevEx.Domain.Contracts.ContentFile;
+using RevEx.Domain.Contracts.ContentHistory;
+using RevEx.Domain.Contracts.ContentVersion;
+using RevEx.Domain.Contracts.Tag;
 using RevEx.Desktop.Core.Interfaces;
 using RevEx.Connector.Contracts;
+using RevEx.Domain.Contracts.Connectors;
 using RevEx.Configuration;
 using RevEx.Desktop.Connectors;
 using RevEx.LoadingQueue;
@@ -54,7 +60,7 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
     public int Id { get; }
     public bool CanEdit { get; }
     public ObservableCollection<ContentVersionDto> Versions { get; } = [];
-    public ObservableCollection<ContentHistoryEventDto> History { get; } = [];
+    public ObservableCollection<ContentHistoryEventViewModel> History { get; } = [];
     public ObservableCollection<ContentVersionFileItemViewModel> VersionFiles { get; } = [];
     public ObservableCollection<ContentTagItemViewModel> Tags { get; } = [];
     public IReadOnlyList<FileRoleOption> FileRoles { get; } =
@@ -572,7 +578,7 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
     {
         History.Clear();
         foreach (var item in history.OrderByDescending(entry => entry.OccurredAt).ThenByDescending(entry => entry.Id))
-            History.Add(item);
+            History.Add(new ContentHistoryEventViewModel(item));
     }
 
     private async Task SelectInitialVersionAsync()

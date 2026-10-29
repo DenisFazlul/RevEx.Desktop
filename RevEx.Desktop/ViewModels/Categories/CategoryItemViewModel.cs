@@ -1,5 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using RevEx.Desktop.Core.Domain;
+using RevEx.Domain.Contracts.Category;
 
 namespace RevEx.Desktop.ViewModels.Categories;
 

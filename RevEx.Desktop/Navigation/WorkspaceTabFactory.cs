@@ -1,7 +1,8 @@
+using RevEx.Domain.Security;
 using System;
 using System.Collections.Generic;
 using RevEx.Desktop.Core.Interfaces;
-using RevEx.Desktop.Core.Domain;
+using RevEx.Domain.Contracts.ContentVersion;
 using RevEx.Desktop.ViewModels.Catalog;
 using RevEx.Desktop.ViewModels.Categories;
 using RevEx.Desktop.ViewModels.Contents;

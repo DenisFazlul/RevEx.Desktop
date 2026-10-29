@@ -1,4 +1,10 @@
-using RevEx.Desktop.Core.Domain;
+using RevEx.Domain.Contracts.Category;
+using RevEx.Domain.Contracts.Content;
+using RevEx.Domain.Contracts.ContentFile;
+using RevEx.Domain.Contracts.ContentHistory;
+using RevEx.Domain.Contracts.ContentStatus;
+using RevEx.Domain.Contracts.ContentVersion;
+using RevEx.Domain.Contracts.Tag;
 
 namespace RevEx.Desktop.Core.Services;
 

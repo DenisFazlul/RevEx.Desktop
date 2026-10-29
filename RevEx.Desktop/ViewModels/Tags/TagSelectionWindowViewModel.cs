@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
-using RevEx.Desktop.Core.Domain;
+using RevEx.Domain.Contracts.Tag;
 
 namespace RevEx.Desktop.ViewModels.Tags;
 

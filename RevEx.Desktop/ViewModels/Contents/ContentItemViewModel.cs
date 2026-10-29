@@ -5,7 +5,7 @@ using System.Linq;
 using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using RevEx.Desktop.Configuration;
-using RevEx.Desktop.Core.Domain;
+using RevEx.Domain.Contracts.Content;
 
 namespace RevEx.Desktop.ViewModels.Contents;
 

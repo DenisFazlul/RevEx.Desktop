@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Controls;
-using RevEx.Connector.Contracts;
+using RevEx.Domain.Contracts.Connectors;
 
 namespace RevEx.Desktop.Views.Connectors;
 

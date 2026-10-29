@@ -5,7 +5,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using RevEx.Desktop.Core.Domain;
+using RevEx.Domain.Contracts.Tag;
 using RevEx.Desktop.Core.Interfaces;
 using RevEx.Desktop.ViewModels.Tabs;
 

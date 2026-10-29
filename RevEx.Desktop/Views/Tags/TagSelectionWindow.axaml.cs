@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Avalonia.Controls;
 using Avalonia.Input;
-using RevEx.Desktop.Core.Domain;
+using RevEx.Domain.Contracts.Tag;
 using RevEx.Desktop.ViewModels.Tags;
 
 namespace RevEx.Desktop.Views.Tags;

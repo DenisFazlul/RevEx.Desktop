@@ -1,4 +1,5 @@
-using RevEx.Desktop.Core.Domain;
+using RevEx.Domain.Contracts.Content;
+using RevEx.Domain.Contracts.ContentFile;
 using RevEx.Desktop.Core.Interfaces;
 using static RevEx.Desktop.Core.Services.MockApiData;
 
