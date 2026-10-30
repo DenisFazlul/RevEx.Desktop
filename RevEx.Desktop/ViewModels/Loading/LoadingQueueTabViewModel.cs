@@ -10,13 +10,13 @@ namespace RevEx.Desktop.ViewModels.Loading;
 
 public sealed class LoadingQueueTabViewModel : WorkspaceTabViewModel
 {
-    private readonly IFileLoadingQueue _queue;
+    private readonly IConnectorTaskQueue _queue;
 
     public ObservableCollection<LoadingQueueItemViewModel> Items { get; } = [];
     public bool HasItems => Items.Count > 0;
     public bool HasNoItems => !HasItems;
 
-    public LoadingQueueTabViewModel(IFileLoadingQueue queue)
+    public LoadingQueueTabViewModel(IConnectorTaskQueue queue)
         : base("Загрузки", true, "loading-queue")
     {
         _queue = queue;
@@ -43,16 +43,17 @@ public sealed class LoadingQueueTabViewModel : WorkspaceTabViewModel
     }
 }
 
-public sealed class LoadingQueueItemViewModel(FileLoadingQueueItem item)
+public sealed class LoadingQueueItemViewModel(ConnectorTaskQueueItem item)
 {
     public Guid Id => item.Id;
-    public string FileName => item.FileName;
-    public FileLoadingStatus Status => item.Status;
+    public string Name => item.Name;
+    public string? Message => item.Message;
+    public ConnectorTaskStatus Status => item.Status;
     public string StatusText => item.Status switch
     {
-        FileLoadingStatus.Accepted => "Принят",
-        FileLoadingStatus.Started => "Загрузка начата",
-        FileLoadingStatus.Completed => "Загрузка завершена",
+        ConnectorTaskStatus.Sent => "Отправлено",
+        ConnectorTaskStatus.Accepted => "Принято",
+        ConnectorTaskStatus.Done => "Готово",
         _ => item.Status.ToString()
     };
     public string UpdatedAtText => item.UpdatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm:ss");

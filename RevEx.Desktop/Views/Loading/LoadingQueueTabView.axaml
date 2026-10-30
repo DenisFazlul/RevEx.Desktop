@@ -8,7 +8,7 @@
               HorizontalAlignment="Center">
             <HeaderedContentControl Theme="{StaticResource PageHeaderTheme}"
                                     Header="Загрузки"
-                                    Content="Состояние передачи файлов в активный проект Connector" />
+                                    Content="Состояние задач коннектора" />
 
             <Border Grid.Row="2" Classes="card section-card">
                 <StackPanel Spacing="14">
@@ -19,14 +19,16 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="vm:LoadingQueueItemViewModel">
                                 <Border Classes="value-box" Margin="0,0,0,8">
-                                    <Grid ColumnDefinitions="*,20,190,20,150" RowDefinitions="Auto,5,Auto">
-                                        <TextBlock Text="{Binding FileName}" FontWeight="SemiBold"
+                                    <Grid ColumnDefinitions="*,20,190,20,150" RowDefinitions="Auto,5,Auto,5,Auto">
+                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold"
                                                    TextTrimming="CharacterEllipsis" />
                                         <TextBlock Grid.Column="2" Text="{Binding StatusText}" />
                                         <TextBlock Grid.Column="4" Classes="caption"
                                                    Text="{Binding UpdatedAtText}" />
                                         <TextBlock Grid.Row="2" Grid.ColumnSpan="5" Classes="caption"
                                                    Text="{Binding Id}" />
+                                        <TextBlock Grid.Row="4" Grid.ColumnSpan="5" Text="{Binding Message}"
+                                                   TextWrapping="Wrap" Classes="caption" />
                                     </Grid>
                                 </Border>
                             </DataTemplate>

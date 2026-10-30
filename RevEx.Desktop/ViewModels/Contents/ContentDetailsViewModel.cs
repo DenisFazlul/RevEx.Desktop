@@ -19,7 +19,6 @@ using RevEx.Connector.Contracts;
 using RevEx.Domain.Contracts.Connectors;
 using RevEx.Configuration;
 using RevEx.Desktop.Connectors;
-using RevEx.LoadingQueue;
 
 namespace RevEx.Desktop.ViewModels.Contents;
 
@@ -31,8 +30,6 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
     private readonly IRevExApiService _apiService;
     private readonly IConnectorClient _connectorClient;
     private readonly IConnectorRegistry _connectorRegistry;
-    private readonly IFileLoadingQueue _fileLoadingQueue;
-    private readonly Uri _loadingStatusCallbackAddress;
     private ContentDto? _content;
     private IReadOnlyCollection<TagDto> _allTags = [];
     private IReadOnlyCollection<CategoryDto> _categories = [];
@@ -56,6 +53,30 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
     [ObservableProperty] private bool _isSavingVersionFile;
     [ObservableProperty] private string? _versionErrorMessage;
     [ObservableProperty] private string? _versionMessage;
+
+    [ObservableProperty] private bool _isSubscribed;
+    [ObservableProperty] private bool _isChangingSubscription;
+    [ObservableProperty] private string? _subscriptionMessage;
+    public string SubscriptionTip => IsSubscribed ? "Отписаться от изменений" : "Подписаться на изменения";
+    partial void OnIsSubscribedChanged(bool value) => OnPropertyChanged(nameof(SubscriptionTip));
+
+    [RelayCommand]
+    private async Task ToggleSubscriptionAsync()
+    {
+        if (IsChangingSubscription || IsLoading) return;
+        IsChangingSubscription = true;
+        try
+        {
+            await _apiService.ContentHistory.SetSubscriptionAsync(Id, !IsSubscribed);
+            IsSubscribed = !IsSubscribed;
+            SubscriptionMessage = IsSubscribed ? "Вы подписаны на изменения." : "Подписка отменена.";
+        }
+        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
+        {
+            SubscriptionMessage = $"Не удалось изменить подписку: {exception.Message}";
+        }
+        finally { IsChangingSubscription = false; }
+    }
 
     public int Id { get; }
     public bool CanEdit { get; }
@@ -94,8 +115,6 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         IRevExApiService apiService,
         IConnectorClient connectorClient,
         IConnectorRegistry connectorRegistry,
-        IFileLoadingQueue fileLoadingQueue,
-        Uri loadingStatusCallbackAddress,
         bool canEdit,
         Action openVersionEditor,
         Action close,
@@ -108,8 +127,6 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         _apiService = apiService;
         _connectorClient = connectorClient;
         _connectorRegistry = connectorRegistry;
-        _fileLoadingQueue = fileLoadingQueue;
-        _loadingStatusCallbackAddress = loadingStatusCallbackAddress;
         CanEdit = canEdit;
         _openVersionEditor = openVersionEditor;
         _close = close;
@@ -140,6 +157,8 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
             ReplaceHistory(await historyTask);
             await LoadPreviewAsync(content.PreviewFileId);
             await SelectInitialVersionAsync();
+            try { IsSubscribed = await _apiService.ContentHistory.IsSubscribedAsync(Id); }
+            catch (HttpRequestException exception) { SubscriptionMessage = $"Не удалось загрузить подписку: {exception.Message}"; }
 
             NotifyCollectionStateChanged();
         }
@@ -301,7 +320,6 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
             var hasDuplicateName = versionFiles.Count(item =>
                 string.Equals(item.Name, file.Name, StringComparison.OrdinalIgnoreCase)) > 1;
             var path = GetVersionFilePath(targetDirectory, file.Name, file.Id, hasDuplicateName);
-            _fileLoadingQueue.Enqueue(loadingId, file.Name);
             filesToLoad.Add(new QueuedVersionFile(file.Id, loadingId, file.Name, path));
         }
 
@@ -330,13 +348,12 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
 
             var response = await _connectorClient.LoadContentVersionAsync(
                 connector,
-                connectorFiles,
-                _loadingStatusCallbackAddress);
+                connectorFiles);
             if (!response.Success)
                 throw new InvalidOperationException("Connector не подтвердил загрузку версии.");
         }
         catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException or
-                                             IOException or UnauthorizedAccessException or InvalidOperationException)
+                                             IOException or System.Net.Sockets.SocketException or UnauthorizedAccessException or InvalidOperationException)
         {
             Console.Error.WriteLine($"Фоновая загрузка версии не выполнена: {exception}");
         }

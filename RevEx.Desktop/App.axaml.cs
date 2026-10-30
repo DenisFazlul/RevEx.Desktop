@@ -43,6 +43,31 @@ public partial class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+            var shutdownCompleted = false;
+            var shutdownStarted = false;
+            desktop.ShutdownRequested += async (_, e) =>
+            {
+                if (shutdownCompleted) return;
+                e.Cancel = true;
+                if (shutdownStarted) return;
+                shutdownStarted = true;
+                try
+                {
+                    using var timeout = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(10));
+                    await Services.GetRequiredService<IConnectorRuntime>().StopAsync(timeout.Token)
+                        .WaitAsync(timeout.Token);
+                }
+                catch (Exception error)
+                {
+                    Console.Error.WriteLine($"Ошибка остановки коннекторов: {error}");
+                }
+                finally
+                {
+                    (Services.GetRequiredService<RevEx.Connector.Contracts.IConnectorClient>() as IDisposable)?.Dispose();
+                    shutdownCompleted = true;
+                    desktop.Shutdown();
+                }
+            };
             desktop.Startup += async (_, _) => await StartDesktopAsync(desktop);
         }
 
@@ -58,7 +83,7 @@ public partial class App : Application
                 desktop.Shutdown();
                 return;
             }
-            await Services.GetRequiredService<DesktopConnectorServer>().StartAsync();
+            await Services.GetRequiredService<IConnectorRuntime>().StartAsync();
             var authenticationService = Services.GetRequiredService<IAuthenticationService>();
             var accessToken = await authenticationService.GetAccessTokenAsync();
             try
@@ -99,3 +124,4 @@ public partial class App : Application
         return configuration;
     }
 }
+

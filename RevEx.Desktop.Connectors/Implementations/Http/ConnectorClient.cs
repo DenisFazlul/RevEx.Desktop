@@ -4,8 +4,12 @@ using RevEx.Domain.Contracts.Connectors;
 
 namespace RevEx.Desktop.Connectors;
 
-public sealed class ConnectorClient(HttpClient httpClient) : IConnectorClient
+public sealed class ConnectorClient(HttpClient httpClient, Uri? statusCallbackAddress = null) : IConnectorClient
 {
+    public Task<TResponse> ExecuteAsync<TRequest, TResponse>(ConnectorDescriptor connector,
+        ConnectorTask task, TRequest request, CancellationToken cancellationToken = default) =>
+        throw new NotSupportedException("The archived HTTP protocol does not support generic tasks.");
+
     public async Task<ConnectorHealthResponse> GetHealthAsync(
         ConnectorDescriptor connector,
         CancellationToken cancellationToken = default)
@@ -19,14 +23,13 @@ public sealed class ConnectorClient(HttpClient httpClient) : IConnectorClient
     public async Task<LoadContentVersionResponse> LoadContentVersionAsync(
         ConnectorDescriptor connector,
         IReadOnlyCollection<ContentVersionLoadFile> files,
-        Uri statusCallbackAddress,
         CancellationToken cancellationToken = default)
     {
         await GetHealthAsync(connector, cancellationToken);
         return await PostAsync<LoadContentVersionRequest, LoadContentVersionResponse>(
             connector,
             "api/v1/projects/active/content-versions/load",
-            new LoadContentVersionRequest(files, statusCallbackAddress),
+            new LoadContentVersionRequest(files, statusCallbackAddress ?? throw new InvalidOperationException("HTTP status callback address is not configured.")),
             cancellationToken);
     }
 

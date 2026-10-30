@@ -6,11 +6,12 @@
   </PropertyGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <ProjectReference Include="../../RevEx.RevitPlugin/RevEx.RevitPlugin.Connector/RevEx.RevitPlugin.Connector.csproj" />
     <ProjectReference Include="..\..\RevEx.Connecter\RevEx.Connector.Contracts\RevEx.Connector.Contracts.csproj" />
     <ProjectReference Include="..\RevEx.LoadingQueue\RevEx.LoadingQueue.csproj" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../RevEx.Domain/src/RevEx.Domain/RevEx.Domain.csproj" Condition="'$(UseRevExDomainPackage)' != 'true'" />
-    <PackageReference Include="RevEx.Domain" Version="1.0.0" Condition="'$(UseRevExDomainPackage)' == 'true'" />
+    <PackageReference Include="RevEx.Domain" Version="1.0.5" Condition="'$(UseRevExDomainPackage)' == 'true'" />
   </ItemGroup>
 </Project>

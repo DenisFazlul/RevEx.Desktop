@@ -26,7 +26,7 @@ public sealed class WorkspaceTabFactory : IWorkspaceTabFactory
     private readonly IConnectorClient _connectorClient;
     private readonly IConnectorRegistry _connectorRegistry;
     private readonly IRevExUserSettingsStore _userSettingsStore;
-    private readonly IFileLoadingQueue _fileLoadingQueue;
+    private readonly IConnectorTaskQueue _taskQueue;
     private readonly IAuthenticationService _authenticationService;
     private readonly IReadOnlyDictionary<Type, Func<WorkspaceTabContext, object?, WorkspaceTabViewModel>> _factories;
 
@@ -35,7 +35,7 @@ public sealed class WorkspaceTabFactory : IWorkspaceTabFactory
         IConnectorClient connectorClient,
         IConnectorRegistry connectorRegistry,
         IRevExUserSettingsStore userSettingsStore,
-        IFileLoadingQueue fileLoadingQueue,
+        IConnectorTaskQueue taskQueue,
         IAuthenticationService authenticationService,
         IAppSettings settings)
     {
@@ -43,7 +43,7 @@ public sealed class WorkspaceTabFactory : IWorkspaceTabFactory
         _connectorClient = connectorClient;
         _connectorRegistry = connectorRegistry;
         _userSettingsStore = userSettingsStore;
-        _fileLoadingQueue = fileLoadingQueue;
+        _taskQueue = taskQueue;
         _authenticationService = authenticationService;
         _settings = settings;
         _factories = new Dictionary<Type, Func<WorkspaceTabContext, object?, WorkspaceTabViewModel>>
@@ -59,7 +59,7 @@ public sealed class WorkspaceTabFactory : IWorkspaceTabFactory
     }
 
     private WorkspaceTabViewModel CreateLoadingQueueTab(WorkspaceTabContext _, object? __) =>
-        new LoadingQueueTabViewModel(_fileLoadingQueue);
+        new LoadingQueueTabViewModel(_taskQueue);
 
     private WorkspaceTabViewModel CreateSettings(WorkspaceTabContext arg1, object? arg2)
     {
@@ -116,8 +116,6 @@ public sealed class WorkspaceTabFactory : IWorkspaceTabFactory
             _revExApiService,
             _connectorClient,
             _connectorRegistry,
-            _fileLoadingQueue,
-            new Uri(new Uri(_settings.ConnectorRegistrationAddress), "api/v1/loading/status"),
             CanEditContent(),
             () => context.OpenTab(new WorkspaceTabRequest(
                 typeof(ContentEditorTabViewModel),

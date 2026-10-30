@@ -5,10 +5,18 @@
              xmlns:vm="using:RevEx.Desktop.ViewModels.Contents"
              x:Class="RevEx.Desktop.Views.Contents.ContentDetailsView"
              x:DataType="vm:ContentDetailsViewModel">
-    <Grid Margin="32" RowDefinitions="Auto,24,*" MaxWidth="1120" HorizontalAlignment="Stretch">
+    <Grid Margin="32" RowDefinitions="Auto,Auto,*" MaxWidth="1120" HorizontalAlignment="Stretch">
         <HeaderedContentControl Theme="{StaticResource EyebrowHeaderTheme}"
                                 Header="{Binding Title}" Content="Карточка материала из базы знаний" />
 
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8">
+            <ToggleButton IsChecked="{Binding IsSubscribed, Mode=OneWay}"
+                          Command="{Binding ToggleSubscriptionCommand}" IsEnabled="{Binding !IsChangingSubscription}"
+                          ToolTip.Tip="{Binding SubscriptionTip}">
+                <PathIcon Width="20" Height="14" Data="M0,7 Q10,-5 20,7 Q10,19 0,7 Z M13,7 A3,3 0 1 1 7,7 A3,3 0 1 1 13,7" />
+            </ToggleButton>
+            <TextBlock Text="{Binding SubscriptionMessage}" VerticalAlignment="Center" />
+        </StackPanel>
         <TabControl Grid.Row="2">
             <TabItem Header="Основное">
                 <ScrollViewer HorizontalScrollBarVisibility="Disabled">
