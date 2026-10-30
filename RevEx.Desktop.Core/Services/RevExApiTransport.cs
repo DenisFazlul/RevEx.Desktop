@@ -6,6 +6,9 @@ namespace RevEx.Desktop.Core.Services;
 
 public sealed class RevExApiTransport(HttpClient httpClient)
 {
+    internal async Task<bool> GetSubscriptionAsync(int contentId, CancellationToken token) =>
+        await httpClient.GetFromJsonAsync<bool>($"api/content/{contentId}/subscription", token);
+
     internal Task<byte[]> DownloadAsync(string route, CancellationToken cancellationToken) =>
         httpClient.GetByteArrayAsync(route, cancellationToken);
 

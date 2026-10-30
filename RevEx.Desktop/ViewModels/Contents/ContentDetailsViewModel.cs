@@ -54,6 +54,30 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
     [ObservableProperty] private string? _versionErrorMessage;
     [ObservableProperty] private string? _versionMessage;
 
+    [ObservableProperty] private bool _isSubscribed;
+    [ObservableProperty] private bool _isChangingSubscription;
+    [ObservableProperty] private string? _subscriptionMessage;
+    public string SubscriptionTip => IsSubscribed ? "Отписаться от изменений" : "Подписаться на изменения";
+    partial void OnIsSubscribedChanged(bool value) => OnPropertyChanged(nameof(SubscriptionTip));
+
+    [RelayCommand]
+    private async Task ToggleSubscriptionAsync()
+    {
+        if (IsChangingSubscription || IsLoading) return;
+        IsChangingSubscription = true;
+        try
+        {
+            await _apiService.ContentHistory.SetSubscriptionAsync(Id, !IsSubscribed);
+            IsSubscribed = !IsSubscribed;
+            SubscriptionMessage = IsSubscribed ? "Вы подписаны на изменения." : "Подписка отменена.";
+        }
+        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
+        {
+            SubscriptionMessage = $"Не удалось изменить подписку: {exception.Message}";
+        }
+        finally { IsChangingSubscription = false; }
+    }
+
     public int Id { get; }
     public bool CanEdit { get; }
     public ObservableCollection<ContentVersionDto> Versions { get; } = [];
@@ -133,6 +157,8 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
             ReplaceHistory(await historyTask);
             await LoadPreviewAsync(content.PreviewFileId);
             await SelectInitialVersionAsync();
+            try { IsSubscribed = await _apiService.ContentHistory.IsSubscribedAsync(Id); }
+            catch (HttpRequestException exception) { SubscriptionMessage = $"Не удалось загрузить подписку: {exception.Message}"; }
 
             NotifyCollectionStateChanged();
         }
