@@ -46,7 +46,8 @@ public partial class ConnectorItemViewModel(
             IsAvailable = false;
             Status = "Проверка отменена";
         }
-        catch (HttpRequestException)
+        catch (Exception exception) when (exception is HttpRequestException or System.IO.IOException or
+            System.Net.Sockets.SocketException or InvalidOperationException or ObjectDisposedException)
         {
             IsAvailable = false;
             Status = "Недоступен";

@@ -19,7 +19,6 @@ using RevEx.Connector.Contracts;
 using RevEx.Domain.Contracts.Connectors;
 using RevEx.Configuration;
 using RevEx.Desktop.Connectors;
-using RevEx.LoadingQueue;
 
 namespace RevEx.Desktop.ViewModels.Contents;
 
@@ -31,8 +30,6 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
     private readonly IRevExApiService _apiService;
     private readonly IConnectorClient _connectorClient;
     private readonly IConnectorRegistry _connectorRegistry;
-    private readonly IFileLoadingQueue _fileLoadingQueue;
-    private readonly Uri _loadingStatusCallbackAddress;
     private ContentDto? _content;
     private IReadOnlyCollection<TagDto> _allTags = [];
     private IReadOnlyCollection<CategoryDto> _categories = [];
@@ -94,8 +91,6 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         IRevExApiService apiService,
         IConnectorClient connectorClient,
         IConnectorRegistry connectorRegistry,
-        IFileLoadingQueue fileLoadingQueue,
-        Uri loadingStatusCallbackAddress,
         bool canEdit,
         Action openVersionEditor,
         Action close,
@@ -108,8 +103,6 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         _apiService = apiService;
         _connectorClient = connectorClient;
         _connectorRegistry = connectorRegistry;
-        _fileLoadingQueue = fileLoadingQueue;
-        _loadingStatusCallbackAddress = loadingStatusCallbackAddress;
         CanEdit = canEdit;
         _openVersionEditor = openVersionEditor;
         _close = close;
@@ -301,7 +294,6 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
             var hasDuplicateName = versionFiles.Count(item =>
                 string.Equals(item.Name, file.Name, StringComparison.OrdinalIgnoreCase)) > 1;
             var path = GetVersionFilePath(targetDirectory, file.Name, file.Id, hasDuplicateName);
-            _fileLoadingQueue.Enqueue(loadingId, file.Name);
             filesToLoad.Add(new QueuedVersionFile(file.Id, loadingId, file.Name, path));
         }
 
@@ -330,13 +322,12 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
 
             var response = await _connectorClient.LoadContentVersionAsync(
                 connector,
-                connectorFiles,
-                _loadingStatusCallbackAddress);
+                connectorFiles);
             if (!response.Success)
                 throw new InvalidOperationException("Connector не подтвердил загрузку версии.");
         }
         catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException or
-                                             IOException or UnauthorizedAccessException or InvalidOperationException)
+                                             IOException or System.Net.Sockets.SocketException or UnauthorizedAccessException or InvalidOperationException)
         {
             Console.Error.WriteLine($"Фоновая загрузка версии не выполнена: {exception}");
         }

@@ -12,6 +12,11 @@ using RevEx.Desktop.Views;
 using RevEx.Desktop.Views.MainMenu;
 using RevEx.Connector.Contracts;
 using RevEx.Desktop.Connectors;
+using RevEx.RevitPlugin.Connector;
+using RevEx.RevitPlugin.Connector.Implementations.Tcp;
+using RevEx.RevitPlugin.Connector.Implementations.LocalDirectory;
+using RevEx.Desktop.Connectors.Implementations.Tcp;
+using RevEx.Desktop.Connectors.Implementations.LocalDirectory;
 using RevEx.Configuration;
 using RevEx.LoadingQueue;
 using RevEx.Desktop.Updates;
@@ -40,13 +45,11 @@ public static class ServiceExtensions
         services.AddTransient<IContentFileRepository, ContentFileRepository>();
         services.AddTransient<IContentHistoryRepository, ContentHistoryRepository>();
         services.AddSingleton<IConnectorRegistry, ConnectorRegistry>();
-        services.AddSingleton<IFileLoadingQueue, FileLoadingQueue>();
-        services.AddSingleton(provider => new DesktopConnectorServer(
-            provider.GetRequiredService<IConnectorRegistry>(),
-            provider.GetRequiredService<IFileLoadingQueue>(),
-            new Uri(appSettings.ConnectorRegistrationAddress)));
-        services.AddHttpClient<IConnectorClient, ConnectorClient>(httpClient =>
-            httpClient.Timeout = TimeSpan.FromMinutes(2));
+        services.AddSingleton<IConnectorTaskQueue, ConnectorTaskQueue>();
+        services.AddSingleton<IConnectorDiscovery, FileConnectorDiscovery>();
+        services.AddSingleton<IConnectorTransport, TcpConnectorTransport>();
+        services.AddSingleton<IConnectorClient, TcpConnectorClient>();
+        services.AddSingleton<IConnectorRuntime, DirectoryConnectorRuntime>();
 
         services.AddUIServices();
         return services;
@@ -64,17 +67,6 @@ public static class ServiceExtensions
         {
             throw new InvalidOperationException(
                 "Настройка AppSettings:ApiPath должна содержать абсолютный HTTP(S)-адрес.");
-        }
-
-        if (!Uri.TryCreate(
-                settings.ConnectorRegistrationAddress,
-                UriKind.Absolute,
-                out var connectorRegistrationUri) ||
-            connectorRegistrationUri.Scheme != Uri.UriSchemeHttp ||
-            !connectorRegistrationUri.IsLoopback)
-        {
-            throw new InvalidOperationException(
-                "AppSettings:ConnectorRegistrationAddress должен содержать loopback HTTP-адрес.");
         }
 
         ValidateAuthenticationSettings(settings.Authentication);

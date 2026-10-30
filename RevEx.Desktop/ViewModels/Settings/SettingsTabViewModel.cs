@@ -72,15 +72,7 @@ public partial class SettingsTabViewModel : WorkspaceTabViewModel
             return;
         }
 
-        if (!TryNormalizeAddress(
-                ConnectorRegistrationAddress,
-                requireLoopback: true,
-                out var connectorAddress))
-        {
-            SettingsErrorMessage =
-                "Адрес регистрации Connector должен быть loopback HTTP-адресом.";
-            return;
-        }
+        var connectorAddress = _settings.ConnectorRegistrationAddress;
 
         try
         {

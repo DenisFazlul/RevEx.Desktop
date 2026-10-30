@@ -16,7 +16,7 @@
                     <StackPanel Spacing="4">
                         <TextBlock Classes="h2" Text="Подключения" />
                         <TextBlock Classes="caption"
-                                   Text="Адрес основного API и точка регистрации Revit Connector" />
+                                   Text="Адрес основного API; коннекторы обнаруживаются автоматически" />
                     </StackPanel>
 
                     <HeaderedContentControl Grid.Row="2" Theme="{StaticResource FormFieldTheme}"
@@ -25,11 +25,8 @@
                                  Watermark="http://localhost:8080/" />
                     </HeaderedContentControl>
 
-                    <HeaderedContentControl Grid.Row="4" Theme="{StaticResource FormFieldTheme}"
-                                            Header="Адрес регистрации Revit Connector">
-                        <TextBox Text="{Binding ConnectorRegistrationAddress}"
-                                 Watermark="http://127.0.0.1:5060/" />
-                    </HeaderedContentControl>
+                    <TextBlock Grid.Row="4" Classes="caption" TextWrapping="Wrap"
+                               Text="Запущенные коннекторы на этом компьютере подключаются автоматически." />
 
                     <Button Grid.Row="6" Classes="primary" HorizontalAlignment="Left"
                             Content="Сохранить подключения"

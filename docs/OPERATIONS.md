@@ -22,7 +22,7 @@ dotnet run --project RevEx.Desktop/RevEx.Desktop.csproj -c Release
 | Ключ под AppSettings | Текущее значение / назначение |
 | --- | --- |
 | `ApiPath` | `http://localhost:8082/` — опубликованный API Web. |
-| `ConnectorRegistrationAddress` | `http://127.0.0.1:5060/` — локальный сервер регистрации. |
+| `ConnectorRegistrationAddress` | Устаревшая настройка HTTP-реализации; TCP-обнаружение её не использует. |
 | `Authentication:Provider` | `Keycloak`. |
 | `Authentication:RedirectUri` | `http://127.0.0.1:7890/` — OIDC callback. |
 | `Authentication:Providers:Keycloak:Authority` | `http://localhost:8081/realms/revex`. |

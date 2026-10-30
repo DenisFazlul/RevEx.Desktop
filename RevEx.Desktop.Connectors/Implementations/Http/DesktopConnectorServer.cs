@@ -9,7 +9,7 @@ namespace RevEx.Desktop.Connectors;
 
 public sealed class DesktopConnectorServer(
     IConnectorRegistry registry,
-    IFileLoadingQueue loadingQueue,
+    IConnectorTaskQueue loadingQueue,
     Uri address) : IAsyncDisposable
 {
     private WebApplication? _application;
@@ -54,7 +54,8 @@ public sealed class DesktopConnectorServer(
         {
             try
             {
-                loadingQueue.UpdateStatus(update.Id, update.Status);
+                loadingQueue.Update(new ConnectorTaskUpdate(update.Id, update.Status == FileLoadingStatus.Completed
+                    ? ConnectorTaskStatus.Done : ConnectorTaskStatus.Accepted));
                 return Results.NoContent();
             }
             catch (KeyNotFoundException)
