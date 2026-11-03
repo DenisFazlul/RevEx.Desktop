@@ -60,7 +60,7 @@ public sealed class MockRevExApiService : IRevExApiService
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var categoryIds = query.CategoryIds.ToHashSet();
+        var categoryIds = new HashSet<int>(query.CategoryIds);
         var result = Contents.AsEnumerable();
 
         if (categoryIds.Count > 0)
@@ -68,7 +68,7 @@ public sealed class MockRevExApiService : IRevExApiService
             result = result.Where(content => categoryIds.Contains(content.CategoryId));
         }
 
-        var tagIds = query.TagIds.ToHashSet();
+        var tagIds = new HashSet<int>(query.TagIds);
         if (tagIds.Count > 0)
         {
             result = result.Where(content =>
@@ -78,7 +78,7 @@ public sealed class MockRevExApiService : IRevExApiService
         if (!string.IsNullOrWhiteSpace(query.Name))
         {
             result = result.Where(content =>
-                content.Name.Contains(query.Name.Trim(), StringComparison.OrdinalIgnoreCase));
+                content.Name.IndexOf(query.Name!.Trim(), StringComparison.OrdinalIgnoreCase) >= 0);
         }
 
         return Task.FromResult<IReadOnlyCollection<ContentDto>>(result.ToArray());

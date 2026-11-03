@@ -44,8 +44,13 @@ public sealed class RevExApiService(HttpClient httpClient) : IRevExApiService
             null,
             cancellationToken);
 
-    public Task<byte[]> DownloadContentFileAsync(int id, CancellationToken cancellationToken = default) =>
-        httpClient.GetByteArrayAsync($"api/content-files/{id}/content", cancellationToken);
+    public async Task<byte[]> DownloadContentFileAsync(int id, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.GetAsync($"api/content-files/{id}/content", cancellationToken);
+        response.EnsureSuccessStatusCode();
+        cancellationToken.ThrowIfCancellationRequested();
+        return await response.Content.ReadAsByteArrayAsync();
+    }
 
     public Task<IReadOnlyCollection<ContentHistoryEventDto>> GetContentHistoryAsync(
         int contentId,
@@ -171,7 +176,7 @@ public sealed class RevExApiService(HttpClient httpClient) : IRevExApiService
 
         if (!string.IsNullOrWhiteSpace(query.Name))
         {
-            parameters.Add($"Name={Uri.EscapeDataString(query.Name.Trim())}");
+            parameters.Add($"Name={Uri.EscapeDataString(query.Name!.Trim())}");
         }
 
         return parameters.Count == 0
