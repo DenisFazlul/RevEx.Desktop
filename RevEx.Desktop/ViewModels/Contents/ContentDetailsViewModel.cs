@@ -22,6 +22,7 @@ using RevEx.Connector.Client;
 
 namespace RevEx.Desktop.ViewModels.Contents;
 
+/// <summary>Модель карточки контента. Хранит данные и состояние экрана; операции разделены по тематическим файлам.</summary>
 public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
 {
     private readonly Action _openVersionEditor;
@@ -33,37 +34,62 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
     private ContentDto? _content;
     private IReadOnlyCollection<TagDto> _allTags = [];
     private IReadOnlyCollection<CategoryDto> _categories = [];
+    private bool _disposed;
 
-    [ObservableProperty] private bool _isLoading;
-    [ObservableProperty] private bool _isSavingTags;
-    [ObservableProperty] private bool _isUpdatingPreview;
-    [ObservableProperty] private bool _isSavingContent;
-    [ObservableProperty] private bool _isDeleting;
-    [ObservableProperty] private string? _errorMessage;
-    [ObservableProperty] private string? _tagMessage;
-    [ObservableProperty] private string? _previewMessage;
-    [ObservableProperty] private string? _contentMessage;
-    [ObservableProperty] private string _name;
-    [ObservableProperty] private string _description;
-    [ObservableProperty] private string _categoryName = string.Empty;
-    [ObservableProperty] private Bitmap? _previewImage;
-    [ObservableProperty] private ContentVersionDto? _selectedVersion;
-    [ObservableProperty] private FileRoleOption _selectedFileRole;
-    [ObservableProperty] private bool _isLoadingVersion;
-    [ObservableProperty] private bool _isSavingVersionFile;
-    [ObservableProperty] private string? _versionErrorMessage;
-    [ObservableProperty] private string? _versionMessage;
+    [ObservableProperty]
 
-    [ObservableProperty] private bool _isSubscribed;
-    [ObservableProperty] private bool _isChangingSubscription;
-    [ObservableProperty] private string? _subscriptionMessage;
+    private bool _isSavingTags;
+    [ObservableProperty]
+    private bool _isUpdatingPreview;
+    [ObservableProperty]
+    private bool _isSavingContent;
+    [ObservableProperty]
+    private bool _isDeleting;
+    [ObservableProperty]
+    private string? _tagMessage;
+    [ObservableProperty]
+    private string? _previewMessage;
+    [ObservableProperty]
+    private string? _contentMessage;
+    [ObservableProperty]
+    private string _name;
+    [ObservableProperty]
+    private string _description;
+    [ObservableProperty]
+    private string _categoryName = string.Empty;
+    [ObservableProperty]
+    private Bitmap? _previewImage;
+    [ObservableProperty]
+    private ContentVersionDto? _selectedVersion;
+    [ObservableProperty]
+    private FileRoleOption _selectedFileRole;
+    [ObservableProperty]
+    private bool _isLoadingVersion;
+    [ObservableProperty]
+    private bool _isSavingVersionFile;
+    [ObservableProperty]
+    private string? _versionErrorMessage;
+    [ObservableProperty]
+    private string? _versionMessage;
+
+    [ObservableProperty]
+
+    private bool _isSubscribed;
+    [ObservableProperty]
+    private bool _isChangingSubscription;
+    [ObservableProperty]
+    private string? _subscriptionMessage;
     public string SubscriptionTip => IsSubscribed ? "Отписаться от изменений" : "Подписаться на изменения";
     partial void OnIsSubscribedChanged(bool value) => OnPropertyChanged(nameof(SubscriptionTip));
 
     [RelayCommand]
     private async Task ToggleSubscriptionAsync()
     {
-        if (IsChangingSubscription || IsLoading) return;
+        if (IsChangingSubscription || IsLoading)
+        {
+            return;
+        }
+
         IsChangingSubscription = true;
         try
         {
@@ -75,18 +101,30 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         {
             SubscriptionMessage = $"Не удалось изменить подписку: {exception.Message}";
         }
-        finally { IsChangingSubscription = false; }
+        finally
+        {
+            IsChangingSubscription = false;
+        }
     }
 
-    public int Id { get; }
-    public bool CanEdit { get; }
+    public int Id
+    {
+        get;
+    }
+    public bool CanEdit
+    {
+        get;
+    }
     public ObservableCollection<ContentVersionDto> Versions { get; } = [];
     public ObservableCollection<ContentHistoryEventViewModel> History { get; } = [];
     public ObservableCollection<ContentVersionFileItemViewModel> VersionFiles { get; } = [];
     public ObservableCollection<ContentTagItemViewModel> Tags { get; } = [];
-    public IReadOnlyList<FileRoleOption> FileRoles { get; } =
+    public IReadOnlyList<FileRoleOption> FileRoles
+    {
+        get;
+    } =
     [
-        new("primary", "Основной RFA"),
+        new("primary", "Основной файл"),
         new("type-catalog", "Каталог типов TXT"),
         new("lookup-table", "Таблица поиска CSV"),
         new("attachment", "Вложение")
@@ -157,8 +195,14 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
             ReplaceHistory(await historyTask);
             await LoadPreviewAsync(content.PreviewFileId);
             await SelectInitialVersionAsync();
-            try { IsSubscribed = await _apiService.ContentHistory.IsSubscribedAsync(Id); }
-            catch (HttpRequestException exception) { SubscriptionMessage = $"Не удалось загрузить подписку: {exception.Message}"; }
+            try
+            {
+                IsSubscribed = await _apiService.ContentHistory.IsSubscribedAsync(Id);
+            }
+            catch (HttpRequestException exception)
+            {
+                SubscriptionMessage = $"Не удалось загрузить подписку: {exception.Message}";
+            }
 
             NotifyCollectionStateChanged();
         }
@@ -173,342 +217,8 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         }
     }
 
-    public async Task AssignTagAsync(TagDto tag)
-    {
-        if (_content is null || Tags.Any(item => item.Id == tag.Id))
-            return;
-
-        await RunTagActionAsync(async () =>
-        {
-            var tagIds = Tags.Select(item => item.Id).Append(tag.Id).ToArray();
-            await UpdateTagAssignmentsAsync(tagIds);
-            Tags.Add(new ContentTagItemViewModel(tag, RemoveTagAsync));
-            TagMessage = $"Тег «{tag.Name}» добавлен.";
-            NotifyCollectionStateChanged();
-        });
-    }
-
-    public async Task<IReadOnlyCollection<TagDto>> GetAvailableTagsAsync()
-    {
-        try
-        {
-            ErrorMessage = null;
-            _allTags = await _apiService.Tags.GetAllAsync();
-            NotifyCollectionStateChanged();
-            return AvailableTags;
-        }
-        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
-        {
-            ErrorMessage = $"Не удалось загрузить доступные теги: {exception.Message}";
-            return [];
-        }
-    }
-
-    public void AddOrUpdateVersion(ContentVersionDto version)
-    {
-        var existing = Versions.FirstOrDefault(item => item.Id == version.Id);
-        if (existing is not null)
-            Versions.Remove(existing);
-
-        Versions.Insert(0, version);
-        NotifyCollectionStateChanged();
-        _ = SelectVersionAsync(version);
-    }
-
-    [RelayCommand]
-    private async Task SelectVersionAsync(ContentVersionDto version)
-    {
-        try
-        {
-            IsLoadingVersion = true;
-            VersionErrorMessage = null;
-            VersionMessage = null;
-            SelectedVersion = version;
-            var files = await _apiService.ContentFiles.GetAllAsync();
-            ReplaceVersionFiles(files.Where(item => item.ContentVersionId == version.Id));
-        }
-        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
-        {
-            VersionFiles.Clear();
-            VersionErrorMessage = $"Не удалось загрузить файлы версии: {exception.Message}";
-        }
-        finally
-        {
-            IsLoadingVersion = false;
-            NotifyVersionStateChanged();
-        }
-    }
-
-    public async Task AddVersionFileAsync(string path, string fileName)
-    {
-        if (SelectedVersion is null)
-            return;
-
-        try
-        {
-            IsSavingVersionFile = true;
-            VersionErrorMessage = null;
-            VersionMessage = null;
-            await using var stream = File.OpenRead(path);
-            var updated = await _apiService.ContentVersions.UploadFileAsync(
-                SelectedVersion.Id, stream, fileName, SelectedFileRole.Value);
-            ReplaceVersion(updated);
-            await SelectVersionAsync(updated);
-            VersionMessage = "Файл добавлен в версию.";
-        }
-        catch (Exception exception) when (exception is HttpRequestException or IOException or UnauthorizedAccessException)
-        {
-            VersionErrorMessage = $"Не удалось добавить файл: {exception.Message}";
-        }
-        finally
-        {
-            IsSavingVersionFile = false;
-            NotifyVersionStateChanged();
-        }
-    }
-
-    public async Task DeleteVersionFileAsync(ContentVersionFileItemViewModel file)
-    {
-        if (SelectedVersion is null)
-            return;
-
-        try
-        {
-            IsSavingVersionFile = true;
-            VersionErrorMessage = null;
-            VersionMessage = null;
-            await _apiService.ContentVersions.DeleteFileAsync(SelectedVersion.Id, file.Id);
-            VersionFiles.Remove(file);
-            SelectedVersion = SelectedVersion with
-            {
-                FileIds = SelectedVersion.FileIds.Where(id => id != file.Id).ToArray()
-            };
-            ReplaceVersion(SelectedVersion);
-            VersionMessage = "Файл удалён из версии.";
-        }
-        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
-        {
-            VersionErrorMessage = $"Не удалось удалить файл: {exception.Message}";
-        }
-        finally
-        {
-            IsSavingVersionFile = false;
-            NotifyVersionStateChanged();
-        }
-    }
-
-    public IReadOnlyCollection<ConnectorDescriptor> GetAvailableConnectors() =>
-        _connectorRegistry.GetAll();
-
-    public void QueueVersionForLoading(ConnectorDescriptor connector)
-    {
-        if (SelectedVersion is null || VersionFiles.Count == 0)
-            return;
-
-        VersionErrorMessage = null;
-        var selectedVersion = SelectedVersion;
-        var versionFiles = VersionFiles.ToArray();
-        var targetDirectory = Path.Combine(
-            RevExSettingsPaths.DownloadsDirectory,
-            CreateSafeDirectoryName(Name, $"content-{Id}"),
-            CreateSafeDirectoryName(selectedVersion.Name, $"version-{selectedVersion.Id}"));
-
-        var filesToLoad = new List<QueuedVersionFile>(versionFiles.Length);
-        foreach (var file in versionFiles)
-        {
-            var loadingId = Guid.NewGuid();
-            var hasDuplicateName = versionFiles.Count(item =>
-                string.Equals(item.Name, file.Name, StringComparison.OrdinalIgnoreCase)) > 1;
-            var path = GetVersionFilePath(targetDirectory, file.Name, file.Id, hasDuplicateName);
-            filesToLoad.Add(new QueuedVersionFile(file.Id, loadingId, file.Name, path));
-        }
-
-        VersionMessage = $"В очередь {connector.Name} добавлено файлов: {filesToLoad.Count}.";
-        _ = Task.Run(() => ProcessQueuedVersionAsync(connector, targetDirectory, filesToLoad));
-    }
-
-    private async Task ProcessQueuedVersionAsync(
-        ConnectorDescriptor connector,
-        string targetDirectory,
-        IReadOnlyCollection<QueuedVersionFile> queuedFiles)
-    {
-        try
-        {
-            Directory.CreateDirectory(targetDirectory);
-            var connectorFiles = new List<ContentVersionExecuteDto>(queuedFiles.Count);
-            foreach (var file in queuedFiles)
-            {
-                var bytes = await _apiService.ContentFiles.DownloadAsync(file.ContentFileId);
-                await File.WriteAllBytesAsync(file.Path, bytes);
-                connectorFiles.Add(new ContentVersionExecuteDto(
-                    file.LoadingId,
-                    file.FileName,
-                    file.Path));
-            }
-
-            var response = await _connectorClient.LoadContentVersionAsync(
-                connector,
-                connectorFiles);
-            if (!response.Success)
-                throw new InvalidOperationException("Connector не подтвердил загрузку версии.");
-        }
-        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException or
-                                             IOException or System.Net.Sockets.SocketException or UnauthorizedAccessException or InvalidOperationException)
-        {
-            Console.Error.WriteLine($"Фоновая загрузка версии не выполнена: {exception}");
-        }
-    }
-
-    public async Task UpdatePreviewAsync(string path, string fileName)
-    {
-        if (_content is null)
-            return;
-
-        try
-        {
-            IsUpdatingPreview = true;
-            ErrorMessage = null;
-            PreviewMessage = "Загружаем изображение…";
-            await using var stream = File.OpenRead(path);
-            _content = await _apiService.Contents.UploadPreviewAsync(Id, stream, fileName);
-            await LoadPreviewAsync(_content.PreviewFileId);
-            await RefreshHistoryAsync();
-            PreviewMessage = "Изображение обновлено.";
-        }
-        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException or IOException or UnauthorizedAccessException)
-        {
-            ErrorMessage = $"Не удалось обновить изображение: {exception.Message}";
-            PreviewMessage = null;
-        }
-        finally
-        {
-            IsUpdatingPreview = false;
-        }
-    }
-
-    public async Task UpdateContentInformationAsync(string name, string description)
-    {
-        if (_content is null)
-            return;
-
-        if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(description))
-        {
-            ErrorMessage = "Название и описание не должны быть пустыми.";
-            return;
-        }
-
-        try
-        {
-            IsSavingContent = true;
-            ErrorMessage = null;
-            ContentMessage = null;
-            name = name.Trim();
-            description = description.Trim();
-            await _apiService.Contents.UpdateAsync(Id, CreateUpdateRequest(name, description, _content.TagIds));
-            _content = _content with { Name = name, Description = description, UpdatedAt = DateTimeOffset.UtcNow };
-            Name = name;
-            Description = description;
-            Title = name;
-            _contentUpdated(name, description, _content.CategoryId);
-            await RefreshHistoryAsync();
-            ContentMessage = "Изменения сохранены.";
-        }
-        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
-        {
-            ErrorMessage = $"Не удалось сохранить контент: {exception.Message}";
-        }
-        finally
-        {
-            IsSavingContent = false;
-        }
-    }
-
-    public Task UpdateContentNameAsync(string name) =>
-        UpdateContentInformationAsync(name, Description);
-
-    public Task UpdateContentDescriptionAsync(string description) =>
-        UpdateContentInformationAsync(Name, description);
-
-    public IReadOnlyCollection<CategoryDto> GetCategories() => _categories;
-    public int? GetCurrentCategoryId() => _content?.CategoryId;
-
-    public async Task UpdateContentCategoryAsync(CategoryDto category)
-    {
-        if (_content is null || _content.CategoryId == category.Id)
-            return;
-
-        try
-        {
-            IsSavingContent = true;
-            ErrorMessage = null;
-            ContentMessage = null;
-            await _apiService.Contents.UpdateAsync(
-                Id,
-                CreateUpdateRequest(_content.Name, _content.Description, _content.TagIds, category.Id));
-            _content = _content with { CategoryId = category.Id, UpdatedAt = DateTimeOffset.UtcNow };
-            CategoryName = category.Name;
-            _contentUpdated(_content.Name, _content.Description, category.Id);
-            await RefreshHistoryAsync();
-            ContentMessage = "Категория изменена.";
-        }
-        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
-        {
-            ErrorMessage = $"Не удалось изменить категорию: {exception.Message}";
-        }
-        finally
-        {
-            IsSavingContent = false;
-        }
-    }
-
-    public async Task DeleteContentAsync()
-    {
-        try
-        {
-            IsDeleting = true;
-            ErrorMessage = null;
-            await _apiService.Contents.DeleteAsync(Id);
-            _close();
-        }
-        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
-        {
-            ErrorMessage = $"Не удалось удалить контент: {exception.Message}";
-        }
-        finally
-        {
-            IsDeleting = false;
-        }
-    }
-
     [RelayCommand]
     private void AddVersion() => _openVersionEditor();
-
-    private async Task RemoveTagAsync(ContentTagItemViewModel tag)
-    {
-        if (_content is null)
-            return;
-
-        await RunTagActionAsync(async () =>
-        {
-            var tagIds = Tags.Where(item => item.Id != tag.Id).Select(item => item.Id).ToArray();
-            await UpdateTagAssignmentsAsync(tagIds);
-            Tags.Remove(tag);
-            TagMessage = $"Тег «{tag.Name}» снят с контента.";
-            NotifyCollectionStateChanged();
-        });
-    }
-
-    private async Task UpdateTagAssignmentsAsync(IReadOnlyCollection<int> tagIds)
-    {
-        if (_content is null)
-            return;
-
-        await _apiService.Contents.UpdateAsync(
-            Id,
-            CreateUpdateRequest(_content.Name, _content.Description, tagIds));
-        _content = _content with { TagIds = tagIds, UpdatedAt = DateTimeOffset.UtcNow };
-        await RefreshHistoryAsync();
-    }
 
     private async Task RefreshHistoryAsync()
     {
@@ -523,26 +233,7 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         }
     }
 
-    private async Task RunTagActionAsync(Func<Task> action)
-    {
-        try
-        {
-            IsSavingTags = true;
-            ErrorMessage = null;
-            TagMessage = null;
-            await action();
-        }
-        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
-        {
-            ErrorMessage = $"Не удалось изменить теги: {exception.Message}";
-        }
-        finally
-        {
-            IsSavingTags = false;
-        }
-    }
-
-    partial void OnIsLoadingChanged(bool value) => NotifyCollectionStateChanged();
+    protected override void OnLoadingStateChanged() => NotifyCollectionStateChanged();
     partial void OnPreviewImageChanged(Bitmap? value) => NotifyCollectionStateChanged();
     partial void OnSelectedVersionChanged(ContentVersionDto? value) => NotifyVersionStateChanged();
     partial void OnIsLoadingVersionChanged(bool value) => NotifyVersionStateChanged();
@@ -559,8 +250,27 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         }
 
         var previous = PreviewImage;
+        if (_disposed)
+        {
+            image?.Dispose();
+            return;
+        }
+
         PreviewImage = image;
         previous?.Dispose();
+    }
+
+    public override void Dispose()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _disposed = true;
+        PreviewImage?.Dispose();
+        PreviewImage = null;
+        base.Dispose();
     }
 
     private void ApplyContent(
@@ -588,14 +298,18 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         foreach (var version in versions
                      .Where(item => item.ContentId == Id)
                      .OrderByDescending(item => item.Date))
+        {
             Versions.Add(version);
+        }
     }
 
     private void ReplaceHistory(IEnumerable<ContentHistoryEventDto> history)
     {
         History.Clear();
         foreach (var item in history.OrderByDescending(entry => entry.OccurredAt).ThenByDescending(entry => entry.Id))
+        {
             History.Add(new ContentHistoryEventViewModel(item));
+        }
     }
 
     private async Task SelectInitialVersionAsync()
@@ -605,7 +319,9 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
             : Versions.FirstOrDefault(item => item.Id == SelectedVersion.Id) ?? Versions.FirstOrDefault();
 
         if (selected is not null)
+        {
             await SelectVersionAsync(selected);
+        }
         else
         {
             SelectedVersion = null;
@@ -618,7 +334,9 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
     {
         var existing = Versions.FirstOrDefault(item => item.Id == version.Id);
         if (existing is null)
+        {
             return;
+        }
 
         var index = Versions.IndexOf(existing);
         Versions[index] = version;
@@ -628,7 +346,9 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
     {
         VersionFiles.Clear();
         foreach (var file in files.OrderBy(item => item.Role).ThenBy(item => item.OriginalFileName))
+        {
             VersionFiles.Add(new ContentVersionFileItemViewModel(file, CanEdit));
+        }
     }
 
     private void ReplaceTags(IReadOnlyCollection<int> assignedTagIds)
@@ -637,7 +357,9 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         foreach (var tag in _allTags
                      .Where(item => assignedTagIds.Contains(item.Id))
                      .OrderBy(item => item.Name))
+        {
             Tags.Add(new ContentTagItemViewModel(tag, RemoveTagAsync, CanEdit));
+        }
     }
 
     private void NotifyCollectionStateChanged()
@@ -665,31 +387,6 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         OnPropertyChanged(nameof(SelectedVersionUpdatedAtText));
     }
 
-    private static string CreateSafeDirectoryName(string value, string fallback)
-    {
-        var invalidCharacters = Path.GetInvalidFileNameChars();
-        var sanitized = new string(value.Trim()
-            .Select(character => invalidCharacters.Contains(character) ? '_' : character)
-            .ToArray());
-        return string.IsNullOrWhiteSpace(sanitized) ? fallback : sanitized;
-    }
-
-    private static string GetVersionFilePath(
-        string directory,
-        string fileName,
-        int fileId,
-        bool includeFileId)
-    {
-        var safeName = Path.GetFileName(fileName);
-        if (string.IsNullOrWhiteSpace(safeName))
-            safeName = $"file-{fileId}";
-
-        if (includeFileId)
-            safeName = $"{Path.GetFileNameWithoutExtension(safeName)}-{fileId}{Path.GetExtension(safeName)}";
-
-        return Path.Combine(directory, safeName);
-    }
-
     private UpdateContentDto CreateUpdateRequest(
         string name,
         string description,
@@ -703,41 +400,4 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
             ContentStatusId = _content!.ContentStatusId,
             TagIds = tagIds
         };
-}
-
-public sealed record FileRoleOption(string Value, string Name);
-
-internal sealed record QueuedVersionFile(
-    int ContentFileId,
-    Guid LoadingId,
-    string FileName,
-    string Path);
-
-public sealed class ContentVersionFileItemViewModel
-{
-    public int Id { get; }
-    public string Name { get; }
-    public string RoleName { get; }
-    public string SizeText { get; }
-    public bool CanEdit { get; }
-
-    public ContentVersionFileItemViewModel(ContentFileDto file, bool canEdit = true)
-    {
-        CanEdit = canEdit;
-        Id = file.Id;
-        Name = file.OriginalFileName;
-        RoleName = file.Role switch
-        {
-            "primary" => "Основной RFA",
-            "type-catalog" => "Каталог типов",
-            "lookup-table" => "Таблица поиска",
-            _ => "Вложение"
-        };
-        SizeText = file.SizeBytes switch
-        {
-            < 1024 => $"{file.SizeBytes} Б",
-            < 1024 * 1024 => $"{file.SizeBytes / 1024d:0.#} КБ",
-            _ => $"{file.SizeBytes / (1024d * 1024d):0.#} МБ"
-        };
-    }
 }

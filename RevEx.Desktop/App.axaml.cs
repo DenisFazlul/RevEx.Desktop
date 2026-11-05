@@ -35,7 +35,7 @@ public partial class App : Application
     {
         var configuration = CreateConfig();
         var services = new ServiceCollection();
-        
+
         services.AddServices(configuration);
 
         Services = services.BuildServiceProvider();
@@ -47,9 +47,17 @@ public partial class App : Application
             var shutdownStarted = false;
             desktop.ShutdownRequested += async (_, e) =>
             {
-                if (shutdownCompleted) return;
+                if (shutdownCompleted)
+                {
+                    return;
+                }
+
                 e.Cancel = true;
-                if (shutdownStarted) return;
+                if (shutdownStarted)
+                {
+                    return;
+                }
+
                 shutdownStarted = true;
                 try
                 {

@@ -8,24 +8,17 @@ using RevEx.Desktop.Navigation;
 
 namespace RevEx.Desktop.ViewModels.MainMenu;
 
-public sealed class BtnLink
-{
-    public string Name { get; }
-    public string Symbol { get; }
-    public ICommand OpenCommand { get; }
-
-    public BtnLink(string name, string symbol, WorkspaceTabRequest request, Action<WorkspaceTabRequest> openTab)
-    {
-        Name = name;
-        Symbol = symbol;
-        OpenCommand = new RelayCommand(() => openTab(request));
-    }
-}
-
+/// <summary>Модель главного меню. Хранит доступные разделы и команду выхода из профиля.</summary>
 public sealed class MainMenuViewModel : ViewModelBase
 {
-    public ObservableCollection<BtnLink> BtnLinks { get; }
-    public IAsyncRelayCommand LogoutCommand { get; }
+    public ObservableCollection<BtnLink> BtnLinks
+    {
+        get;
+    }
+    public IAsyncRelayCommand LogoutCommand
+    {
+        get;
+    }
 
     public MainMenuViewModel(
         IEnumerable<BtnLink> links,

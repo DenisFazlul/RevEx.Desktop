@@ -1,4 +1,5 @@
 <UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:common="using:RevEx.Desktop.Views.Common"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:RevEx.Desktop.ViewModels.Contents"
              x:Class="RevEx.Desktop.Views.Contents.ContentEditorTabView"
@@ -103,9 +104,7 @@
                         </Grid>
                     </StackPanel>
 
-                    <ProgressBar IsVisible="{Binding IsSaving}" IsIndeterminate="True" />
-                    <TextBlock Text="{Binding Message}" TextWrapping="Wrap"
-                               Foreground="{StaticResource TextSecondaryBrush}" />
+                    <common:OperationFeedbackView />
 
                     <Button Classes="primary" HorizontalAlignment="Left"
                             Content="Сохранить"

@@ -85,7 +85,9 @@ public sealed class WorkspaceTabFactory : IWorkspaceTabFactory
     public WorkspaceTabViewModel Create(Type tabType, WorkspaceTabContext context, object? parameter = null)
     {
         if (!_factories.TryGetValue(tabType, out var createTab))
+        {
             throw new InvalidOperationException($"Фабрика вкладки {tabType.Name} не зарегистрирована.");
+        }
 
         return createTab(context, parameter);
     }

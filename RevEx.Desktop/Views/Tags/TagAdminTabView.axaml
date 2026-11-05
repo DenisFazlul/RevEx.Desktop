@@ -1,4 +1,5 @@
 <UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:common="using:RevEx.Desktop.Views.Common"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:RevEx.Desktop.ViewModels.Tags"
              x:Class="RevEx.Desktop.Views.Tags.TagAdminTabView"
@@ -24,8 +25,7 @@
                 </Grid>
 
                 <Grid Grid.Row="2">
-                    <ProgressBar IsVisible="{Binding IsLoading}" IsIndeterminate="True"
-                                 VerticalAlignment="Top" />
+
                     <TextBlock IsVisible="{Binding HasNoGroups}"
                                Text="Групп пока нет. Создайте первую группу."
                                HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -89,7 +89,6 @@
                 </Grid>
             </Grid>
         </Border>
-        <TextBlock Grid.Row="3" Margin="2,12,0,0" Text="{Binding ErrorMessage}"
-                   TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" />
+        <common:OperationFeedbackView Grid.Row="3" Margin="2,12,0,0" />
     </Grid>
 </UserControl>

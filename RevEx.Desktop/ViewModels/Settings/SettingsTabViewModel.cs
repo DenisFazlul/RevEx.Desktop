@@ -17,6 +17,7 @@ using RevEx.Desktop.ViewModels.Tabs;
 
 namespace RevEx.Desktop.ViewModels.Settings;
 
+/// <summary>Модель настроек. Сохраняет адрес API и показывает состояние локальных коннекторов.</summary>
 public partial class SettingsTabViewModel : WorkspaceTabViewModel
 {
     private readonly IAppSettings _settings;
@@ -117,7 +118,10 @@ public partial class SettingsTabViewModel : WorkspaceTabViewModel
         _connectorRegistry.Remove(instanceId);
         var item = Connectors.FirstOrDefault(connector => connector.InstanceId == instanceId);
         if (item is not null)
+        {
             Connectors.Remove(item);
+        }
+
         NotifyConnectorStateChanged();
     }
 

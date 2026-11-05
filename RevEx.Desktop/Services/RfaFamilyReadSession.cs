@@ -21,15 +21,33 @@ public sealed class RfaFamilyReadSession : IDisposable
         Connector = connector;
     }
 
-    public string FileName { get; }
-    public string FilePath { get; }
+    public string FileName
+    {
+        get;
+    }
+    public string FilePath
+    {
+        get;
+    }
     public string ContentName => Path.GetFileNameWithoutExtension(FileName);
-    public ConnectorDescriptor Connector { get; }
+    public ConnectorDescriptor Connector
+    {
+        get;
+    }
     public RevitFamilyReadResult Family { get; internal set; } = new();
     public JObject Metadata { get; internal set; } = new();
-    public ContentDto? SavedContent { get; internal set; }
-    public ContentVersionDto? SavedVersion { get; internal set; }
-    public bool IsFileUploaded { get; internal set; }
+    public ContentDto? SavedContent
+    {
+        get; internal set;
+    }
+    public ContentVersionDto? SavedVersion
+    {
+        get; internal set;
+    }
+    public bool IsFileUploaded
+    {
+        get; internal set;
+    }
 
     public void Dispose()
     {

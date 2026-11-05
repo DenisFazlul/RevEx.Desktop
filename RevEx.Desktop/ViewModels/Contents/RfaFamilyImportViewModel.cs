@@ -6,24 +6,23 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using RevEx.Desktop.ViewModels.Common;
+using RevEx.Desktop.ViewModels.Revit;
 using Newtonsoft.Json;
 using RevEx.Desktop.Core.Interfaces;
 using RevEx.Desktop.Services;
 using RevEx.Domain.Contracts.Category;
 using RevEx.Domain.Contracts.ContentVersion;
-using RevEx.Domain.Contracts.Revit;
 
 namespace RevEx.Desktop.ViewModels.Contents;
 
-public partial class RfaFamilyImportViewModel : ViewModelBase, IDisposable
+/// <summary>Модель импорта RFA. Читает семейство через коннектор, заполняет поля и сохраняет новую версию с метаданными.</summary>
+public partial class RfaFamilyImportViewModel : DialogViewModel<ContentVersionDto>, IDisposable
 {
     private readonly IRevExApiService _api;
     private readonly RfaFamilyImportService _import;
     private RfaFamilyReadSession? _session;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(CanSave), nameof(CanChooseFile))]
-    private bool _isBusy;
 
     [ObservableProperty]
     private string _fileName = "Файл не выбран";
@@ -59,19 +58,16 @@ public partial class RfaFamilyImportViewModel : ViewModelBase, IDisposable
     [NotifyPropertyChangedFor(nameof(CanEditContent))]
     private bool _isNewContent = true;
 
-    [ObservableProperty]
-    private string? _message;
-
-    [ObservableProperty]
-    private bool _hasError;
-
     public ObservableCollection<CategoryDto> Categories { get; } = [];
-    public ObservableCollection<RevitFamilyReadResultType> FamilyTypes { get; } = [];
+    public RevitFamilyReadResultViewModel FamilyMetadata { get; } = new();
     public bool CanSave => !IsBusy && _session is not null && SavedVersion is null;
     public bool CanChooseFile => !IsBusy && _session?.SavedVersion is null && _session?.SavedContent is null;
     public bool CanEditContent => IsNewContent && _session?.SavedContent is null;
     public bool CanEditVersion => _session?.SavedVersion is null;
-    public ContentVersionDto? SavedVersion { get; private set; }
+    public ContentVersionDto? SavedVersion
+    {
+        get; private set;
+    }
 
     public RfaFamilyImportViewModel(IRevExApiService api, RfaFamilyImportService import)
     {
@@ -88,7 +84,7 @@ public partial class RfaFamilyImportViewModel : ViewModelBase, IDisposable
 
         _session?.Dispose();
         _session = null;
-        FamilyTypes.Clear();
+        FamilyMetadata.Family = null;
         ContentName = string.Empty;
         Description = string.Empty;
         SelectedCategory = null;
@@ -99,8 +95,8 @@ public partial class RfaFamilyImportViewModel : ViewModelBase, IDisposable
         VersionName = string.Empty;
         TargetDescription = "Читаем выбранное семейство…";
         FileName = Path.GetFileName(path);
-        IsBusy = true;
-        HasError = false;
+        IsLoading = true;
+        ErrorMessage = null;
         Message = "Подбираем коннектор и читаем семейство…";
         try
         {
@@ -118,10 +114,7 @@ public partial class RfaFamilyImportViewModel : ViewModelBase, IDisposable
             var year = Regex.Match(_session.Family.ApplicationVersion ?? _session.Connector.ProductVersion, @"20\d{2}");
             ApplicationVersion = year.Success ? year.Value : string.Empty;
             MetadataJson = _session.Metadata.ToString(Formatting.Indented);
-            foreach (var type in _session.Family.Types)
-            {
-                FamilyTypes.Add(type);
-            }
+            FamilyMetadata.Family = _session.Family;
 
             var existing = await _import.FindContentAsync(ContentName);
             IsNewContent = existing is null;
@@ -144,11 +137,12 @@ public partial class RfaFamilyImportViewModel : ViewModelBase, IDisposable
         {
             _session?.Dispose();
             _session = null;
+            FamilyMetadata.Family = null;
             SetError($"Не удалось подготовить семейство: {exception.Message}");
         }
         finally
         {
-            IsBusy = false;
+            IsLoading = false;
             OnPropertyChanged(nameof(CanEditContent));
             OnPropertyChanged(nameof(CanEditVersion));
         }
@@ -174,8 +168,8 @@ public partial class RfaFamilyImportViewModel : ViewModelBase, IDisposable
             return false;
         }
 
-        IsBusy = true;
-        HasError = false;
+        IsSaving = true;
+        ErrorMessage = null;
         Message = "Сохраняем новую версию, файл и метаданные…";
         try
         {
@@ -191,7 +185,7 @@ public partial class RfaFamilyImportViewModel : ViewModelBase, IDisposable
         }
         finally
         {
-            IsBusy = false;
+            IsSaving = false;
             OnPropertyChanged(nameof(CanEditContent));
             OnPropertyChanged(nameof(CanEditVersion));
         }
@@ -203,9 +197,18 @@ public partial class RfaFamilyImportViewModel : ViewModelBase, IDisposable
         _session = null;
     }
 
-    private void SetError(string message)
+    protected override void OnBusyStateChanged()
     {
-        HasError = true;
-        Message = message;
+        OnPropertyChanged(nameof(CanSave));
+        OnPropertyChanged(nameof(CanChooseFile));
+    }
+
+    [RelayCommand]
+    private async Task SaveAndCloseAsync()
+    {
+        if (await SaveAsync() && SavedVersion is not null)
+        {
+            Complete(SavedVersion);
+        }
     }
 }

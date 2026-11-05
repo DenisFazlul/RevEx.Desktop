@@ -9,6 +9,7 @@ using RevEx.Domain.Contracts.Connectors;
 
 namespace RevEx.Desktop.ViewModels.Connectors;
 
+/// <summary>Модель строки коннектора. Проверяет доступность приложения и показывает результат подключения.</summary>
 public partial class ConnectorItemViewModel(
     ConnectorDescriptor connector,
     IConnectorClient connectorClient,

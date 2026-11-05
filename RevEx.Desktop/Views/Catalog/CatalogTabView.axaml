@@ -1,9 +1,10 @@
 <UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:common="using:RevEx.Desktop.Views.Common"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:RevEx.Desktop.ViewModels.Catalog"
              xmlns:contentVm="using:RevEx.Desktop.ViewModels.Contents"
              x:Class="RevEx.Desktop.Views.Catalog.CatalogTabView" x:DataType="vm:CatalogTabViewModel">
-    <Grid Margin="28" RowDefinitions="Auto,22,*">
+    <Grid Margin="28" RowDefinitions="Auto,22,*,Auto">
         <Grid ColumnDefinitions="*,Auto,12,304">
             <HeaderedContentControl Theme="{StaticResource PageHeaderTheme}" Header="Каталог"
                                     Content="Материалы, инструкции и документы команды" />
@@ -86,5 +87,6 @@
                 </Grid>
             </Border>
         </Grid>
+        <common:OperationFeedbackView Grid.Row="3" Margin="0,12,0,0" />
     </Grid>
 </UserControl>

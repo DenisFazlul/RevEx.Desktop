@@ -1,0 +1,68 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RevEx.Desktop.ViewModels.Revit"
+             xmlns:revit="clr-namespace:RevEx.Domain.Contracts.Revit;assembly=RevEx.Contracts"
+             x:Class="RevEx.Desktop.Views.Revit.RevitFamilyReadResultView"
+             x:DataType="vm:RevitFamilyReadResultViewModel"
+             x:CompileBindings="True">
+    <StackPanel Spacing="12">
+        <TextBlock Classes="caption" Text="Нет метаданных семейства."
+                   IsVisible="{Binding !HasFamily}" />
+        <StackPanel Spacing="12" IsVisible="{Binding HasFamily}">
+            <Grid ColumnDefinitions="*,16,*">
+                <HeaderedContentControl Theme="{StaticResource InfoFieldTheme}"
+                                        Header="Название семейства" Content="{Binding Family.Name}" />
+                <HeaderedContentControl Grid.Column="2" Theme="{StaticResource InfoFieldTheme}"
+                                        Header="Категория" Content="{Binding Family.Category}" />
+            </Grid>
+            <HeaderedContentControl Theme="{StaticResource InfoFieldTheme}"
+                                    Header="Описание семейства" Content="{Binding Family.Description}" />
+            <HeaderedContentControl Theme="{StaticResource InfoFieldTheme}"
+                                    Header="Путь" Content="{Binding Family.Path}" />
+            <Grid ColumnDefinitions="*,16,*,16,*">
+                <HeaderedContentControl Theme="{StaticResource InfoFieldTheme}"
+                                        Header="Версия Revit" Content="{Binding Family.ApplicationVersion}" />
+                <HeaderedContentControl Grid.Column="2" Theme="{StaticResource InfoFieldTheme}"
+                                        Header="VID" Content="{Binding Family.VID.Value}" />
+                <HeaderedContentControl Grid.Column="4" Theme="{StaticResource InfoFieldTheme}"
+                                        Header="CID" Content="{Binding Family.CID.Value}" />
+            </Grid>
+            <TextBlock Classes="label" Text="Типоразмер" />
+            <ComboBox x:Name="TypesBox" ItemsSource="{Binding Types}"
+                      SelectedItem="{Binding SelectedType, Mode=TwoWay}"
+                      IsEnabled="{Binding HasTypes}" HorizontalAlignment="Stretch">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="revit:RevitFamilyReadResultType">
+                        <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <TextBlock Classes="caption" Text="В семействе нет типоразмеров."
+                       IsVisible="{Binding !HasTypes}" />
+            <StackPanel Spacing="8" IsVisible="{Binding HasTypes}">
+                <TextBlock Classes="label" Text="Параметры типоразмера" />
+                <TextBlock x:Name="EmptyParametersText" Classes="caption"
+                           Text="У выбранного типоразмера нет параметров."
+                           IsVisible="{Binding !HasParameters}" />
+                <StackPanel Spacing="6" IsVisible="{Binding HasParameters}">
+                    <Grid ColumnDefinitions="2*,12,2*,12,*">
+                        <TextBlock Classes="label" Text="Параметр" />
+                        <TextBlock Grid.Column="2" Classes="label" Text="Значение" />
+                        <TextBlock Grid.Column="4" Classes="label" Text="Тип хранения" />
+                    </Grid>
+                    <ItemsControl x:Name="ParametersList" ItemsSource="{Binding Parameters}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="revit:RevitFamilyReadResultTypeParameter">
+                                <Grid ColumnDefinitions="2*,12,2*,12,*" Margin="0,3">
+                                    <TextBlock Text="{Binding Name}" TextWrapping="Wrap" />
+                                    <TextBlock Grid.Column="2" Text="{Binding Value}" TextWrapping="Wrap" />
+                                    <TextBlock Grid.Column="4" Text="{Binding StorageType}" TextWrapping="Wrap" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+    </StackPanel>
+</UserControl>

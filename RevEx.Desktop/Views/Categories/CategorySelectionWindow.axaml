@@ -1,6 +1,9 @@
-<Window xmlns="https://github.com/avaloniaui"
+<common:DialogWindow xmlns="https://github.com/avaloniaui"
+        xmlns:common="using:RevEx.Desktop.Views.Common"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:domain="using:RevEx.Domain.Contracts.Category"
+        xmlns:vm="using:RevEx.Desktop.ViewModels.Categories"
+        x:DataType="vm:CategorySelectionViewModel"
         x:Class="RevEx.Desktop.Views.Categories.CategorySelectionWindow"
         Title="Изменение категории" Width="500" Height="300"
         MinWidth="440" MinHeight="280" WindowStartupLocation="CenterOwner"
@@ -12,8 +15,8 @@
 
         <HeaderedContentControl Grid.Row="2" Theme="{StaticResource FormFieldTheme}"
                                 Header="Категория">
-            <ComboBox x:Name="CategoryBox" ItemsSource="{Binding Categories}"
-                      SelectedItem="{Binding SelectedCategory}">
+            <ComboBox x:Name="CategoryBox" ItemsSource="{Binding Items}"
+                      SelectedItem="{Binding SelectedItem}">
                 <ComboBox.ItemTemplate>
                     <DataTemplate x:DataType="domain:CategoryDto">
                         <TextBlock Text="{Binding Name}" />
@@ -23,8 +26,8 @@
         </HeaderedContentControl>
 
         <Grid Grid.Row="3" ColumnDefinitions="*,Auto,10,Auto">
-            <Button Grid.Column="1" Classes="secondary" Content="Отмена" Click="OnCancelClick" />
-            <Button Grid.Column="3" Classes="primary" Content="Сохранить" Click="OnSaveClick" />
+            <Button Grid.Column="1" Classes="secondary" Content="Отмена" Command="{Binding CancelCommand}" />
+            <Button Grid.Column="3" Classes="primary" Content="Сохранить" Command="{Binding AcceptCommand}" />
         </Grid>
     </Grid>
-</Window>
+</common:DialogWindow>

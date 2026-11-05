@@ -1,17 +1,20 @@
-<Window xmlns="https://github.com/avaloniaui"
+<common:DialogWindow xmlns="https://github.com/avaloniaui"
+        xmlns:common="using:RevEx.Desktop.Views.Common"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RevEx.Desktop.ViewModels.Common"
+        x:DataType="vm:DeleteConfirmationViewModel"
         x:Class="RevEx.Desktop.Views.Tags.DeleteConfirmationWindow"
         Title="Подтверждение удаления" Width="440" Height="230"
         MinWidth="400" MinHeight="210" WindowStartupLocation="CenterOwner"
         CanResize="False">
     <Grid Margin="24" RowDefinitions="Auto,14,*,Auto">
         <TextBlock Classes="h2" Text="Удалить?" />
-        <TextBlock Grid.Row="2" Text="{Binding Message}" TextWrapping="Wrap"
+        <TextBlock Grid.Row="2" Text="{Binding Description}" TextWrapping="Wrap"
                    Foreground="{StaticResource TextSecondaryBrush}" />
         <Grid Grid.Row="3" ColumnDefinitions="*,12,*">
-            <Button Content="{Binding CancelButtonText}" Click="OnCancelClick" />
+            <Button Content="{Binding CancelButtonText}" Command="{Binding CancelCommand}" />
             <Button Grid.Column="2" Classes="danger" Content="Удалить"
-                    IsVisible="{Binding CanDelete}" Click="OnDeleteClick" />
+                    IsVisible="{Binding CanDelete}" Command="{Binding DeleteCommand}" />
         </Grid>
     </Grid>
-</Window>
+</common:DialogWindow>

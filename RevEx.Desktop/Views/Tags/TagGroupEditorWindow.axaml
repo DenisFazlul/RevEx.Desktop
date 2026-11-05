@@ -1,5 +1,8 @@
-<Window xmlns="https://github.com/avaloniaui"
+<common:DialogWindow xmlns="https://github.com/avaloniaui"
+        xmlns:common="using:RevEx.Desktop.Views.Common"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RevEx.Desktop.ViewModels.Tags"
+        x:DataType="vm:TagGroupEditorViewModel"
         x:Class="RevEx.Desktop.Views.Tags.TagGroupEditorWindow"
         Title="Группа тегов" Width="460" Height="270"
         MinWidth="400" MinHeight="250" WindowStartupLocation="CenterOwner"
@@ -11,15 +14,15 @@
         </StackPanel>
         <StackPanel Grid.Row="2" Spacing="7">
             <TextBlock Classes="label" Text="Название группы" />
-            <TextBox x:Name="NameBox" Text="{Binding EntityName}" MaxLength="100"
+            <TextBox x:Name="NameBox" Text="{Binding Text}" MaxLength="100"
                      Watermark="Например, Платформа" />
-            <TextBlock x:Name="ValidationMessage" Foreground="{StaticResource TextSecondaryBrush}" />
+            <TextBlock Text="{Binding ValidationMessage}" Foreground="{StaticResource TextSecondaryBrush}" />
         </StackPanel>
         <Grid Grid.Row="4" ColumnDefinitions="Auto,*,Auto,10,Auto">
             <Button Classes="danger" Content="Удалить" IsVisible="{Binding IsEditing}"
-                    Click="OnDeleteClick" />
-            <Button Grid.Column="2" Content="Отмена" Click="OnCancelClick" />
-            <Button Grid.Column="4" Classes="primary" Content="Сохранить" Click="OnSaveClick" />
+                    Command="{Binding DeleteCommand}" />
+            <Button Grid.Column="2" Content="Отмена" Command="{Binding CancelCommand}" />
+            <Button Grid.Column="4" Classes="primary" Content="Сохранить" Command="{Binding SaveCommand}" />
         </Grid>
     </Grid>
-</Window>
+</common:DialogWindow>

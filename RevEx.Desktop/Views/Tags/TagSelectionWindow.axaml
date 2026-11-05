@@ -1,4 +1,5 @@
-<Window xmlns="https://github.com/avaloniaui"
+<common:DialogWindow xmlns="https://github.com/avaloniaui"
+        xmlns:common="using:RevEx.Desktop.Views.Common"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:domain="using:RevEx.Domain.Contracts.Tag"
         xmlns:vm="using:RevEx.Desktop.ViewModels.Tags"
@@ -16,7 +17,7 @@
                 <TextBlock IsVisible="{Binding !HasTags}" Text="Все доступные теги уже добавлены."
                            TextWrapping="Wrap" HorizontalAlignment="Center" VerticalAlignment="Center"
                            Foreground="{StaticResource TextSecondaryBrush}" />
-                <ListBox Classes="clean-list category-list" ItemsSource="{Binding Tags}" SelectedItem="{Binding SelectedTag}"
+                <ListBox Classes="clean-list category-list" ItemsSource="{Binding Tags}" SelectedItem="{Binding SelectedItem}"
                          IsVisible="{Binding HasTags}" DoubleTapped="OnTagDoubleTapped">
                     <ListBox.ItemTemplate>
                         <DataTemplate x:DataType="domain:TagDto">
@@ -30,8 +31,8 @@
             </Grid>
         </Border>
         <Grid Grid.Row="4" ColumnDefinitions="*,12,*">
-            <Button Content="Отмена" Click="OnCancelClick" />
-            <Button Grid.Column="2" Classes="primary" Content="Добавить" Click="OnAddClick" />
+            <Button Content="Отмена" Command="{Binding CancelCommand}" />
+            <Button Grid.Column="2" Classes="primary" Content="Добавить" Command="{Binding AcceptCommand}" />
         </Grid>
     </Grid>
-</Window>
+</common:DialogWindow>

@@ -70,7 +70,8 @@ internal static class RfaImportChecks
                 await first.LoadFileAsync(path);
                 Require(!first.HasError && first.CanSave && first.IsNewContent, first.Message ?? "Reading failed.");
                 Require(first.ContentName == name && first.ConnectorName == "RFA mock reader", "Name or automatic reader selection failed.");
-                Require(first.FamilyTypes.Count == 1 && first.Description == "Mock description" && first.ApplicationVersion == "2026", "Form was not populated.");
+                Require(first.FamilyMetadata.Types.Count == 1 && first.Description == "Mock description" && first.ApplicationVersion == "2026", "Form was not populated.");
+                Require(first.FamilyMetadata.SelectedType?.Name == "Type A", "Imported family type was not selected.");
                 Require(JObject.Parse(first.MetadataJson)["future"]?["nested"]?[1]?["value"]?.Value<int>() == 42, "Unknown connector fields were lost.");
                 first.SelectedCategory = category;
                 versions.FailNextUpload = true;

@@ -1,7 +1,8 @@
-<Window xmlns="https://github.com/avaloniaui"
+<common:DialogWindow xmlns="https://github.com/avaloniaui"
+        xmlns:common="using:RevEx.Desktop.Views.Common"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:RevEx.Desktop.ViewModels.Contents"
-        xmlns:revit="clr-namespace:RevEx.Domain.Contracts.Revit;assembly=RevEx.Contracts"
+        xmlns:revit="using:RevEx.Desktop.Views.Revit"
         x:Class="RevEx.Desktop.Views.Contents.RfaFamilyImportWindow"
         x:DataType="vm:RfaFamilyImportViewModel"
         Title="Добавить семейство RFA" Width="860" Height="780"
@@ -20,7 +21,7 @@
                     <Button Grid.Column="2" Content="Выбрать RFA" Click="OnChooseFileClick"
                             IsEnabled="{Binding CanChooseFile}" />
                 </Grid>
-                <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsBusy}" />
+
                 <TextBlock Text="{Binding TargetDescription}" TextWrapping="Wrap" />
                 <StackPanel Spacing="12" IsEnabled="{Binding !IsBusy}">
                     <Grid ColumnDefinitions="*,16,*" RowDefinitions="Auto,8,Auto">
@@ -48,41 +49,20 @@
                                  IsReadOnly="{Binding !CanEditVersion}" />
                     </Grid>
                 </StackPanel>
-                <Expander Header="Типоразмеры и параметры семейства">
-                    <ItemsControl ItemsSource="{Binding FamilyTypes}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="revit:RevitFamilyReadResultType">
-                                <StackPanel Margin="0,8" Spacing="6">
-                                    <TextBlock FontWeight="SemiBold" Text="{Binding Name}" />
-                                    <ItemsControl ItemsSource="{Binding Parameters}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate x:DataType="revit:RevitFamilyReadResultTypeParameter">
-                                                <Grid ColumnDefinitions="*,12,*" Margin="0,3">
-                                                    <TextBlock Text="{Binding Name}" TextWrapping="Wrap" />
-                                                    <TextBlock Grid.Column="2" Text="{Binding Value}" TextWrapping="Wrap" />
-                                                </Grid>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                <Expander Header="Метаданные семейства" IsExpanded="True">
+                    <revit:RevitFamilyReadResultView DataContext="{Binding FamilyMetadata}" />
                 </Expander>
                 <Expander Header="Метаданные, которые будут сохранены с файлом">
                     <TextBox Text="{Binding MetadataJson}" IsReadOnly="True" AcceptsReturn="True"
                              TextWrapping="Wrap" FontFamily="Consolas" MaxHeight="240" />
                 </Expander>
-                <TextBlock Text="{Binding Message}" TextWrapping="Wrap" IsVisible="{Binding !HasError}"
-                           Foreground="{StaticResource TextSecondaryBrush}" />
-                <TextBlock Text="{Binding Message}" IsVisible="{Binding HasError}" TextWrapping="Wrap"
-                           Foreground="{StaticResource DangerBrush}" />
+                <common:OperationFeedbackView />
             </StackPanel>
         </ScrollViewer>
         <StackPanel Grid.Row="4" Orientation="Horizontal" Spacing="12" HorizontalAlignment="Right">
-            <Button Content="Отмена" Click="OnCancelClick" IsEnabled="{Binding !IsBusy}" />
-            <Button Classes="primary" Content="Сохранить новую версию" Click="OnSaveClick"
+            <Button Content="Отмена" Command="{Binding CancelCommand}" IsEnabled="{Binding !IsBusy}" />
+            <Button Classes="primary" Content="Сохранить новую версию" Command="{Binding SaveAndCloseCommand}"
                     IsEnabled="{Binding CanSave}" />
         </StackPanel>
     </Grid>
-</Window>
+</common:DialogWindow>

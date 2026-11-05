@@ -17,6 +17,7 @@ using RevEx.Desktop.ViewModels.Tabs;
 
 namespace RevEx.Desktop.ViewModels.Contents;
 
+/// <summary>Модель ручного редактора. Проверяет карточку, выбранные файлы и сохраняет контент или новую версию.</summary>
 public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
 {
     private const string NoFamilyFileSelected = "Файл не выбран";
@@ -55,17 +56,9 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
     [ObservableProperty]
     private string _selectedPreviewName = NoPreviewSelected;
 
-    [ObservableProperty]
-    private bool _isLoading;
 
-    [ObservableProperty]
-    private bool _isSaving;
 
-    [ObservableProperty]
-    private string? _message;
 
-    [ObservableProperty]
-    private bool _hasError;
 
     public ObservableCollection<CategoryDto> Categories { get; } = [];
     public ObservableCollection<ContentTagItemViewModel> SelectedTags { get; } = [];
@@ -97,12 +90,14 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
     public override async Task ActivateAsync()
     {
         if (_isLoaded)
+        {
             return;
+        }
 
         try
         {
             IsLoading = true;
-            HasError = false;
+            ErrorMessage = null;
             Message = null;
 
             if (IsCreatingContent)
@@ -114,7 +109,9 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
                 var categories = await categoriesTask;
                 Categories.Clear();
                 foreach (var category in categories.OrderBy(item => item.Name))
+                {
                     Categories.Add(category);
+                }
 
                 SelectedCategory ??= Categories.FirstOrDefault();
                 _availableTags = await tagsTask;
@@ -156,7 +153,9 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
     public void AddTag(TagDto tag)
     {
         if (SelectedTags.Any(item => item.Id == tag.Id))
+        {
             return;
+        }
 
         SelectedTags.Add(new ContentTagItemViewModel(tag, RemoveTagAsync));
         NotifySelectedTagsChanged();
@@ -174,7 +173,7 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
         try
         {
             IsSaving = true;
-            HasError = false;
+            ErrorMessage = null;
             Message = "Сохраняем контент и загружаем Revit-семейство…";
 
             var createdContent = IsCreatingContent ? await CreateContentWithPreviewAsync() : null;
@@ -259,18 +258,6 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
 
         message = string.Empty;
         return true;
-    }
-
-    private void SetError(string message)
-    {
-        HasError = true;
-        Message = message;
-    }
-
-    private void ClearMessage()
-    {
-        Message = null;
-        HasError = false;
     }
 
     private async Task<ContentDto> CreateContentWithPreviewAsync()
