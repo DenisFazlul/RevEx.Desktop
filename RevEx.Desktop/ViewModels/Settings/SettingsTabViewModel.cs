@@ -9,7 +9,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using RevEx.Connector.Contracts;
 using RevEx.Desktop.Core.Interfaces;
-using RevEx.Desktop.Connectors;
+using RevEx.Connector.Client;
 using RevEx.Desktop.Services;
 using RevEx.Configuration;
 using RevEx.Desktop.ViewModels.Connectors;
@@ -26,9 +26,6 @@ public partial class SettingsTabViewModel : WorkspaceTabViewModel
 
     [ObservableProperty]
     private string _apiServerAddress;
-
-    [ObservableProperty]
-    private string _connectorRegistrationAddress;
 
     [ObservableProperty]
     private string? _settingsMessage;
@@ -57,7 +54,6 @@ public partial class SettingsTabViewModel : WorkspaceTabViewModel
         _connectorClient = connectorClient;
         _userSettingsStore = userSettingsStore;
         _apiServerAddress = settings.ApiPath;
-        _connectorRegistrationAddress = settings.ConnectorRegistrationAddress;
     }
 
     [RelayCommand]
@@ -66,26 +62,20 @@ public partial class SettingsTabViewModel : WorkspaceTabViewModel
         SettingsMessage = null;
         SettingsErrorMessage = null;
 
-        if (!TryNormalizeAddress(ApiServerAddress, requireLoopback: false, out var apiAddress))
+        if (!TryNormalizeAddress(ApiServerAddress, out var apiAddress))
         {
             SettingsErrorMessage = "Укажите корректный HTTP(S)-адрес API-сервера.";
             return;
         }
-
-        var connectorAddress = _settings.ConnectorRegistrationAddress;
-
         try
         {
             _userSettingsStore.Save(new RevExUserSettings
             {
-                ApiPath = apiAddress,
-                ConnectorRegistrationAddress = connectorAddress
+                ApiPath = apiAddress
             });
             ApiServerAddress = apiAddress;
-            ConnectorRegistrationAddress = connectorAddress;
             _settings.ApiPath = apiAddress;
-            _settings.ConnectorRegistrationAddress = connectorAddress;
-            SettingsMessage = $"Настройки сохранены в {_userSettingsStore.FilePath}. Они применятся после перезапуска Desktop и коннектеров.";
+            SettingsMessage = $"Настройки сохранены в {_userSettingsStore.FilePath}. Они применятся после перезапуска Desktop.";
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or JsonException)
         {
@@ -139,13 +129,11 @@ public partial class SettingsTabViewModel : WorkspaceTabViewModel
 
     private static bool TryNormalizeAddress(
         string value,
-        bool requireLoopback,
         out string normalizedAddress)
     {
         normalizedAddress = string.Empty;
         if (!Uri.TryCreate(value.Trim(), UriKind.Absolute, out var address) ||
-            (address.Scheme != Uri.UriSchemeHttp && address.Scheme != Uri.UriSchemeHttps) ||
-            (requireLoopback && (address.Scheme != Uri.UriSchemeHttp || !address.IsLoopback)))
+            (address.Scheme != Uri.UriSchemeHttp && address.Scheme != Uri.UriSchemeHttps))
         {
             return false;
         }

@@ -37,7 +37,7 @@ public sealed class MainMenuProvider : IMainMenuProvider
         };
         if (CanEditContent())
         {
-            items.Add(WorkspaceTabDescriptor.Create<ContentEditorTabViewModel>("Добавить контент", "+"));
+            items.Add(WorkspaceTabDescriptor.Create<ContentCreationTabViewModel>("Добавление контента", "+"));
             items.Add(WorkspaceTabDescriptor.Create<LoadingQueueTabViewModel>("Загрузки", "⇩"));
         }
         if (_authenticationService.IsInRole(RevExRoles.Administrator))

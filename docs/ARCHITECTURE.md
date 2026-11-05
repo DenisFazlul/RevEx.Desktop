@@ -6,21 +6,20 @@
 | `RevEx.Desktop.Core` | DTO каталога, интерфейсы, фасад RevExApiService, предметные репозитории, RevExApiTransport, mock API, роли и Authentication. |
 | `RevEx.Desktop.Updates` | Стартовая проверка политики backend, окно обновления, пакеты и установка через Velopack. |
 | `RevEx.Configuration` | Пути настроек и загрузок, хранение user-settings.json, адрес регистрации. |
-| `RevEx.Connector.Contracts` | DTO и интерфейс обмена с коннекторами. |
-| `RevEx.Connector.Host` | HTTP-хост коннектора и регистрация в Desktop. |
-| `RevEx.Desktop.Connectors` | Локальный сервер Desktop, реестр коннекторов и HTTP-клиент. |
-| `RevEx.Connector.Mock` | Исполняемый пример коннектора. |
-| `RevEx.LoadingQueue` | Элементы очереди и смена статусов загрузки. |
+| `RevEx.Connector.Contracts` | Интерфейс клиента из репозитория RevEx.Connector.Client; DTO находятся в Domain. |
+| `RevEx.Connector.Client` | Внешний клиент: TCP-команды, реестр коннекторов и обнаружение. |
+| `RevEx.Connector.Protocol` | Общий TCP-протокол из RevEx.Connecter, без серверных исполнителей. |
+| `RevEx.LoadingQueue` | Клиентская очередь задач из RevEx.Connector.Client. |
 
-Все текущие проекты нацелены на net8.0. Desktop.Core сейчас не предоставляет
-netstandard2.0; это существенно для совместимости с плагином Revit 2020.
+Desktop и реализация клиента нацелены на net8.0. Общий протокол поддерживает
+net472 и netstandard2.0 для совместимости с плагином Revit 2020.
 
 ## Последовательность запуска
 
 `Program.cs` запускает Avalonia. `App.axaml.cs` читает конфигурацию,
 регистрирует зависимости через `DI/ServiceExtensions.cs`, затем:
 
-1. Выполняет StartupUpdateCoordinator: установленный клиент проверяет обновления до входа; IDE-сборка пропускает проверку. Затем запускает DesktopConnectorServer на loopback-порту.
+1. Выполняет StartupUpdateCoordinator: установленный клиент проверяет обновления до входа; IDE-сборка пропускает проверку. Затем запускает IConnectorRuntime для обнаружения локальных TCP-коннекторов.
 2. Получает access token через IAuthenticationService; при необходимости открывает браузер.
 3. После успешного callback отправляет подтверждение версии через ReportAuthenticatedAsync и показывает MainWindow. Ошибка подтверждения не блокирует работу.
 4. При исключении показывает AuthenticationErrorWindow вместо главного окна.
@@ -52,4 +51,8 @@ WindowsAuthenticationService не выдаёт OIDC-токен и содержи
 Работа локального стенда проверялась только с Keycloak.
 
 
-Реализация Connector.Host, Connector.Mock, общие Contracts и Configuration вынесены в [RevEx.Connecter](https://github.com/DenisFazlul/RevEx.Connecter). Перед сборкой клонируйте его рядом с RevEx.Desktop: проекты используют относительные ProjectReference. Сервер регистрации Desktop и HTTP-клиент остаются здесь.
+Клиент, его интерфейс и очередь вынесены в соседний репозиторий RevEx.Connector.Client.
+Серверная библиотека RevEx.Connector, её Host и Mock находятся в RevEx.Connecter;
+Desktop не ссылается на серверную библиотеку и не зависит от проектов Revit.
+Репозитории RevEx.Desktop, RevEx.Connector.Client, RevEx.Connecter и RevEx.Domain
+должны находиться рядом. Ссылки на внешние проекты заданы в csproj и RevEx.Desktop.sln.

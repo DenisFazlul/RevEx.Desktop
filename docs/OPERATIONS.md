@@ -22,7 +22,6 @@ dotnet run --project RevEx.Desktop/RevEx.Desktop.csproj -c Release
 | Ключ под AppSettings | Текущее значение / назначение |
 | --- | --- |
 | `ApiPath` | `http://localhost:8082/` — опубликованный API Web. |
-| `ConnectorRegistrationAddress` | Устаревшая настройка HTTP-реализации; TCP-обнаружение её не использует. |
 | `Authentication:Provider` | `Keycloak`. |
 | `Authentication:RedirectUri` | `http://127.0.0.1:7890/` — OIDC callback. |
 | `Authentication:Providers:Keycloak:Authority` | `http://localhost:8081/realms/revex`. |
@@ -30,8 +29,9 @@ dotnet run --project RevEx.Desktop/RevEx.Desktop.csproj -c Release
 | `Authentication:Providers:Keycloak:Scope` | `openid profile`. |
 | `Authentication:Providers:Keycloak:RequireHttpsMetadata` | `false` для локального HTTP-стенда. |
 
-API-адрес должен быть абсолютным HTTP(S), адрес регистрации — loopback HTTP,
-callback — с хостом 127.0.0.1 и разрешённым redirect в Keycloak.
+API-адрес должен быть абсолютным HTTP(S). OIDC callback должен иметь хост
+127.0.0.1 и разрешённый redirect в Keycloak. Коннекторы обнаруживаются через
+локальный каталог RevEx/connectors, отдельный адрес регистрации не требуется.
 
 | ОС | Пользовательский файл |
 | --- | --- |
@@ -39,9 +39,9 @@ callback — с хостом 127.0.0.1 и разрешённым redirect в Key
 | macOS | `~/Library/Application Support/RevEx/user-settings.json` |
 | Linux | `$XDG_CONFIG_HOME/RevEx/user-settings.json`, fallback `~/.config/RevEx/user-settings.json` |
 
-В этом же каталоге есть `Downloads`. Экран «Настройки» сохраняет ApiPath и
-ConnectorRegistrationAddress внутри объекта `AppSettings` атомарной заменой файла.
-Сохранённые значения применяются после перезапуска Desktop и коннекторов.
+В этом же каталоге есть `Downloads`. Экран «Настройки» сохраняет ApiPath
+внутри объекта `AppSettings` атомарной заменой файла.
+Сохранённое значение применяется после перезапуска Desktop.
 Пользовательский файл имеет приоритет: изменение исходного appsettings не отменяет его значений.
 
 ## Вход и проверка
@@ -63,7 +63,7 @@ ConnectorRegistrationAddress внутри объекта `AppSettings` атом�
 | Симптом | Что проверить |
 | --- | --- |
 | Нет главного окна | Завершён ли браузерный вход; startup ждёт токен. |
-| AuthenticationErrorWindow | Текст ошибки, Keycloak metadata, свободные 5060/7890, настройки callback. |
+| AuthenticationErrorWindow | Текст ошибки, Keycloak metadata, свободный порт 7890, настройки OIDC callback. |
 | Неверный логин/пароль | Используйте revex, а не master; фактический пароль хранится в Keycloak. |
 | 404 от Caddy | Старый ApiPath 8080; нужен 8082, включая user-settings.json. |
 | 401/403 | Срок/issuer/audience токена и роли пользователя. |

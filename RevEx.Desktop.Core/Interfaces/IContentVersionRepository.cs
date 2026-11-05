@@ -17,7 +17,8 @@ public interface IContentVersionRepository
         Stream content,
         string fileName,
         string role,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default,
+        string? metadataJson = null);
 
     Task DeleteFileAsync(
         int versionId,

@@ -18,7 +18,8 @@ public sealed class RevExApiTransport(HttpClient httpClient)
         string fileName,
         string mediaType,
         string? role,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        string? metadataJson = null)
     {
         using var multipartContent = new MultipartFormDataContent();
         using var fileContent = new StreamContent(content);
@@ -26,7 +27,14 @@ public sealed class RevExApiTransport(HttpClient httpClient)
         multipartContent.Add(fileContent, "File", fileName);
 
         if (role is not null)
+        {
             multipartContent.Add(new StringContent(role), "Role");
+        }
+
+        if (metadataJson is not null)
+        {
+            multipartContent.Add(new StringContent(metadataJson), "MetadataJson");
+        }
 
         using var response = await httpClient.PostAsync(route, multipartContent, cancellationToken);
         response.EnsureSuccessStatusCode();

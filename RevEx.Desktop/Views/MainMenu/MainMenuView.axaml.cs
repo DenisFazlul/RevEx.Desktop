@@ -13,7 +13,6 @@ public partial class MainMenuView : UserControl
         InitializeComponent();
     }
 
-    
 
     private void Test_OnClick(object? sender, RoutedEventArgs e)
     {

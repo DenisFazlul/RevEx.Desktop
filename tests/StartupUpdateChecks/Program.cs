@@ -42,7 +42,7 @@ try
     Check(optional.CanContinue && optional.HasUpdate && !optional.Decision.IsCompleted, "Backend optional decision waits for user");
     optional.ContinueWithoutUpdateCommand.Execute(null);
     Check(await optional.Decision, "Optional update may be declined");
-    Check(saved.Value.ConnectorRegistrationAddress == "http://127.0.0.1:7891/", "Saving backend preserves connector address");
+    Check(saved.Value.ApiPath == settings.ApiPath, "Saving backend persists API address");
     var required = Model("required");
     await required.CheckCommand.ExecuteAsync(null);
     required.ContinueWithoutUpdateCommand.Execute(null);
@@ -81,13 +81,12 @@ sealed class Handler(string decision, string target, string? path, bool fail) : 
 sealed class Settings : IAppSettings
 {
     public string ApiPath { get; set; } = "http://localhost:8080/";
-    public string ConnectorRegistrationAddress { get; set; } = "http://127.0.0.1:7891/";
     public AuthenticationSettings Authentication { get; set; } = new();
 }
 sealed class SavedSettings : IRevExUserSettingsStore
 {
     public string FilePath => "memory";
-    public RevExUserSettings Value { get; private set; } = new() { ConnectorRegistrationAddress = "http://127.0.0.1:7891/" };
+    public RevExUserSettings Value { get; private set; } = new();
     public RevExUserSettings Load() => Value;
     public void Save(RevExUserSettings settings) => Value = settings;
 }

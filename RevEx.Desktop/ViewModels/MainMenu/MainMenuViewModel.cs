@@ -27,9 +27,12 @@ public sealed class MainMenuViewModel : ViewModelBase
     public ObservableCollection<BtnLink> BtnLinks { get; }
     public IAsyncRelayCommand LogoutCommand { get; }
 
-    public MainMenuViewModel(IEnumerable<BtnLink> links, Func<Task> logout)
+    public MainMenuViewModel(
+        IEnumerable<BtnLink> links,
+        Func<Task> logout)
     {
         BtnLinks = new ObservableCollection<BtnLink>(links);
         LogoutCommand = new AsyncRelayCommand(logout);
     }
+
 }

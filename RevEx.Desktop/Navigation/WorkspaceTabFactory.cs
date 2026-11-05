@@ -10,7 +10,7 @@ using RevEx.Desktop.ViewModels.Settings;
 using RevEx.Desktop.ViewModels.Tabs;
 using RevEx.Desktop.ViewModels.Tags;
 using RevEx.Connector.Contracts;
-using RevEx.Desktop.Connectors;
+using RevEx.Connector.Client;
 using RevEx.Desktop.Services;
 using RevEx.Configuration;
 using RevEx.LoadingQueue;
@@ -28,6 +28,7 @@ public sealed class WorkspaceTabFactory : IWorkspaceTabFactory
     private readonly IRevExUserSettingsStore _userSettingsStore;
     private readonly IConnectorTaskQueue _taskQueue;
     private readonly IAuthenticationService _authenticationService;
+    private readonly RfaFamilyImportService _rfaImportService;
     private readonly IReadOnlyDictionary<Type, Func<WorkspaceTabContext, object?, WorkspaceTabViewModel>> _factories;
 
     public WorkspaceTabFactory(
@@ -37,7 +38,8 @@ public sealed class WorkspaceTabFactory : IWorkspaceTabFactory
         IRevExUserSettingsStore userSettingsStore,
         IConnectorTaskQueue taskQueue,
         IAuthenticationService authenticationService,
-        IAppSettings settings)
+        IAppSettings settings,
+        RfaFamilyImportService rfaImportService)
     {
         _revExApiService = revExApiService;
         _connectorClient = connectorClient;
@@ -46,12 +48,14 @@ public sealed class WorkspaceTabFactory : IWorkspaceTabFactory
         _taskQueue = taskQueue;
         _authenticationService = authenticationService;
         _settings = settings;
+        _rfaImportService = rfaImportService;
         _factories = new Dictionary<Type, Func<WorkspaceTabContext, object?, WorkspaceTabViewModel>>
         {
             [typeof(CatalogTabViewModel)] = CreateCatalogTab,
             [typeof(CategoryAdminTabViewModel)] = CreateCategoryAdminTab,
             [typeof(ContentDetailsViewModel)] = CreateContentDetailsTab,
             [typeof(ContentEditorTabViewModel)] = CreateContentEditorTab,
+            [typeof(ContentCreationTabViewModel)] = CreateContentCreationTab,
             [typeof(LoadingQueueTabViewModel)] = CreateLoadingQueueTab,
             [typeof(TagAdminTabViewModel)] = CreateTagAdminTab,
             [typeof(SettingsTabViewModel)] = CreateSettings
@@ -93,6 +97,14 @@ public sealed class WorkspaceTabFactory : IWorkspaceTabFactory
                 typeof(ContentDetailsViewModel),
                 content.Id,
                 content)));
+
+    private ContentCreationTabViewModel CreateContentCreationTab(WorkspaceTabContext context, object? parameter)
+    {
+        return new ContentCreationTabViewModel(
+            _revExApiService,
+            _rfaImportService,
+            () => context.OpenTab(new WorkspaceTabRequest(typeof(ContentEditorTabViewModel))));
+    }
 
     private ContentEditorTabViewModel CreateContentEditorTab(WorkspaceTabContext _, object? parameter) =>
         parameter switch

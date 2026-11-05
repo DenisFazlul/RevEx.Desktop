@@ -18,7 +18,7 @@ using RevEx.Desktop.Core.Interfaces;
 using RevEx.Connector.Contracts;
 using RevEx.Domain.Contracts.Connectors;
 using RevEx.Configuration;
-using RevEx.Desktop.Connectors;
+using RevEx.Connector.Client;
 
 namespace RevEx.Desktop.ViewModels.Contents;
 
@@ -335,12 +335,12 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         try
         {
             Directory.CreateDirectory(targetDirectory);
-            var connectorFiles = new List<ContentVersionLoadFile>(queuedFiles.Count);
+            var connectorFiles = new List<ContentVersionExecuteDto>(queuedFiles.Count);
             foreach (var file in queuedFiles)
             {
                 var bytes = await _apiService.ContentFiles.DownloadAsync(file.ContentFileId);
                 await File.WriteAllBytesAsync(file.Path, bytes);
-                connectorFiles.Add(new ContentVersionLoadFile(
+                connectorFiles.Add(new ContentVersionExecuteDto(
                     file.LoadingId,
                     file.FileName,
                     file.Path));

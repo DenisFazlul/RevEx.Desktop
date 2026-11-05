@@ -1,3 +1,4 @@
+using RevEx.Connector.Protocol;
 using System;
 using System.Net.Http;
 using Microsoft.Extensions.Configuration;
@@ -11,12 +12,11 @@ using RevEx.Desktop.ViewModels;
 using RevEx.Desktop.Views;
 using RevEx.Desktop.Views.MainMenu;
 using RevEx.Connector.Contracts;
-using RevEx.Desktop.Connectors;
-using RevEx.RevitPlugin.Connector;
-using RevEx.RevitPlugin.Connector.Implementations.Tcp;
-using RevEx.RevitPlugin.Connector.Implementations.LocalDirectory;
-using RevEx.Desktop.Connectors.Implementations.Tcp;
-using RevEx.Desktop.Connectors.Implementations.LocalDirectory;
+using RevEx.Connector.Client;
+using RevEx.Connector.Protocol.Implementations.Tcp;
+using RevEx.Connector.Protocol.Implementations.LocalDirectory;
+using RevEx.Connector.Client.Implementations.Tcp;
+using RevEx.Connector.Client.Implementations.LocalDirectory;
 using RevEx.Configuration;
 using RevEx.LoadingQueue;
 using RevEx.Desktop.Updates;
@@ -50,6 +50,7 @@ public static class ServiceExtensions
         services.AddSingleton<IConnectorTransport, TcpConnectorTransport>();
         services.AddSingleton<IConnectorClient, TcpConnectorClient>();
         services.AddSingleton<IConnectorRuntime, DirectoryConnectorRuntime>();
+        services.AddSingleton<RfaFamilyImportService>();
 
         services.AddUIServices();
         return services;

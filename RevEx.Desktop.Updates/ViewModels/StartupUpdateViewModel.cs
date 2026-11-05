@@ -42,8 +42,7 @@ public partial class StartupUpdateViewModel(DesktopUpdateService updates, IAppSe
         {
             _check = await updates.CheckAsync(ServerAddress, operation.Token);
             settings.ApiPath = ServerAddress.TrimEnd('/') + "/";
-            var saved = userSettings.Load();
-            userSettings.Save(new RevExUserSettings { ApiPath = settings.ApiPath, ConnectorRegistrationAddress = saved.ConnectorRegistrationAddress });
+            userSettings.Save(new RevExUserSettings { ApiPath = settings.ApiPath });
             CanContinue = _check.Compatible;
             RecommendedVersion = _check.Response.TargetVersion;
             Notes = _check.Response.Notes;

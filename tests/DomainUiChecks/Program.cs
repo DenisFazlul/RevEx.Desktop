@@ -15,6 +15,8 @@ using RevEx.Domain.Contracts.ContentHistory;
 using RevEx.Domain.Contracts.Tag;
 
 AppBuilder.Configure<App>().UseHeadless(new AvaloniaHeadlessPlatformOptions()).SetupWithoutStarting();
+ConnectorChecks.Run();
+RfaImportChecks.Run();
 var now=DateTimeOffset.Parse("2026-10-29T10:00:00+03:00");
 var history=new ContentHistoryEventDto(1,1,now,"Changed","author");
 var historyViewModel=new ContentHistoryEventViewModel(history);
@@ -24,6 +26,7 @@ Window[] windows = [new MainWindow(),
     new TagSelectionWindow([new TagDto(1,"Tag",1,"Group",now,now)]),
     new ConnectorSelectionWindow([new ConnectorDescriptor(Guid.NewGuid(),"Test",ConnectorProduct.Mock,"1",new Uri("http://127.0.0.1:1"),1,null)]),
     new ContentHistoryDetailsWindow(history),
+    new RfaFamilyImportWindow(),
     new Window { Content=new ContentDetailsView() }];
 foreach(var window in windows) { window.Show(); Dispatcher.UIThread.RunJobs(); window.Close(); }
 Console.WriteLine("PASS: Desktop initialization, resources, shared DTO templates and local history time (headless).");

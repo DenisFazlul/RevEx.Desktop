@@ -14,7 +14,7 @@ using RevEx.Desktop.Services;
 using RevEx.Desktop.ViewModels;
 using RevEx.Desktop.Views;
 using RevEx.Desktop.Views.MainMenu;
-using RevEx.Desktop.Connectors;
+using RevEx.Connector.Client;
 using RevEx.Configuration;
 using RevEx.Desktop.Updates.Services;
 

@@ -25,14 +25,16 @@ public sealed class ContentVersionRepository(RevExApiTransport transport) : ICon
         Stream content,
         string fileName,
         string role,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        string? metadataJson = null)
         => await transport.UploadFileAsync<ContentVersionDto>(
             $"api/content-versions/{versionId}/file",
             content,
             fileName,
             "application/octet-stream",
             role,
-            cancellationToken);
+            cancellationToken,
+            metadataJson);
 
     public Task DeleteFileAsync(
         int versionId,
