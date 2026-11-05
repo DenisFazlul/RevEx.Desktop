@@ -30,10 +30,10 @@
     <ItemGroup>
       <ProjectReference Include="..\RevEx.Desktop.Updates\RevEx.Desktop.Updates.csproj" />
       <ProjectReference Include="..\RevEx.Desktop.Core\RevEx.Desktop.Core.csproj" />
-      <ProjectReference Include="..\..\RevEx.Connecter\RevEx.Connector.Contracts\RevEx.Connector.Contracts.csproj" />
-      <ProjectReference Include="..\RevEx.Desktop.Connectors\RevEx.Desktop.Connectors.csproj" />
+      <ProjectReference Include="../../RevEx.Connector.Client/RevEx.Connector.Contracts/RevEx.Connector.Contracts.csproj" />
+      <ProjectReference Include="../../RevEx.Connector.Client/RevEx.Connector.Client/RevEx.Connector.Client.csproj" />
       <ProjectReference Include="..\..\RevEx.Connecter\RevEx.Configuration\RevEx.Configuration.csproj" />
-      <ProjectReference Include="..\RevEx.LoadingQueue\RevEx.LoadingQueue.csproj" />
+      <ProjectReference Include="../../RevEx.Connector.Client/RevEx.LoadingQueue/RevEx.LoadingQueue.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -43,6 +43,10 @@
     </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../RevEx.Domain/src/RevEx.Domain/RevEx.Domain.csproj" Condition="'$(UseRevExDomainPackage)' != 'true'" />
-    <PackageReference Include="RevEx.Domain" Version="1.0.0" Condition="'$(UseRevExDomainPackage)' == 'true'" />
+    <PackageReference Include="RevEx.Domain" Version="1.1.0" Condition="'$(UseRevExDomainPackage)' == 'true'" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../RevEx.Domain/src/RevEx.Contracts/RevEx.Contracts.csproj" Condition="'$(UseRevExDomainPackage)' != 'true'" />
+    <PackageReference Include="RevEx.Contracts" Version="1.0.0" Condition="'$(UseRevExDomainPackage)' == 'true'" />
   </ItemGroup>
 </Project>

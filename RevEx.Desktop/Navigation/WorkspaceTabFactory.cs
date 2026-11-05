@@ -10,7 +10,7 @@ using RevEx.Desktop.ViewModels.Settings;
 using RevEx.Desktop.ViewModels.Tabs;
 using RevEx.Desktop.ViewModels.Tags;
 using RevEx.Connector.Contracts;
-using RevEx.Desktop.Connectors;
+using RevEx.Connector.Client;
 using RevEx.Desktop.Services;
 using RevEx.Configuration;
 using RevEx.LoadingQueue;
@@ -26,8 +26,9 @@ public sealed class WorkspaceTabFactory : IWorkspaceTabFactory
     private readonly IConnectorClient _connectorClient;
     private readonly IConnectorRegistry _connectorRegistry;
     private readonly IRevExUserSettingsStore _userSettingsStore;
-    private readonly IFileLoadingQueue _fileLoadingQueue;
+    private readonly IConnectorTaskQueue _taskQueue;
     private readonly IAuthenticationService _authenticationService;
+    private readonly RfaFamilyImportService _rfaImportService;
     private readonly IReadOnlyDictionary<Type, Func<WorkspaceTabContext, object?, WorkspaceTabViewModel>> _factories;
 
     public WorkspaceTabFactory(
@@ -35,23 +36,26 @@ public sealed class WorkspaceTabFactory : IWorkspaceTabFactory
         IConnectorClient connectorClient,
         IConnectorRegistry connectorRegistry,
         IRevExUserSettingsStore userSettingsStore,
-        IFileLoadingQueue fileLoadingQueue,
+        IConnectorTaskQueue taskQueue,
         IAuthenticationService authenticationService,
-        IAppSettings settings)
+        IAppSettings settings,
+        RfaFamilyImportService rfaImportService)
     {
         _revExApiService = revExApiService;
         _connectorClient = connectorClient;
         _connectorRegistry = connectorRegistry;
         _userSettingsStore = userSettingsStore;
-        _fileLoadingQueue = fileLoadingQueue;
+        _taskQueue = taskQueue;
         _authenticationService = authenticationService;
         _settings = settings;
+        _rfaImportService = rfaImportService;
         _factories = new Dictionary<Type, Func<WorkspaceTabContext, object?, WorkspaceTabViewModel>>
         {
             [typeof(CatalogTabViewModel)] = CreateCatalogTab,
             [typeof(CategoryAdminTabViewModel)] = CreateCategoryAdminTab,
             [typeof(ContentDetailsViewModel)] = CreateContentDetailsTab,
             [typeof(ContentEditorTabViewModel)] = CreateContentEditorTab,
+            [typeof(ContentCreationTabViewModel)] = CreateContentCreationTab,
             [typeof(LoadingQueueTabViewModel)] = CreateLoadingQueueTab,
             [typeof(TagAdminTabViewModel)] = CreateTagAdminTab,
             [typeof(SettingsTabViewModel)] = CreateSettings
@@ -59,7 +63,7 @@ public sealed class WorkspaceTabFactory : IWorkspaceTabFactory
     }
 
     private WorkspaceTabViewModel CreateLoadingQueueTab(WorkspaceTabContext _, object? __) =>
-        new LoadingQueueTabViewModel(_fileLoadingQueue);
+        new LoadingQueueTabViewModel(_taskQueue);
 
     private WorkspaceTabViewModel CreateSettings(WorkspaceTabContext arg1, object? arg2)
     {
@@ -81,7 +85,9 @@ public sealed class WorkspaceTabFactory : IWorkspaceTabFactory
     public WorkspaceTabViewModel Create(Type tabType, WorkspaceTabContext context, object? parameter = null)
     {
         if (!_factories.TryGetValue(tabType, out var createTab))
+        {
             throw new InvalidOperationException($"Фабрика вкладки {tabType.Name} не зарегистрирована.");
+        }
 
         return createTab(context, parameter);
     }
@@ -93,6 +99,14 @@ public sealed class WorkspaceTabFactory : IWorkspaceTabFactory
                 typeof(ContentDetailsViewModel),
                 content.Id,
                 content)));
+
+    private ContentCreationTabViewModel CreateContentCreationTab(WorkspaceTabContext context, object? parameter)
+    {
+        return new ContentCreationTabViewModel(
+            _revExApiService,
+            _rfaImportService,
+            () => context.OpenTab(new WorkspaceTabRequest(typeof(ContentEditorTabViewModel))));
+    }
 
     private ContentEditorTabViewModel CreateContentEditorTab(WorkspaceTabContext _, object? parameter) =>
         parameter switch
@@ -116,8 +130,6 @@ public sealed class WorkspaceTabFactory : IWorkspaceTabFactory
             _revExApiService,
             _connectorClient,
             _connectorRegistry,
-            _fileLoadingQueue,
-            new Uri(new Uri(_settings.ConnectorRegistrationAddress), "api/v1/loading/status"),
             CanEditContent(),
             () => context.OpenTab(new WorkspaceTabRequest(
                 typeof(ContentEditorTabViewModel),

@@ -4,15 +4,21 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevEx.Desktop", "RevEx.Desk
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevEx.Desktop.Core", "RevEx.Desktop.Core\RevEx.Desktop.Core.csproj", "{784CC236-4167-40D6-BFBD-16D533AFFDC1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevEx.Desktop.Connectors", "RevEx.Desktop.Connectors\RevEx.Desktop.Connectors.csproj", "{EB7D56CC-CB3D-43A7-9D33-EF3B71EC2999}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevEx.Connector.Client", "../RevEx.Connector.Client/RevEx.Connector.Client/RevEx.Connector.Client.csproj", "{EB7D56CC-CB3D-43A7-9D33-EF3B71EC2999}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevEx.LoadingQueue", "RevEx.LoadingQueue\RevEx.LoadingQueue.csproj", "{972723A4-CA24-4166-A884-8CE1E37A96DC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevEx.LoadingQueue", "../RevEx.Connector.Client/RevEx.LoadingQueue/RevEx.LoadingQueue.csproj", "{972723A4-CA24-4166-A884-8CE1E37A96DC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevEx.Desktop.Updates", "RevEx.Desktop.Updates\RevEx.Desktop.Updates.csproj", "{1AD042BA-B7E4-4D1A-9487-3D81F4A046AB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevEx.Connector.Contracts", "..\RevEx.Connecter\RevEx.Connector.Contracts\RevEx.Connector.Contracts.csproj", "{9FCC8A05-FDE9-41F4-9D1E-84956129D54D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevEx.Connector.Contracts", "../RevEx.Connector.Client/RevEx.Connector.Contracts/RevEx.Connector.Contracts.csproj", "{9FCC8A05-FDE9-41F4-9D1E-84956129D54D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevEx.Configuration", "..\RevEx.Connecter\RevEx.Configuration\RevEx.Configuration.csproj", "{D96244DA-11FD-4185-ABDB-5D4086106B3C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevEx.Domain", "..\RevEx.Domain\src\RevEx.Domain\RevEx.Domain.csproj", "{94260CD3-A065-42ED-AB6A-0FF5C7AB25EB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevEx.Connector.Protocol", "..\RevEx.Connecter\RevEx.Connector.Protocol\RevEx.Connector.Protocol.csproj", "{EC11547E-0A45-4B98-91B0-7EF7E50F7F90}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevEx.Contracts", "..\RevEx.Domain\src\RevEx.Contracts\RevEx.Contracts.csproj", "{833CBED9-7009-49E3-B14C-648FC37419AA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -108,6 +114,42 @@ Global
 		{D96244DA-11FD-4185-ABDB-5D4086106B3C}.Release|x64.Build.0 = Release|Any CPU
 		{D96244DA-11FD-4185-ABDB-5D4086106B3C}.Release|x86.ActiveCfg = Release|Any CPU
 		{D96244DA-11FD-4185-ABDB-5D4086106B3C}.Release|x86.Build.0 = Release|Any CPU
+		{94260CD3-A065-42ED-AB6A-0FF5C7AB25EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94260CD3-A065-42ED-AB6A-0FF5C7AB25EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94260CD3-A065-42ED-AB6A-0FF5C7AB25EB}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{94260CD3-A065-42ED-AB6A-0FF5C7AB25EB}.Debug|x64.Build.0 = Debug|Any CPU
+		{94260CD3-A065-42ED-AB6A-0FF5C7AB25EB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{94260CD3-A065-42ED-AB6A-0FF5C7AB25EB}.Debug|x86.Build.0 = Debug|Any CPU
+		{94260CD3-A065-42ED-AB6A-0FF5C7AB25EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94260CD3-A065-42ED-AB6A-0FF5C7AB25EB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94260CD3-A065-42ED-AB6A-0FF5C7AB25EB}.Release|x64.ActiveCfg = Release|Any CPU
+		{94260CD3-A065-42ED-AB6A-0FF5C7AB25EB}.Release|x64.Build.0 = Release|Any CPU
+		{94260CD3-A065-42ED-AB6A-0FF5C7AB25EB}.Release|x86.ActiveCfg = Release|Any CPU
+		{94260CD3-A065-42ED-AB6A-0FF5C7AB25EB}.Release|x86.Build.0 = Release|Any CPU
+		{EC11547E-0A45-4B98-91B0-7EF7E50F7F90}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC11547E-0A45-4B98-91B0-7EF7E50F7F90}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC11547E-0A45-4B98-91B0-7EF7E50F7F90}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{EC11547E-0A45-4B98-91B0-7EF7E50F7F90}.Debug|x64.Build.0 = Debug|Any CPU
+		{EC11547E-0A45-4B98-91B0-7EF7E50F7F90}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{EC11547E-0A45-4B98-91B0-7EF7E50F7F90}.Debug|x86.Build.0 = Debug|Any CPU
+		{EC11547E-0A45-4B98-91B0-7EF7E50F7F90}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC11547E-0A45-4B98-91B0-7EF7E50F7F90}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC11547E-0A45-4B98-91B0-7EF7E50F7F90}.Release|x64.ActiveCfg = Release|Any CPU
+		{EC11547E-0A45-4B98-91B0-7EF7E50F7F90}.Release|x64.Build.0 = Release|Any CPU
+		{EC11547E-0A45-4B98-91B0-7EF7E50F7F90}.Release|x86.ActiveCfg = Release|Any CPU
+		{EC11547E-0A45-4B98-91B0-7EF7E50F7F90}.Release|x86.Build.0 = Release|Any CPU
+		{833CBED9-7009-49E3-B14C-648FC37419AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{833CBED9-7009-49E3-B14C-648FC37419AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{833CBED9-7009-49E3-B14C-648FC37419AA}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{833CBED9-7009-49E3-B14C-648FC37419AA}.Debug|x64.Build.0 = Debug|Any CPU
+		{833CBED9-7009-49E3-B14C-648FC37419AA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{833CBED9-7009-49E3-B14C-648FC37419AA}.Debug|x86.Build.0 = Debug|Any CPU
+		{833CBED9-7009-49E3-B14C-648FC37419AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{833CBED9-7009-49E3-B14C-648FC37419AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{833CBED9-7009-49E3-B14C-648FC37419AA}.Release|x64.ActiveCfg = Release|Any CPU
+		{833CBED9-7009-49E3-B14C-648FC37419AA}.Release|x64.Build.0 = Release|Any CPU
+		{833CBED9-7009-49E3-B14C-648FC37419AA}.Release|x86.ActiveCfg = Release|Any CPU
+		{833CBED9-7009-49E3-B14C-648FC37419AA}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

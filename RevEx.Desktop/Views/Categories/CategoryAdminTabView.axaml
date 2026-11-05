@@ -1,4 +1,5 @@
 <UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:common="using:RevEx.Desktop.Views.Common"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:RevEx.Desktop.ViewModels.Categories"
              x:Class="RevEx.Desktop.Views.Categories.CategoryAdminTabView"
@@ -22,8 +23,7 @@
                 </Grid>
 
                 <Grid Grid.Row="2">
-                    <ProgressBar IsVisible="{Binding IsLoading}" IsIndeterminate="True"
-                                 VerticalAlignment="Top" />
+
                     <TextBlock IsVisible="{Binding HasNoCategories}" Classes="caption"
                                Text="Категорий пока нет." HorizontalAlignment="Center"
                                VerticalAlignment="Center" />
@@ -53,9 +53,6 @@
             </Grid>
         </Border>
 
-        <StackPanel Grid.Row="3" Margin="2,12,0,0" Spacing="4">
-            <TextBlock Classes="status-message" Text="{Binding Message}" />
-            <TextBlock Classes="validation-message" Text="{Binding ErrorMessage}" />
-        </StackPanel>
+        <common:OperationFeedbackView Grid.Row="3" Margin="2,12,0,0" />
     </Grid>
 </UserControl>

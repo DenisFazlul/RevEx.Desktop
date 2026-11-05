@@ -1,6 +1,9 @@
-<Window xmlns="https://github.com/avaloniaui"
+<common:DialogWindow xmlns="https://github.com/avaloniaui"
+        xmlns:common="using:RevEx.Desktop.Views.Common"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:contracts="using:RevEx.Domain.Contracts.Connectors"
+        xmlns:vm="using:RevEx.Desktop.ViewModels.Connectors"
+        x:DataType="vm:ConnectorSelectionViewModel"
         x:Class="RevEx.Desktop.Views.Connectors.ConnectorSelectionWindow"
         Title="Выбор Connector" Width="540" Height="330"
         MinWidth="480" MinHeight="300" WindowStartupLocation="CenterOwner"
@@ -11,16 +14,16 @@
                                 Content="Выберите приложение, в активный проект которого нужно загрузить файлы" />
 
         <StackPanel Grid.Row="2" Spacing="12">
-            <TextBlock IsVisible="{Binding HasNoConnectors}"
+            <TextBlock IsVisible="{Binding !HasItems}"
                        Classes="validation-message"
                        Text="Нет подключённых Connector. Запустите Connector Mock и повторите попытку."
                        TextWrapping="Wrap" />
             <HeaderedContentControl Theme="{StaticResource FormFieldTheme}"
                                     Header="Connector"
-                                    IsVisible="{Binding HasConnectors}">
+                                    IsVisible="{Binding HasItems}">
                 <ComboBox x:Name="ConnectorBox"
-                          ItemsSource="{Binding Connectors}"
-                          SelectedItem="{Binding SelectedConnector}">
+                          ItemsSource="{Binding Items}"
+                          SelectedItem="{Binding SelectedItem}">
                     <ComboBox.ItemTemplate>
                         <DataTemplate x:DataType="contracts:ConnectorDescriptor">
                             <StackPanel Spacing="3">
@@ -35,9 +38,9 @@
         </StackPanel>
 
         <Grid Grid.Row="3" ColumnDefinitions="*,Auto,10,Auto">
-            <Button Grid.Column="1" Classes="secondary" Content="Отмена" Click="OnCancelClick" />
+            <Button Grid.Column="1" Classes="secondary" Content="Отмена" Command="{Binding CancelCommand}" />
             <Button Grid.Column="3" Classes="primary" Content="Загрузить"
-                    IsEnabled="{Binding HasConnectors}" Click="OnSelectClick" />
+                    IsEnabled="{Binding HasItems}" Command="{Binding AcceptCommand}" />
         </Grid>
     </Grid>
-</Window>
+</common:DialogWindow>

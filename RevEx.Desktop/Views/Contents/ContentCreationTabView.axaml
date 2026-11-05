@@ -1,0 +1,33 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RevEx.Desktop.ViewModels.Contents"
+             x:Class="RevEx.Desktop.Views.Contents.ContentCreationTabView"
+             x:DataType="vm:ContentCreationTabViewModel">
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+        <Grid Margin="32,30" RowDefinitions="Auto,22,Auto" MaxWidth="880" HorizontalAlignment="Center">
+            <HeaderedContentControl Theme="{StaticResource PageHeaderTheme}"
+                                    Header="Добавление контента"
+                                    Content="Выберите способ добавления материала в каталог" />
+            <StackPanel Grid.Row="2" Spacing="16">
+                <Border Classes="card section-card">
+                    <StackPanel Spacing="12">
+                        <TextBlock Classes="h2" Text="Семейство Revit" />
+                        <TextBlock Classes="caption" TextWrapping="Wrap"
+                                   Text="Прочитайте RFA-файл через коннектор, проверьте данные и сохраните новую версию в каталоге." />
+                        <Button Classes="primary" Content="Добавить семейство RFA"
+                                HorizontalAlignment="Left" Click="OnAddRfaFamilyClick" />
+                    </StackPanel>
+                </Border>
+                <Border Classes="card section-card">
+                    <StackPanel Spacing="12">
+                        <TextBlock Classes="h2" Text="Ручное добавление" />
+                        <TextBlock Classes="caption" Text="Заполните карточку контента и выберите файлы самостоятельно."
+                                   TextWrapping="Wrap" />
+                        <Button Content="Добавить контент вручную" HorizontalAlignment="Left"
+                                Command="{Binding AddContentManuallyCommand}" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

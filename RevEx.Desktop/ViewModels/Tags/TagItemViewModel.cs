@@ -3,10 +3,17 @@ using RevEx.Domain.Contracts.Tag;
 
 namespace RevEx.Desktop.ViewModels.Tags;
 
+/// <summary>Модель строки тега в справочнике. Хранит название и связь с группой.</summary>
 public partial class TagItemViewModel : ViewModelBase
 {
-    public int Id { get; }
-    public int TagGroupId { get; set; }
+    public int Id
+    {
+        get;
+    }
+    public int TagGroupId
+    {
+        get; set;
+    }
 
     [ObservableProperty]
     private string _name;

@@ -9,15 +9,31 @@ using RevEx.Domain.Contracts.Content;
 
 namespace RevEx.Desktop.ViewModels.Contents;
 
+/// <summary>Модель карточки в каталоге. Хранит краткие сведения, теги и изображение предпросмотра.</summary>
 public partial class ContentItemViewModel : ViewModelBase, IDisposable
 {
-    public int Id { get; }
+    public int Id
+    {
+        get;
+    }
     [ObservableProperty]
     private int _categoryId;
-    public int ContentStatusId { get; }
-    public IReadOnlyCollection<int> TagIds { get; }
-    public IReadOnlyCollection<string> VisibleTags { get; }
-    public string? AdditionalTagsText { get; }
+    public int ContentStatusId
+    {
+        get;
+    }
+    public IReadOnlyCollection<int> TagIds
+    {
+        get;
+    }
+    public IReadOnlyCollection<string> VisibleTags
+    {
+        get;
+    }
+    public string? AdditionalTagsText
+    {
+        get;
+    }
     public bool HasAdditionalTags => AdditionalTagsText is not null;
 
     [ObservableProperty]
@@ -26,7 +42,10 @@ public partial class ContentItemViewModel : ViewModelBase, IDisposable
     [ObservableProperty]
     private string _description;
 
-    public Bitmap? PreviewImage { get; }
+    public Bitmap? PreviewImage
+    {
+        get;
+    }
     public bool HasPreview => PreviewImage is not null;
 
     public ContentItemViewModel(

@@ -13,6 +13,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        Closed += (_, _) => (DataContext as System.IDisposable)?.Dispose();
     }
 
     public MainWindow(MainViewModel viewModel) : this()
@@ -64,11 +65,15 @@ public partial class MainWindow : Window
     private void OnWindowKeyDown(object? sender, KeyEventArgs eventArgs)
     {
         if (DataContext is not MainViewModel mainViewModel)
+        {
             return;
+        }
 
         var hasCommandModifier = (eventArgs.KeyModifiers & (KeyModifiers.Control | KeyModifiers.Meta)) != 0;
         if (!hasCommandModifier)
+        {
             return;
+        }
 
         if (eventArgs.Key == Key.W && mainViewModel.SelectedTab is { } selectedTab)
         {
@@ -85,7 +90,9 @@ public partial class MainWindow : Window
         }
 
         if (eventArgs.Key != Key.Tab || mainViewModel.Tabs.Count < 2)
+        {
             return;
+        }
 
         var currentIndex = mainViewModel.SelectedTab is null
             ? -1

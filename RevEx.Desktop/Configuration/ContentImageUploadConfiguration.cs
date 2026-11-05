@@ -6,7 +6,10 @@ namespace RevEx.Desktop.Configuration;
 
 public static class ContentImageUploadConfiguration
 {
-    public static FilePickerFileType FilePickerType { get; } = new("Изображения")
+    public static FilePickerFileType FilePickerType
+    {
+        get;
+    } = new("Изображения")
     {
         Patterns = ["*.jpg", "*.jpeg", "*.png", "*.webp", "*.gif"],
         MimeTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"]

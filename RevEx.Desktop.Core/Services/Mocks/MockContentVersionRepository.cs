@@ -39,7 +39,8 @@ internal sealed class MockContentVersionRepository : IContentVersionRepository
         Stream content,
         string fileName,
         string role,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        string? metadataJson = null)
     {
         cancellationToken.ThrowIfCancellationRequested();
         var versionIndex = ContentVersions.FindIndex(item => item.Id == versionId);
@@ -56,7 +57,10 @@ internal sealed class MockContentVersionRepository : IContentVersionRepository
             content.CanSeek ? content.Length : 0,
             role,
             DateTimeOffset.UtcNow,
-            DateTimeOffset.UtcNow));
+            DateTimeOffset.UtcNow)
+        {
+            Metadata = metadataJson is null ? null : System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.JsonElement>(metadataJson)
+        });
 
         var version = ContentVersions[versionIndex];
         version = version with { FileIds = version.FileIds.Append(fileId).ToArray() };

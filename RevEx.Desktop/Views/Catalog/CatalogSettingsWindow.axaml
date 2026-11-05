@@ -1,10 +1,12 @@
-<Window xmlns="https://github.com/avaloniaui"
+<common:DialogWindow xmlns="https://github.com/avaloniaui"
+        xmlns:common="using:RevEx.Desktop.Views.Common"
+        xmlns:models="using:RevEx.Desktop.ViewModels.Common"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:RevEx.Desktop.ViewModels.Catalog"
         xmlns:categories="using:RevEx.Desktop.ViewModels.Categories"
         xmlns:tags="using:RevEx.Desktop.ViewModels.Tags"
         x:Class="RevEx.Desktop.Views.Catalog.CatalogSettingsWindow"
-        x:DataType="vm:CatalogTabViewModel"
+        x:DataType="vm:CatalogSettingsViewModel"
         Title="Категории и теги"
         Width="680" Height="560"
         MinWidth="560" MinHeight="460"
@@ -25,7 +27,7 @@
                     </StackPanel>
                     <ListBox Grid.Row="2" Classes="clean-list" ItemsSource="{Binding Categories}">
                         <ListBox.ItemTemplate>
-                            <DataTemplate x:DataType="categories:CategoryItemViewModel">
+                            <DataTemplate x:DataType="models:FilterItemViewModel">
                                 <CheckBox Margin="4,7" Content="{Binding Name}"
                                           IsChecked="{Binding IsSelected}" />
                             </DataTemplate>
@@ -42,7 +44,7 @@
                     </StackPanel>
                     <ListBox Grid.Row="2" Classes="clean-list" ItemsSource="{Binding Tags}">
                         <ListBox.ItemTemplate>
-                            <DataTemplate x:DataType="tags:TagFilterItemViewModel">
+                            <DataTemplate x:DataType="models:FilterItemViewModel">
                                 <CheckBox Margin="4,7" Content="{Binding Name}"
                                           IsChecked="{Binding IsSelected}" />
                             </DataTemplate>
@@ -55,10 +57,10 @@
         <Border Grid.Row="2" Margin="0,18,0,0" BorderBrush="{StaticResource BorderBrush}"
                 BorderThickness="0,1,0,0" Padding="24,14">
             <Grid ColumnDefinitions="Auto,*,Auto,10,Auto">
-                <Button Classes="secondary" Content="Сбросить" Click="OnResetClick" />
-                <Button Grid.Column="2" Classes="secondary" Content="Отмена" Click="OnCancelClick" />
-                <Button Grid.Column="4" Classes="primary" Content="Применить" Click="OnApplyClick" />
+                <Button Classes="secondary" Content="Сбросить" Command="{Binding ResetCommand}" />
+                <Button Grid.Column="2" Classes="secondary" Content="Отмена" Command="{Binding CancelCommand}" />
+                <Button Grid.Column="4" Classes="primary" Content="Применить" Command="{Binding ApplyCommand}" />
             </Grid>
         </Border>
     </Grid>
-</Window>
+</common:DialogWindow>

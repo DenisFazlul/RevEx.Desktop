@@ -1,22 +1,10 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+using RevEx.Desktop.ViewModels.Common;
 using RevEx.Domain.Contracts.Category;
 
 namespace RevEx.Desktop.ViewModels.Categories;
 
-public partial class CategoryItemViewModel : ViewModelBase
+/// <summary>Модель категории в списке и фильтре. Отмечает системную категорию, которую нельзя менять.</summary>
+public sealed class CategoryItemViewModel(CategoryDto dto) : FilterItemViewModel(dto.Id, dto.Name)
 {
-    public int Id { get; }
     public bool CanModify => Id != 1;
-
-    [ObservableProperty]
-    private string _name;
-
-    [ObservableProperty]
-    private bool _isSelected;
-
-    public CategoryItemViewModel(CategoryDto dto)
-    {
-        Id = dto.Id;
-        _name = dto.Name;
-    }
 }

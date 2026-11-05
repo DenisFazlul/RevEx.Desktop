@@ -1,21 +1,7 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+using RevEx.Desktop.ViewModels.Common;
 using RevEx.Domain.Contracts.Tag;
 
 namespace RevEx.Desktop.ViewModels.Tags;
 
-public partial class TagFilterItemViewModel : ViewModelBase
-{
-    public int Id { get; }
-
-    [ObservableProperty]
-    private string _name;
-
-    [ObservableProperty]
-    private bool _isSelected;
-
-    public TagFilterItemViewModel(TagDto dto)
-    {
-        Id = dto.Id;
-        _name = dto.Name;
-    }
-}
+/// <summary>Модель тега в фильтре каталога. Хранит название и признак включения в поиск.</summary>
+public sealed class TagFilterItemViewModel(TagDto dto) : FilterItemViewModel(dto.Id, dto.Name);

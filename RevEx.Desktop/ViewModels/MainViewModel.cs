@@ -9,7 +9,8 @@ using RevEx.Desktop.ViewModels.Tabs;
 
 namespace RevEx.Desktop.ViewModels;
 
-public partial class MainViewModel : ViewModelBase
+/// <summary>Модель главного окна. Управляет меню, открытием, выбором и закрытием рабочих вкладок.</summary>
+public partial class MainViewModel : ViewModelBase, IDisposable
 {
     private readonly IWorkspaceTabFactory _tabFactory;
     private readonly WorkspaceTabContext _tabContext;
@@ -21,7 +22,10 @@ public partial class MainViewModel : ViewModelBase
     private bool _hasTabs;
 
     public ObservableCollection<WorkspaceTabViewModel> Tabs { get; } = [];
-    public MainMenuViewModel MainMenu { get; }
+    public MainMenuViewModel MainMenu
+    {
+        get;
+    }
 
     public MainViewModel(
         IWorkspaceTabFactory tabFactory,
@@ -37,16 +41,24 @@ public partial class MainViewModel : ViewModelBase
     public void CloseTab(WorkspaceTabViewModel tab)
     {
         if (!tab.CanClose)
+        {
             return;
+        }
 
         var tabIndex = Tabs.IndexOf(tab);
         if (tabIndex < 0)
+        {
             return;
+        }
 
         Tabs.RemoveAt(tabIndex);
         HasTabs = Tabs.Count > 0;
         if (ReferenceEquals(SelectedTab, tab))
+        {
             SelectedTab = Tabs.Count == 0 ? null : Tabs[Math.Min(tabIndex, Tabs.Count - 1)];
+        }
+
+        tab.Dispose();
     }
 
     private void OpenTab(WorkspaceTabRequest request)
@@ -67,9 +79,25 @@ public partial class MainViewModel : ViewModelBase
     partial void OnSelectedTabChanged(WorkspaceTabViewModel? value)
     {
         foreach (var tab in Tabs)
+        {
             tab.IsSelected = ReferenceEquals(tab, value);
+        }
 
         if (value is not null)
-            _ = value.ActivateAsync();
+        {
+            _ = value.ActivateSafelyAsync();
+        }
+    }
+
+    public void Dispose()
+    {
+        foreach (var tab in Tabs)
+        {
+            tab.Dispose();
+        }
+
+        Tabs.Clear();
+        SelectedTab = null;
+        HasTabs = false;
     }
 }

@@ -1,62 +1,178 @@
-# Локальные коннекторы
+# Локальная связь Desktop и коннекторов
 
-Desktop управляет каталогом через серверный API и отдельно взаимодействует
-с приложениями на этой машине через loopback HTTP. Эти протоколы не заменяют друг друга.
+## Добавление семейства RFA
 
-## Маршруты Desktop
+Раздел меню «Добавление контента» открывает отдельную рабочую вкладку для moderator / administrator.
+Внутри неё кнопка «Добавить семейство RFA» открывает модальное окно импорта;
+кнопка «Добавить контент вручную» открывает существующий редактор.
+После выбора одного `.rfa` Desktop автоматически выбирает доступный коннектор Revit
+с командой ReadFiles; при отсутствии такого коннектора допускается Mock с этой командой.
+Исходный файл копируется в отдельный временный каталог. Коннектор читает рабочую копию,
+а после проверки полей пользователь сохраняет эту же копию как основной файл новой версии.
+Оригинал пользователя не изменяется. Во время чтения и сохранения закрытие окна блокируется.
 
-По умолчанию `http://127.0.0.1:5060`:
+Название карточки — имя исходного файла без расширения. Перед показом результата и повторно
+перед сохранением выполняется поиск полного имени без учёта регистра. Найденная карточка
+получает новую версию; её описание, категория и теги не изменяются. При нескольких совпадениях
+импорт блокируется, чтобы не выбрать неверную карточку. Для новой карточки обязательна категория.
 
-| Метод и путь | Назначение |
-| --- | --- |
-| `POST /api/v1/connectors/register` | Зарегистрировать экземпляр приложения. |
-| `DELETE /api/v1/connectors/{instanceId}` | Удалить запись из локального реестра. |
-| `POST /api/v1/loading/status` | Обновить статус файла в очереди. |
+Вместе с файлом передаётся MetadataJson с исходным объектом результата коннектора,
+включая неизвестные DTO поля. Backend хранит его вложенным документом MongoDB у файла.
+Типизированный Revit DTO используется только для заполнения формы. Хранилище файлов
+и метаданных остаётся общим для RFA, DWG и других форматов.
+Повтор сохранения после ошибки загрузки повторно использует известную созданную версию.
+Поиск/создание карточки пока не является атомарной операцией между разными Desktop-клиентами.
 
-Регистрация передаёт InstanceId, Name, Product, ProductVersion, BaseAddress,
-ProcessId, ActiveDocument. Product определён enum Revit/AutoCad/Mock.
-BaseAddress должен быть абсолютным loopback HTTP URL.
-Проверка регистрации не доказывает, что сторонний процесс действительно реализует все команды.
-
-## Маршруты Connector.Host
-
-Коннектор слушает выделенный свободный loopback-порт:
-
-| Метод и путь | Назначение |
-| --- | --- |
-| `GET /api/v1/connector/health` | Состояние, InstanceId и активный документ. |
-| `POST /api/v1/projects/active/content-versions/load` | Загрузка файлов версии в активный проект. |
-
-`LoadContentVersionRequest`: массив Files (Id, Name, Path) и StatusCallbackAddress.
-Результат: Success и LoadedFileCount. Callback передаёт Id и Status:
-Accepted → Started → Completed. При неизвестном ID Desktop возвращает 404,
-при недопустимом статусе — 400. Контракты находятся в `RevEx.Connector.Contracts`.
-Путь файла локален для этой машины; не следует выдавать его за серверный URL.
-
-## Mock-сценарий
-
-Сначала запустите Desktop, затем из корня solution:
+Проверки без Revit:
 
 ```powershell
-dotnet run --project ../RevEx.Connecter/RevEx.Connector.Mock/RevEx.Connector.Mock.csproj
+dotnet run --project tests/DomainUiChecks -c Release
 ```
 
-Mock выбирает порт и регистрируется в Desktop, имитирует обработку каждого файла
-и отправляет статусы с паузами 13 секунд. Он не загружает реальные семейства в Revit.
-Адрес регистрации берётся из общего пользовательского файла настроек;
-проверьте его совпадение с адресом Desktop.
+Для ручной сквозной проверки запустите `RevEx.RevitPlugin.TestHub`, возьмите порт
+из его TCP-адреса и выполните из RevEx.Desktop:
 
-Для ручной проверки откройте «Настройки» Desktop, обновите список коннекторов,
-проверьте health и затем очередь загрузок при отправке файлов.
-Удаление записи из реестра не завершает процесс коннектора.
+```powershell
+dotnet run --project tests/RfaImportSmoke -c Release -- "C:\path\Family.rfa" 52595
+```
 
-## Граница с RevitPlugin
+Эта проверка входит через обычную OIDC-авторизацию и намеренно добавляет две версии
+в запущенный API из appsettings.json. Она проверяет ответ HTTP, метаданные и байты
+скачанного файла; записи остаются в каталоге для ручного просмотра.
 
-Текущий соседний RevitPlugin — WPF-плагин Revit 2020 с ExternalEvent и информацией
-о документе. В его исходниках нет регистрации Connector.Host и HTTP-загрузки файлов.
-Наличие ProjectReference на Desktop.Core не означает реализацию этого протокола.
+## Проверка подключения Desktop
 
+Из корня RevEx.Desktop:
 
-Реализация Connector.Host, Connector.Mock, общие Contracts и Configuration вынесены в [RevEx.Connecter](https://github.com/DenisFazlul/RevEx.Connecter). Перед сборкой клонируйте его рядом с RevEx.Desktop: проекты используют относительные ProjectReference. Сервер регистрации Desktop и HTTP-клиент остаются здесь.
+```powershell
+dotnet run --project tests/DomainUiChecks -c Release
+```
 
-Для встроенного listener плагина Revit 2020 ConnectorClient буферизует JSON перед POST, чтобы отправить Content-Length. Chunked request body этот listener не поддерживает и отклоняет с HTTP 411. Проверка настоящего DesktopConnectorServer/ConnectorClient с отдельным процессом плагина находится в RevEx.RevitPlugin/tests/DesktopIntegrationChecks.
+Проверка использует настоящую регистрацию зависимостей Desktop и изолированный
+каталог коннекторов. Она запускает коннектор после клиента, проверяет обнаружение,
+доступность в модели интерфейса, GetCommands, отправку существующего локального файла,
+статусы и сообщение в модели вкладки «Загрузки», а также исчезновение остановленного
+коннектора. Release нужен для headless-проверки без окна отладочных инструментов Avalonia.
+Исполнитель тестовый: обращения к Autodesk API в этой проверке не выполняются.
+
+Приёмник команд находится в RevEx.Connecter/RevEx.Connector. Общий TCP-протокол и
+регистрация в каталоге находятся в RevEx.Connecter/RevEx.Connector.Protocol
+(net472 и netstandard2.0). Клиент и очередь задач находятся в отдельном репозитории
+RevEx.Connector.Client. Desktop подключает клиент, Revit — приёмник команд.
+
+## Задача
+
+Desktop создаёт `ConnectorTask` в Domain: `Id`, `Name`, `Command`.
+Любая прикладная команда отправляется вместе с этой сущностью и своим payload.
+Идентификатор задачи является также идентификатором запроса/ответа TCP.
+Файлы являются данными команды; их идентификаторы не используются коннектором
+для определения задачи или отправки её статусов.
+
+У задачи ровно три состояния `ConnectorTaskStatus`:
+
+1. `Sent = 0` — Отправлено (Desktop начал отправку).
+2. `Accepted = 1` — Принято (коннектор получил задачу).
+3. `Done = 2` — Готово (выполнение закончено).
+
+`ConnectorTaskUpdate` содержит Id, Status, Message и Sequence. Message — произвольная
+информационная строка, например «Открываю документ»; она не определяет состояние.
+Sequence позволяет игнорировать устаревшие уведомления и повторные снимки состояния.
+При ошибке задача также переходит в Done: пояснение находится в Message,
+а ошибка команды возвращается отдельно в ответе. Done означает окончание обработки.
+
+Desktop хранит задачи в общем `IConnectorTaskQueue` / `ConnectorTaskQueue`.
+В интерфейсе состояние и информационная строка отображаются отдельно.
+
+## Исполнитель
+
+Коннектор выбирает `IConnectorCommandExecutor` по enum `ConnectorCommand` из Domain.
+Внешний обработчик наследует типизированную базу:
+
+```csharp
+public sealed class LoadExecutor
+    : ConnectorCommandExecutor<ConnectorLoadRequest, LoadContentVersionResponse>
+{
+    public override ConnectorCommand Command => ConnectorCommand.LoadContentVersion;
+
+    protected override async Task<LoadContentVersionResponse> ExecuteAsync(
+        ConnectorLoadRequest request, IConnectorCommandContext context,
+        CancellationToken token)
+    {
+        await context.ReportStatusAsync("Открываю документ", token);
+        // Execute work in the host application's valid API context.
+        return new LoadContentVersionResponse(true, request.Files.Count);
+    }
+}
+
+connector.RegisterExecutor(new LoadExecutor());
+```
+
+Контекст содержит `Task` и метод обновления информационной строки. Исполнитель не
+получает TCP-соединение, не переключает состояния:
+Accepted и Done публикуются общим сервисом автоматически. Для Revit работа выполняется
+через ExternalEvent; реальная загрузка пока остаётся заглушкой в плагине.
+
+Исполнители по умолчанию требуют исключительного выполнения. Следующая такая задача
+при занятости получает ответ с ошибкой. Служебные health/statuses не блокируются загрузкой
+и при обычном служебном запросе не создают пользовательскую историю. Повторная регистрация
+команды отклоняется. Новые команды добавляются в enum Domain.
+
+`IConnectorClient.ExecuteAsync<TRequest, TResponse>` отправляет произвольную прикладную
+задачу. `LoadContentVersionAsync` — обёртка: создаёт по задаче на файл и вызывает тот же
+общий метод, без собственного механизма статусов.
+
+## Разрыв связи и повтор
+
+Токен выполнения связан с жизнью коннектора, а не TCP-соединением. Отключение Desktop
+не прерывает принятую работу. Статусы остаются в памяти и запрашиваются при подключении.
+Повторный запрос с тем же Id и теми же данными получает сохранённый результат;
+исполнитель повторно не запускается. Использование Id с другими данными запрещено.
+Состояние и результаты пока не сохраняются после завершения процесса коннектора.
+Desktop обновляет известные ему задачи; очередь после полного перезапуска Desktop
+не восстанавливается с диска.
+
+## Обнаружение
+
+Коннектор выбирает свободный loopback TCP-порт (или ConnectorHostOptions.Port),
+после запуска атомарно публикует `<InstanceId>.json`. Desktop читает каталог,
+проверяет health и идентификатор экземпляра, следит за FileSystemWatcher и дополнительно
+сверяет состояние раз в 5 секунд. Недоступные и некорректные записи не показываются.
+Коннектор может работать без Desktop неограниченно долго, без попыток подключения к нему.
+При штатной остановке удаляется только собственная регистрация.
+
+Каталоги:
+
+- Windows: `%LOCALAPPDATA%/RevEx/connectors`.
+- macOS: `~/Library/Application Support/RevEx/connectors`.
+- Linux: `$XDG_CONFIG_HOME/RevEx/connectors` или `~/.config/RevEx/connectors`.
+
+## Протокол версии 2
+
+Регистрация содержит ProtocolVersion = 2 и объект Connector (ConnectorDescriptor).
+TCP-кадр: 4 байта длины big-endian, затем UTF-8 JSON до 8 MiB.
+Envelope: Version = 2, Kind, Id, Name, TaskName, Payload, Error.
+Name содержит wire-имя команды либо имя события; TaskName — название задачи.
+Id запроса — GUID задачи. Ответ содержит тот же Id. Kind = task означает прикладную
+задачу с жизненным циклом; Kind = request — служебный запрос без записи в историю.
+
+Команды: `Health = 1` (health), `GetTaskStatuses = 2` (statuses),
+`LoadContentVersion = 3` (load). Информационные уведомления идут событием `taskStatus`
+с ConnectorTaskUpdate. Payload загрузки содержит Files с локальными путями.
+Результаты и статусы передаются по TCP-соединению.
+
+## TestHub и проверки
+
+TestHub создаёт один коннектор и регистрирует один MockLoadExecutor без аргументов.
+Он ожидает команды от Desktop и завершается по Enter. Mock имитирует загрузку и
+сообщает текст через контекст; Revit не требуется.
+
+Из корня RevEx.RevitPlugin:
+
+```powershell
+dotnet build tests/DomainIntegrationHost/DomainIntegrationHost.csproj
+dotnet run --project ../RevEx.Connector.Client/tests/DomainIntegrationChecks/DomainIntegrationChecks.csproj -- tests/DomainIntegrationHost/bin/Debug/net472/DomainIntegrationHost.exe
+```
+
+Проверяются три состояния, произвольные сообщения, независимость Id задачи от файлов,
+повтор без повторного выполнения, ошибки, разрыв/восстановление связи и обмен
+между .NET Framework 4.7.2 и .NET 8. Проверки выполнены на Windows; macOS требует прогона.
