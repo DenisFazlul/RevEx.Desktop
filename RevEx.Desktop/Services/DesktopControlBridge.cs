@@ -224,6 +224,7 @@ public sealed class DesktopControlBridge : IAsyncDisposable
     {
         return new DesktopConnectorCommandDescription(
             contract.Name,
+            contract.Description,
             contract.RequiresExclusiveExecution,
             contract.Input,
             contract.Output);

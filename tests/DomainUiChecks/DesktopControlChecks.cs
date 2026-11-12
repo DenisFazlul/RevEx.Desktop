@@ -142,6 +142,7 @@ internal static class DesktopControlChecks
 
         return new ConnectorCommandContract(
             ConnectorCommand.LoadContentVersion,
+            "Loads content version files.",
             true,
             input,
             output);

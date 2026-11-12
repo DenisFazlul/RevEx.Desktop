@@ -255,7 +255,9 @@ internal static class RfaImportChecks
     private sealed class ReadExecutor : ConnectorCommandExecutor<ConnecterReadFileRequest, JObject>
     {
         public ReadExecutor()
-            : base(ConnectorCommand.ReadFiles)
+            : base(
+                ConnectorCommand.ReadFiles,
+                "Reads Revit family files.")
         {
         }
 

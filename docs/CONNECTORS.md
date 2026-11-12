@@ -87,7 +87,8 @@ Desktop хранит задачи в общем `IConnectorTaskQueue` / `Connect
 
 Коннектор выбирает `IConnectorCommandExecutor` по строковому имени команды. Имена
 встроенных команд доступны как константы `ConnectorCommand`, а пользовательское имя
-можно передать непосредственно в конструктор базового executor.
+можно передать непосредственно в конструктор базового executor. Там же обязательно
+задаётся описание команды, которое Desktop передаёт в MCP вместе с именем.
 Внешний обработчик наследует типизированную базу:
 
 ```csharp
@@ -95,7 +96,9 @@ public sealed class LoadExecutor
     : ConnectorCommandExecutor<ConnectorLoadRequest, LoadContentVersionResponse>
 {
     public LoadExecutor()
-        : base(ConnectorCommand.LoadContentVersion)
+        : base(
+            ConnectorCommand.LoadContentVersion,
+            "Loads content version files.")
     {
     }
 
@@ -123,7 +126,7 @@ Accepted и Done публикуются общим сервисом автома
 команды отклоняется. Новое имя команды задаётся в конструкторе executor без изменения Domain. Все executors должны
 быть зарегистрированы до `StartAsync`: опубликованный `ConnectorDescriptor.Commands`
 является неизменяемым снимком поддерживаемых команд. Для каждой команды указаны
-строковое имя, `Input`, `Output` и признак эксклюзивного выполнения; дополнительный
+строковые имя и описание, `Input`, `Output` и признак эксклюзивного выполнения; дополнительный
 сетевой запрос для показа команд не выполняется.
 
 `IConnectorClient.ExecuteAsync<TRequest, TResponse>` отправляет произвольную прикладную
@@ -158,7 +161,7 @@ Desktop обновляет известные ему задачи; очеред�
 
 ## Протокол версии 2
 
-Регистрация содержит ProtocolVersion = 4 и объект Connector (ConnectorDescriptor).
+Регистрация содержит ProtocolVersion = 5 и объект Connector (ConnectorDescriptor).
 TCP-кадр: 4 байта длины big-endian, затем UTF-8 JSON до 8 MiB.
 Envelope: Version = 2, Kind, Id, Name, TaskName, Payload, Error.
 Name содержит wire-имя команды либо имя события; TaskName — название задачи.

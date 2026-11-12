@@ -28,6 +28,7 @@ public sealed record DesktopConnectorDescription(
 
 public sealed record DesktopConnectorCommandDescription(
     string Name,
+    string Description,
     bool RequiresExclusiveExecution,
     ConnectorPayloadContract Input,
     ConnectorPayloadContract Output);

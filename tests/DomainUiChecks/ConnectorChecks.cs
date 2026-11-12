@@ -108,7 +108,9 @@ internal static class ConnectorChecks
     private sealed class LoadExecutor : ConnectorCommandExecutor<ConnectorLoadRequest, LoadContentVersionResponse>
     {
         public LoadExecutor()
-            : base(ConnectorCommand.LoadContentVersion)
+            : base(
+                ConnectorCommand.LoadContentVersion,
+                "Loads content version files.")
         {
         }
 
