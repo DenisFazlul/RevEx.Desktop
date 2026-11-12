@@ -62,6 +62,17 @@ public partial class App : Application
                 try
                 {
                     using var timeout = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(10));
+                    await Services.GetRequiredService<DesktopControlBridge>().StopAsync(timeout.Token)
+                        .WaitAsync(timeout.Token);
+                }
+                catch (Exception error)
+                {
+                    Console.Error.WriteLine($"Ошибка остановки Desktop control bridge: {error}");
+                }
+
+                try
+                {
+                    using var timeout = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(10));
                     await Services.GetRequiredService<IConnectorRuntime>().StopAsync(timeout.Token)
                         .WaitAsync(timeout.Token);
                 }
@@ -92,6 +103,7 @@ public partial class App : Application
                 return;
             }
             await Services.GetRequiredService<IConnectorRuntime>().StartAsync();
+            await Services.GetRequiredService<DesktopControlBridge>().StartAsync();
             var authenticationService = Services.GetRequiredService<IAuthenticationService>();
             var accessToken = await authenticationService.GetAccessTokenAsync();
             try

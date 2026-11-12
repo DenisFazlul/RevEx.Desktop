@@ -50,6 +50,8 @@ public static class ServiceExtensions
         services.AddSingleton<IConnectorTransport, TcpConnectorTransport>();
         services.AddSingleton<IConnectorClient, TcpConnectorClient>();
         services.AddSingleton<IConnectorRuntime, DirectoryConnectorRuntime>();
+        services.AddSingleton(new DesktopControlOptions());
+        services.AddSingleton<DesktopControlBridge>();
         services.AddSingleton<RfaFamilyImportService>();
 
         services.AddUIServices();

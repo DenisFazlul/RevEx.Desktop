@@ -17,6 +17,7 @@ using RevEx.Domain.Contracts.Tag;
 
 AppBuilder.Configure<App>().UseHeadless(new AvaloniaHeadlessPlatformOptions()).SetupWithoutStarting();
 ConnectorChecks.Run();
+DesktopControlChecks.Run();
 RfaImportChecks.Run();
 VersionPublicationChecks.Run();
 DialogChecks.Run();
