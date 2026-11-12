@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Text.Json;
+using RevEx.Domain.Contracts.Connectors;
 
 namespace RevEx.Desktop.Services;
 
@@ -21,7 +23,15 @@ public sealed record DesktopConnectorDescription(
     string Product,
     string ProductVersion,
     int ProcessId,
-    string? ActiveDocument);
+    string? ActiveDocument,
+    IReadOnlyCollection<DesktopConnectorCommandDescription> Commands);
+
+public sealed record DesktopConnectorCommandDescription(
+    string Name,
+    string ProtocolName,
+    bool RequiresExclusiveExecution,
+    ConnectorPayloadContract Input,
+    ConnectorPayloadContract Output);
 
 public sealed record ExecuteDesktopConnectorCommandRequest(
     string? TaskName,

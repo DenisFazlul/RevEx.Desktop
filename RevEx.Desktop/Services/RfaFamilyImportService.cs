@@ -87,7 +87,7 @@ public sealed class RfaFamilyImportService
             }
         }
 
-        await ValidateReaderAsync(connector);
+        ValidateReader(connector);
         var directory = Path.Combine(Path.GetTempPath(), "RevEx", "RfaImport", Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(directory);
         var session = new RfaFamilyReadSession(directory, Path.GetFileName(path), connector);
@@ -245,18 +245,14 @@ public sealed class RfaFamilyImportService
         }
     }
 
-    private async Task ValidateReaderAsync(ConnectorDescriptor connector)
+    private void ValidateReader(ConnectorDescriptor connector)
     {
         if (!_registry.GetAll().Any(item => item.InstanceId == connector.InstanceId))
         {
             throw new InvalidOperationException("Выбранный коннектор больше недоступен. Выберите другой коннектор.");
         }
 
-        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(3));
-        var task = new ConnectorTask(Guid.NewGuid(), "Проверка чтения RFA", ConnectorCommand.GetCommands);
-        var commands = await _client.ExecuteAsync<object, ConnectorCommand[]>(
-            connector, task, new object(), timeout.Token);
-        if (!commands.Contains(ConnectorCommand.ReadFiles))
+        if (!connector.Commands.Any(command => command.Command == ConnectorCommand.ReadFiles))
         {
             throw new InvalidOperationException($"Коннектор «{connector.Name}» не поддерживает чтение RFA. Выберите другой коннектор.");
         }

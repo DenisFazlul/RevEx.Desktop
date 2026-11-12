@@ -7,6 +7,7 @@ using RevEx.Connector.Client;
 using RevEx.Connector.Client.Implementations.Tcp;
 using RevEx.Connector.Commands;
 using RevEx.Connector.Host;
+using RevEx.Connector.Protocol.Implementations.LocalDirectory;
 using RevEx.Connector.Protocol.Implementations.Tcp;
 using RevEx.Desktop.Core.Interfaces;
 using RevEx.Desktop.Core.Services;
@@ -77,6 +78,7 @@ internal static class RfaImportChecks
         Directory.CreateDirectory(directory);
         try
         {
+            using var discovery = new FileConnectorDiscovery(directory);
             var mock = new MockRevExApiService();
             var versions = new RetryVersionRepository(mock.ContentVersions);
             var api = new RevExApiService(mock.Contents, mock.Categories, mock.Tags, mock.TagGroups,
@@ -108,13 +110,17 @@ internal static class RfaImportChecks
             await using var unsupported = new ConnectorHost(new ConnectorHostOptions(
                 "Revit without reader", ConnectorProduct.Revit, "2027", DiscoveryDirectory: directory));
             await unsupported.StartAsync();
-            registry.Register(Describe(unsupported, ConnectorProduct.Revit, "2027"));
+            var unsupportedDescriptor = (await discovery.FindAsync(default)).Single(
+                connector => connector.InstanceId == unsupported.InstanceId);
+            registry.Register(unsupportedDescriptor);
             await using var reader = new ConnectorHost(new ConnectorHostOptions(
                 "RFA mock reader", ConnectorProduct.Mock, "2026", DiscoveryDirectory: directory));
             var readerExecutor = new ReadExecutor();
             reader.RegisterExecutor(readerExecutor);
             await reader.StartAsync();
-            registry.Register(Describe(reader, ConnectorProduct.Mock, "2026"));
+            var readerDescriptor = (await discovery.FindAsync(default)).Single(
+                connector => connector.InstanceId == reader.InstanceId);
+            registry.Register(readerDescriptor);
             using (var invalidSelection = new RfaFamilyImportViewModel(api, import))
             {
                 invalidSelection.SelectedConnector = invalidSelection.Connectors.Single(connector => connector.InstanceId == reader.InstanceId);
@@ -236,12 +242,6 @@ internal static class RfaImportChecks
         {
             Directory.Delete(directory, true);
         }
-    }
-
-    private static ConnectorDescriptor Describe(ConnectorHost host, ConnectorProduct product, string version)
-    {
-        return new ConnectorDescriptor(host.InstanceId, product == ConnectorProduct.Mock ? "RFA mock reader" : "Revit without reader",
-            product, version, host.BaseAddress!, Environment.ProcessId, null);
     }
 
     private static void Require(bool value, string message)

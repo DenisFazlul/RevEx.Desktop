@@ -61,9 +61,19 @@ internal static class ConnectorChecks
             var item = new ConnectorItemViewModel(descriptor, client, id => registry.Remove(id));
             await item.PingAsync(timeout.Token);
             Require(item.IsAvailable && item.Status == "Доступен", "Desktop health check failed.");
-            var commands = await client.ExecuteAsync<object, ConnectorCommand[]>(descriptor,
-                new ConnectorTask(Guid.NewGuid(), "Команды", ConnectorCommand.GetCommands), new object(), timeout.Token);
-            Require(commands.Contains(ConnectorCommand.LoadContentVersion), "Registered command is not available to Desktop.");
+            var loadContract = descriptor.Commands.SingleOrDefault(
+                command => command.Command == ConnectorCommand.LoadContentVersion)
+                ?? throw new InvalidOperationException(
+                    "Registered command is not available to Desktop.");
+            Require(
+                loadContract.Input.Objects.Any(contract =>
+                    contract.Name == nameof(ConnectorLoadRequest) &&
+                    contract.Properties.Any(property => property.Name == "files")),
+                "Connector command input contract is missing.");
+            Require(
+                loadContract.Output.Objects.Any(contract =>
+                    contract.Name == nameof(LoadContentVersionResponse)),
+                "Connector command output contract is missing.");
             var file = Path.Combine(directory, "Family.rfa");
             await File.WriteAllTextAsync(file, "Transport test fixture", timeout.Token);
             var id = Guid.NewGuid();

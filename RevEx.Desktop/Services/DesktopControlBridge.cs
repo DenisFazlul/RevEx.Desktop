@@ -2,8 +2,6 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Reflection;
-using System.Runtime.Serialization;
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Threading;
@@ -135,7 +133,8 @@ public sealed class DesktopControlBridge : IAsyncDisposable
                     connector.Product.ToString(),
                     connector.ProductVersion,
                     connector.ProcessId,
-                    connector.ActiveDocument))
+                    connector.ActiveDocument,
+                    connector.Commands.Select(CreateCommandDescription).ToArray()))
                 .ToArray();
 
             return Results.Ok(connectors);
@@ -143,16 +142,14 @@ public sealed class DesktopControlBridge : IAsyncDisposable
 
         application.MapGet(
             "/connectors/{instanceId:guid}/commands",
-            GetConnectorCommandsAsync);
+            GetConnectorCommands);
 
         application.MapPost(
             "/connectors/{instanceId:guid}/commands/{command}",
             ExecuteConnectorCommandAsync);
     }
 
-    private async Task<IResult> GetConnectorCommandsAsync(
-        Guid instanceId,
-        CancellationToken cancellationToken)
+    private IResult GetConnectorCommands(Guid instanceId)
     {
         var connector = FindConnector(instanceId);
         if (connector is null)
@@ -160,24 +157,11 @@ public sealed class DesktopControlBridge : IAsyncDisposable
             return Results.NotFound(new { message = "Connector is not registered in Desktop." });
         }
 
-        var task = new ConnectorTask(
-            Guid.NewGuid(),
-            "Get connector commands",
-            ConnectorCommand.GetCommands);
-        var commands = await _connectorClient.ExecuteAsync<object, ConnectorCommand[]>(
-            connector,
-            task,
-            new object(),
-            cancellationToken);
-        var commandNames = commands
-            .Select(command => new
-            {
-                name = command.ToString(),
-                protocolName = GetProtocolName(command)
-            })
+        var commands = connector.Commands
+            .Select(CreateCommandDescription)
             .ToArray();
 
-        return Results.Ok(commandNames);
+        return Results.Ok(commands);
     }
 
     private async Task<IResult> ExecuteConnectorCommandAsync(
@@ -192,20 +176,18 @@ public sealed class DesktopControlBridge : IAsyncDisposable
             return Results.NotFound(new { message = "Connector is not registered in Desktop." });
         }
 
-        if (!TryParseCommand(command, out var connectorCommand))
-        {
-            return Results.BadRequest(new { message = $"Unknown connector command '{command}'." });
-        }
-
-        var supportedCommands = await GetSupportedCommandsAsync(connector, cancellationToken);
-        if (!supportedCommands.Contains(connectorCommand))
+        var commandContract = connector.Commands.FirstOrDefault(candidate =>
+            string.Equals(candidate.Command.ToString(), command, StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(candidate.ProtocolName, command, StringComparison.OrdinalIgnoreCase));
+        if (commandContract is null)
         {
             return Results.BadRequest(new
             {
-                message = $"Connector does not support command '{connectorCommand}'."
+                message = $"Connector does not support command '{command}'."
             });
         }
 
+        var connectorCommand = commandContract.Command;
         var taskId = Guid.NewGuid();
         var taskName = string.IsNullOrWhiteSpace(request.TaskName)
             ? connectorCommand.ToString()
@@ -231,23 +213,6 @@ public sealed class DesktopControlBridge : IAsyncDisposable
             "application/json");
     }
 
-    private async Task<ConnectorCommand[]> GetSupportedCommandsAsync(
-        ConnectorDescriptor connector,
-        CancellationToken cancellationToken)
-    {
-        var task = new ConnectorTask(
-            Guid.NewGuid(),
-            "Get connector commands",
-            ConnectorCommand.GetCommands);
-        var commands = await _connectorClient.ExecuteAsync<object, ConnectorCommand[]>(
-            connector,
-            task,
-            new object(),
-            cancellationToken);
-
-        return commands;
-    }
-
     private ConnectorDescriptor? FindConnector(Guid instanceId)
     {
         return _connectorRegistry
@@ -255,32 +220,15 @@ public sealed class DesktopControlBridge : IAsyncDisposable
             .FirstOrDefault(connector => connector.InstanceId == instanceId);
     }
 
-    private static bool TryParseCommand(string value, out ConnectorCommand command)
+    private static DesktopConnectorCommandDescription CreateCommandDescription(
+        ConnectorCommandContract contract)
     {
-        if (Enum.TryParse(value, true, out command) && Enum.IsDefined(command))
-        {
-            return true;
-        }
-
-        foreach (var candidate in Enum.GetValues<ConnectorCommand>())
-        {
-            if (string.Equals(GetProtocolName(candidate), value, StringComparison.OrdinalIgnoreCase))
-            {
-                command = candidate;
-                return true;
-            }
-        }
-
-        command = default;
-        return false;
-    }
-
-    private static string GetProtocolName(ConnectorCommand command)
-    {
-        var member = typeof(ConnectorCommand).GetMember(command.ToString()).Single();
-        var attribute = member.GetCustomAttribute<EnumMemberAttribute>();
-
-        return attribute?.Value ?? command.ToString();
+        return new DesktopConnectorCommandDescription(
+            contract.Command.ToString(),
+            contract.ProtocolName,
+            contract.RequiresExclusiveExecution,
+            contract.Input,
+            contract.Output);
     }
 
     private static string GetServerAddress(WebApplication application)

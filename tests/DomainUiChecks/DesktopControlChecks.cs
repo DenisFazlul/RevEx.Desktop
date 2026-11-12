@@ -27,7 +27,13 @@ internal static class DesktopControlChecks
             "2026",
             new Uri("http://127.0.0.1:1"),
             Environment.ProcessId,
-            "Model.rvt");
+            "Model.rvt")
+        {
+            Commands = new[]
+            {
+                CreateLoadContract()
+            }
+        };
         var registry = new ConnectorRegistry();
         registry.Register(connector);
         var client = new TestConnectorClient();
@@ -65,9 +71,14 @@ internal static class DesktopControlChecks
 
             var connectors = await httpClient.GetFromJsonAsync<DesktopConnectorDescription[]>(
                 "connectors");
+            var connectorDescriptions = connectors
+                ?? throw new InvalidOperationException("Desktop connector list is empty.");
             Require(
-                connectors?.Single().InstanceId == connector.InstanceId,
+                connectorDescriptions.Single().InstanceId == connector.InstanceId,
                 "Desktop connector list is invalid.");
+            Require(
+                connectorDescriptions.Single().Commands.Single().Name == nameof(ConnectorCommand.LoadContentVersion),
+                "Desktop connector list does not contain command contracts.");
 
             var commands = await httpClient.GetStringAsync(
                 $"connectors/{connector.InstanceId:D}/commands");
@@ -118,6 +129,25 @@ internal static class DesktopControlChecks
         }
     }
 
+    private static ConnectorCommandContract CreateLoadContract()
+    {
+        var input = new ConnectorPayloadContract(
+            "RevEx.Connector.Protocol.ConnectorLoadRequest",
+            Array.Empty<ConnectorObjectContract>(),
+            Array.Empty<ConnectorEnumContract>());
+        var output = new ConnectorPayloadContract(
+            "RevEx.Domain.Contracts.Connectors.LoadContentVersionResponse",
+            Array.Empty<ConnectorObjectContract>(),
+            Array.Empty<ConnectorEnumContract>());
+
+        return new ConnectorCommandContract(
+            ConnectorCommand.LoadContentVersion,
+            "load",
+            true,
+            input,
+            output);
+    }
+
     private sealed class TestConnectorClient : IConnectorClient
     {
         public ConnectorCommand? LastCommand { get; private set; }
@@ -130,15 +160,7 @@ internal static class DesktopControlChecks
         {
             LastCommand = task.Command;
             object response;
-            if (typeof(TResponse) == typeof(ConnectorCommand[]))
-            {
-                response = new[]
-                {
-                    ConnectorCommand.GetCommands,
-                    ConnectorCommand.LoadContentVersion
-                };
-            }
-            else if (typeof(TResponse) == typeof(JToken))
+            if (typeof(TResponse) == typeof(JToken))
             {
                 response = new JObject
                 {
