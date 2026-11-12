@@ -40,6 +40,7 @@ int? contentId = null;
 for (var addition = 1; addition <= 2; addition++)
 {
     using var form = new RfaFamilyImportViewModel(api, importer);
+    form.SelectedConnector = form.Connectors.Single(connector => connector.InstanceId == descriptor.InstanceId);
     await form.LoadFileAsync(path);
     if (form.HasError || !form.CanSave)
     {

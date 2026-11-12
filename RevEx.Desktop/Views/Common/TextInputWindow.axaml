@@ -7,11 +7,11 @@
         Title="{Binding Options.WindowTitle}" Width="540" Height="360"
         MinWidth="460" MinHeight="320" WindowStartupLocation="CenterOwner"
         CanResize="False">
-    <Grid Margin="24" RowDefinitions="Auto,18,*,Auto">
+    <Grid Margin="16" RowDefinitions="Auto,12,*,Auto">
         <HeaderedContentControl Theme="{StaticResource DialogHeaderTheme}"
                                 Header="{Binding Options.FormTitle}" Content="{Binding Options.Hint}" />
 
-        <StackPanel Grid.Row="2" Spacing="9">
+        <StackPanel Grid.Row="2" Spacing="8">
             <HeaderedContentControl Theme="{StaticResource FormFieldTheme}" Header="{Binding Options.FieldLabel}">
                 <TextBox x:Name="ValueBox" Text="{Binding Text}"
                          Classes.multiline="{Binding Options.IsMultiline}"

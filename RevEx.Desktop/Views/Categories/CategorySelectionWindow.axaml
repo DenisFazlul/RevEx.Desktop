@@ -5,10 +5,10 @@
         xmlns:vm="using:RevEx.Desktop.ViewModels.Categories"
         x:DataType="vm:CategorySelectionViewModel"
         x:Class="RevEx.Desktop.Views.Categories.CategorySelectionWindow"
-        Title="Изменение категории" Width="500" Height="300"
-        MinWidth="440" MinHeight="280" WindowStartupLocation="CenterOwner"
+        Title="Изменение категории" Width="500" Height="224"
+        MinWidth="440" MinHeight="224" WindowStartupLocation="CenterOwner"
         CanResize="False">
-    <Grid Margin="24" RowDefinitions="Auto,18,*,Auto">
+    <Grid Margin="12" RowDefinitions="Auto,8,Auto,12,Auto">
         <HeaderedContentControl Theme="{StaticResource DialogHeaderTheme}"
                                 Header="Категория контента"
                                 Content="Выберите новую категорию карточки" />
@@ -25,7 +25,7 @@
             </ComboBox>
         </HeaderedContentControl>
 
-        <Grid Grid.Row="3" ColumnDefinitions="*,Auto,10,Auto">
+        <Grid Grid.Row="4" ColumnDefinitions="*,Auto,8,Auto">
             <Button Grid.Column="1" Classes="secondary" Content="Отмена" Command="{Binding CancelCommand}" />
             <Button Grid.Column="3" Classes="primary" Content="Сохранить" Command="{Binding AcceptCommand}" />
         </Grid>

@@ -45,7 +45,8 @@ internal static class MockApiData
 
     internal static readonly List<ContentVersionDto> ContentVersions =
     [
-        new(1, 1, [1], "Версия 1.0", CreatedAt, "published", "revit", "2026", CreatedAt, UpdatedAt)
+        new(1, 1, [1], "Версия 1.0", CreatedAt, "published", RevEx.Domain.Entities.PublishStatus.Ready,
+            RevEx.Domain.Entities.Platform.Revit, "revit", "2026", CreatedAt, UpdatedAt)
     ];
 
     internal static readonly List<ContentDto> Contents =

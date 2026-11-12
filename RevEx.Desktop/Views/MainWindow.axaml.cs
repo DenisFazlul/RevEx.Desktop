@@ -8,7 +8,7 @@ namespace RevEx.Desktop.Views;
 
 public partial class MainWindow : Window
 {
-    private const double ExpandedSidebarWidth = 264;
+    private const double ExpandedSidebarWidth = 232;
 
     public MainWindow()
     {

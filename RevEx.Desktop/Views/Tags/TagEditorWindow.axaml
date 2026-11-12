@@ -7,12 +7,12 @@
         Title="Тег" Width="480" Height="350"
         MinWidth="420" MinHeight="320" WindowStartupLocation="CenterOwner"
         CanResize="False">
-    <Grid Margin="24" RowDefinitions="Auto,18,*,Auto">
+    <Grid Margin="16" RowDefinitions="Auto,12,*,Auto">
         <StackPanel Spacing="4">
             <TextBlock Classes="h2" Text="{Binding DialogTitle}" />
             <TextBlock Classes="caption" Text="Укажите имя тега и группу, к которой он относится" />
         </StackPanel>
-        <StackPanel Grid.Row="2" Spacing="9">
+        <StackPanel Grid.Row="2" Spacing="8">
             <TextBlock Classes="label" Text="Название тега" />
             <TextBox x:Name="NameBox" Text="{Binding Text}" MaxLength="100"
                      Watermark="Например, Revit" />

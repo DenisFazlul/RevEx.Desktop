@@ -7,12 +7,12 @@
         Title="Группа тегов" Width="460" Height="270"
         MinWidth="400" MinHeight="250" WindowStartupLocation="CenterOwner"
         CanResize="False">
-    <Grid Margin="24" RowDefinitions="Auto,18,Auto,*,Auto">
+    <Grid Margin="16" RowDefinitions="Auto,12,Auto,*,Auto">
         <StackPanel Spacing="4">
             <TextBlock Classes="h2" Text="{Binding DialogTitle}" />
             <TextBlock Classes="caption" Text="Укажите название группы тегов" />
         </StackPanel>
-        <StackPanel Grid.Row="2" Spacing="7">
+        <StackPanel Grid.Row="2" Spacing="4">
             <TextBlock Classes="label" Text="Название группы" />
             <TextBox x:Name="NameBox" Text="{Binding Text}" MaxLength="100"
                      Watermark="Например, Платформа" />

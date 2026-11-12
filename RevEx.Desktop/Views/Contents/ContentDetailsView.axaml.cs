@@ -138,6 +138,15 @@ public partial class ContentDetailsView : UserControl
         }
     }
 
+    private async void OnVersionSelectionChanged(object? sender, SelectionChangedEventArgs eventArgs)
+    {
+        if (sender is ComboBox { SelectedItem: ContentVersionDto version } &&
+            DataContext is ContentDetailsViewModel viewModel &&
+            viewModel.SelectedVersion?.Id != version.Id)
+        {
+            await viewModel.SelectVersionCommand.ExecuteAsync(version);
+        }
+    }
     private async void OnVersionClick(object? sender, Avalonia.Interactivity.RoutedEventArgs eventArgs)
     {
         if (sender is Control { DataContext: ContentVersionDto version } &&

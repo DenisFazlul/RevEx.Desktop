@@ -4,14 +4,14 @@
              x:Class="RevEx.Desktop.Views.Loading.LoadingQueueTabView"
              x:DataType="vm:LoadingQueueTabViewModel">
     <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-        <Grid Margin="32,30" RowDefinitions="Auto,22,*" MaxWidth="960"
-              HorizontalAlignment="Center">
+        <Grid Margin="12" RowDefinitions="Auto,12,*" MaxWidth="960"
+              HorizontalAlignment="Left">
             <HeaderedContentControl Theme="{StaticResource PageHeaderTheme}"
                                     Header="Загрузки"
                                     Content="Состояние задач коннектора" />
 
             <Border Grid.Row="2" Classes="card section-card">
-                <StackPanel Spacing="14">
+                <StackPanel Spacing="8">
                     <TextBlock IsVisible="{Binding HasNoItems}"
                                Text="Очередь загрузки пока пуста."
                                Foreground="{StaticResource TextSecondaryBrush}" />
@@ -19,7 +19,7 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="vm:LoadingQueueItemViewModel">
                                 <Border Classes="value-box" Margin="0,0,0,8">
-                                    <Grid ColumnDefinitions="*,20,190,20,150" RowDefinitions="Auto,5,Auto,5,Auto">
+                                    <Grid ColumnDefinitions="*,12,190,12,150" RowDefinitions="Auto,5,Auto,5,Auto">
                                         <TextBlock Text="{Binding Name}" FontWeight="SemiBold"
                                                    TextTrimming="CharacterEllipsis" />
                                         <TextBlock Grid.Column="2" Text="{Binding StatusText}" />

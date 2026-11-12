@@ -41,24 +41,41 @@ public partial class ContentDetailsViewModel
     [RelayCommand]
     private async Task SelectVersionAsync(ContentVersionDto version)
     {
+        if (IsSavingPublishStatus)
+        {
+            return;
+        }
+
         try
         {
             IsLoadingVersion = true;
             VersionErrorMessage = null;
             VersionMessage = null;
+            UpdateVersionMetadata(Array.Empty<ContentFileDto>());
             SelectedVersion = version;
             var files = await _apiService.ContentFiles.GetAllAsync();
+            if (SelectedVersion?.Id != version.Id)
+            {
+                return;
+            }
             ReplaceVersionFiles(files.Where(item => item.ContentVersionId == version.Id));
         }
         catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
         {
-            VersionFiles.Clear();
-            VersionErrorMessage = $"Не удалось загрузить файлы версии: {exception.Message}";
+            if (SelectedVersion?.Id == version.Id)
+            {
+                VersionFiles.Clear();
+                UpdateVersionMetadata(Array.Empty<ContentFileDto>());
+                VersionErrorMessage = $"Не удалось загрузить файлы версии: {exception.Message}";
+            }
         }
         finally
         {
-            IsLoadingVersion = false;
-            NotifyVersionStateChanged();
+            if (SelectedVersion?.Id == version.Id)
+            {
+                IsLoadingVersion = false;
+                NotifyVersionStateChanged();
+            }
         }
     }
 
@@ -106,6 +123,7 @@ public partial class ContentDetailsViewModel
             VersionMessage = null;
             await _apiService.ContentVersions.DeleteFileAsync(SelectedVersion.Id, file.Id);
             VersionFiles.Remove(file);
+            UpdateVersionMetadata(_versionMetadataFiles.Where(item => item.Id != file.Id));
             SelectedVersion = SelectedVersion with
             {
                 FileIds = SelectedVersion.FileIds.Where(id => id != file.Id).ToArray()

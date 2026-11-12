@@ -1,6 +1,7 @@
 using RevEx.Domain.Contracts.ContentFile;
 using RevEx.Domain.Contracts.ContentVersion;
 using RevEx.Desktop.Core.Interfaces;
+using RevEx.Domain.Entities;
 using static RevEx.Desktop.Core.Services.MockApiData;
 
 namespace RevEx.Desktop.Core.Services;
@@ -19,19 +20,67 @@ internal sealed class MockContentVersionRepository : IContentVersionRepository
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        var platform = request.Platform;
+        if (platform is null || !Enum.IsDefined(typeof(Platform), platform.Value)
+            || !Enum.IsDefined(typeof(PublishStatus), request.PublishStatus))
+        {
+            throw new InvalidOperationException("Укажите допустимые платформу и статус публикации версии.");
+        }
+
         var version = new ContentVersionDto(
             ContentVersions.Count == 0 ? 1 : ContentVersions.Max(item => item.Id) + 1,
             request.ContentId,
             [],
             request.Name ?? "Новая версия",
             request.Date ?? DateTimeOffset.UtcNow,
-            request.Status ?? "draft",
-            request.Application,
+            GetLegacyStatus(request.PublishStatus),
+            request.PublishStatus,
+            platform.Value,
+            platform.Value switch
+            {
+                Platform.Revit => "revit",
+                Platform.AutoCad => "autocad",
+                _ => request.Application
+            },
             request.ApplicationVersion,
             DateTimeOffset.UtcNow,
             DateTimeOffset.UtcNow);
         ContentVersions.Add(version);
         return Task.FromResult(version);
+    }
+
+    public Task UpdatePublishStatusAsync(
+        int versionId, PublishStatus publishStatus, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (!Enum.IsDefined(typeof(PublishStatus), publishStatus))
+        {
+            throw new InvalidOperationException("Укажите допустимый статус публикации.");
+        }
+
+        var index = ContentVersions.FindIndex(version => version.Id == versionId);
+        if (index < 0)
+        {
+            throw new HttpRequestException($"Version {versionId} was not found.");
+        }
+
+        ContentVersions[index] = ContentVersions[index] with
+        {
+            PublishStatus = publishStatus,
+            Status = GetLegacyStatus(publishStatus),
+            UpdatedAt = DateTimeOffset.UtcNow
+        };
+        return Task.CompletedTask;
+    }
+
+    private static string GetLegacyStatus(PublishStatus status)
+    {
+        return status switch
+        {
+            PublishStatus.Ready => "published",
+            PublishStatus.Withdrawn => "archived",
+            _ => "draft"
+        };
     }
 
     public Task<ContentVersionDto> UploadFileAsync(

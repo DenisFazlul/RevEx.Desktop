@@ -285,6 +285,8 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
             Name = VersionName.Trim(),
             Date = DateTimeOffset.UtcNow,
             Status = "draft",
+            PublishStatus = RevEx.Domain.Entities.PublishStatus.Draft,
+            Platform = RevEx.Domain.Entities.Platform.Revit,
             Application = "revit",
             ApplicationVersion = RevitVersion.Trim()
         });

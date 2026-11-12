@@ -6,12 +6,12 @@
         x:DataType="history:ContentHistoryEventViewModel"
         Title="Детали изменения" Width="720" Height="520"
         MinWidth="560" MinHeight="400" WindowStartupLocation="CenterOwner">
-    <Grid Margin="24" RowDefinitions="Auto,20,Auto,18,*,20,Auto">
+    <Grid Margin="16" RowDefinitions="Auto,12,Auto,12,*,12,Auto">
         <HeaderedContentControl Theme="{StaticResource DialogHeaderTheme}"
                                 Header="Детали изменения"
                                 Content="Полная информация о событии в истории контента" />
 
-        <Grid Grid.Row="2" ColumnDefinitions="*,24,*">
+        <Grid Grid.Row="2" ColumnDefinitions="*,12,*">
             <HeaderedContentControl Theme="{StaticResource InfoFieldTheme}"
                                     Header="Время" Content="{Binding OccurredAtText}" />
             <HeaderedContentControl Grid.Column="2" Theme="{StaticResource InfoFieldTheme}"
@@ -20,7 +20,7 @@
 
         <Border Grid.Row="4" Classes="value-box" Padding="16">
             <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-                <StackPanel Spacing="10">
+                <StackPanel Spacing="8">
                     <TextBlock Classes="caption" Text="ОПИСАНИЕ ИЗМЕНЕНИЯ" />
                     <TextBlock Text="{Binding Description}" TextWrapping="Wrap" />
                 </StackPanel>

@@ -2,10 +2,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:domain="using:RevEx.Domain.Contracts.ContentVersion"
         xmlns:history="using:RevEx.Desktop.ViewModels.Contents"
+             xmlns:revitViews="using:RevEx.Desktop.Views.Revit"
              xmlns:vm="using:RevEx.Desktop.ViewModels.Contents"
              x:Class="RevEx.Desktop.Views.Contents.ContentDetailsView"
              x:DataType="vm:ContentDetailsViewModel">
-    <Grid Margin="32" RowDefinitions="Auto,Auto,*" MaxWidth="1120" HorizontalAlignment="Stretch">
+    <Grid Margin="12" RowDefinitions="Auto,Auto,*" HorizontalAlignment="Stretch">
         <HeaderedContentControl Theme="{StaticResource EyebrowHeaderTheme}"
                                 Header="{Binding Title}" Content="Карточка материала из базы знаний" />
 
@@ -20,9 +21,9 @@
         <TabControl Grid.Row="2">
             <TabItem Header="Основное">
                 <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-                    <Grid Margin="0,16,0,0" ColumnDefinitions="2*,16,3*">
-                        <Border Classes="card section-card">
-                            <StackPanel Spacing="14">
+                    <Grid Margin="0,16,0,0" ColumnDefinitions="2*,12,3*">
+                        <Border Classes="card section-card" VerticalAlignment="Top">
+                            <StackPanel Spacing="8">
                                 <Grid ColumnDefinitions="*,Auto">
                                     <TextBlock Classes="h2" Text="Изображение" />
                                     <Button Grid.Column="1" Classes="icon" Click="OnUpdatePreviewClick"
@@ -32,22 +33,22 @@
                                     </Button>
                                 </Grid>
                                 <ProgressBar IsVisible="{Binding IsUpdatingPreview}" IsIndeterminate="True" />
-                                <Border Classes="image-frame" MinHeight="300">
+                                <Border Classes="image-frame" MinHeight="200">
                                     <Grid>
                                         <TextBlock IsVisible="{Binding HasNoPreview}" Text="Изображение пока не загружено."
                                                    Foreground="{StaticResource TextSecondaryBrush}"
                                                    HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         <Image Source="{Binding PreviewImage}" Stretch="Uniform"
-                                               IsVisible="{Binding HasPreview}" MaxHeight="480" />
+                                               IsVisible="{Binding HasPreview}" MaxHeight="256" />
                                     </Grid>
                                 </Border>
                                 <TextBlock Text="{Binding PreviewMessage}" Classes="status-message" />
                             </StackPanel>
                         </Border>
 
-                        <StackPanel Grid.Column="2" Spacing="16">
+                        <StackPanel Grid.Column="2" Spacing="12">
                             <Border Classes="card section-card">
-                                <StackPanel Spacing="14">
+                                <StackPanel Spacing="8">
                                     <Grid ColumnDefinitions="*,Auto">
                                         <TextBlock Classes="h2" Text="Основная информация" />
                                         <Button Grid.Column="1" Classes="icon danger" Click="OnDeleteContentClick"
@@ -56,28 +57,33 @@
                                             <PathIcon Data="M3,4 L13,4 M5,4 L5,14 L11,14 L11,4 M6,2 L10,2 L11,4 L5,4 Z M7,7 L7,12 M9,7 L9,12" />
                                         </Button>
                                     </Grid>
-                                    <Grid ColumnDefinitions="*,Auto">
-                                        <HeaderedContentControl Theme="{StaticResource InfoFieldTheme}"
-                                                                Header="Название" Content="{Binding Name}" />
-                                        <Button Grid.Column="1" Classes="icon" Click="OnEditNameClick"
+                                    <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto,Auto">
+                                        <Grid.Styles>
+                                            <Style Selector="TextBlock">
+                                                <Setter Property="Margin" Value="8,4" />
+                                                <Setter Property="VerticalAlignment" Value="Center" />
+                                                <Setter Property="TextWrapping" Value="Wrap" />
+                                            </Style>
+                                        </Grid.Styles>
+                                        <Border Grid.Row="0" Grid.ColumnSpan="3" Background="{StaticResource SurfaceMutedBrush}" />
+                                        <Border Grid.Row="2" Grid.ColumnSpan="3" Background="{StaticResource SurfaceMutedBrush}" />
+                                        <TextBlock Grid.Row="0" Classes="caption" Text="Название" />
+                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Name}" />
+                                        <Button Grid.Row="0" Grid.Column="2" Classes="icon" Click="OnEditNameClick"
                                                 IsVisible="{Binding CanEdit}"
                                                 IsEnabled="{Binding !IsSavingContent}" ToolTip.Tip="Изменить название">
                                             <PathIcon Data="M3,11 L3,14 L6,14 L14,6 L11,3 Z M10,4 L13,7 M3,14 L7,13" />
                                         </Button>
-                                    </Grid>
-                                    <Grid ColumnDefinitions="*,Auto">
-                                        <HeaderedContentControl Theme="{StaticResource InfoFieldTheme}"
-                                                                Header="Описание" Content="{Binding Description}" />
-                                        <Button Grid.Column="1" Classes="icon" Click="OnEditDescriptionClick"
+                                        <TextBlock Grid.Row="1" Classes="caption" Text="Описание" />
+                                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Description}" />
+                                        <Button Grid.Row="1" Grid.Column="2" Classes="icon" Click="OnEditDescriptionClick"
                                                 IsVisible="{Binding CanEdit}"
                                                 IsEnabled="{Binding !IsSavingContent}" ToolTip.Tip="Изменить описание">
                                             <PathIcon Data="M3,11 L3,14 L6,14 L14,6 L11,3 Z M10,4 L13,7 M3,14 L7,13" />
                                         </Button>
-                                    </Grid>
-                                    <Grid ColumnDefinitions="*,Auto">
-                                        <HeaderedContentControl Theme="{StaticResource InfoFieldTheme}"
-                                                                Header="Категория" Content="{Binding CategoryName}" />
-                                        <Button Grid.Column="1" Classes="icon" Click="OnEditCategoryClick"
+                                        <TextBlock Grid.Row="2" Classes="caption" Text="Категория" />
+                                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding CategoryName}" />
+                                        <Button Grid.Row="2" Grid.Column="2" Classes="icon" Click="OnEditCategoryClick"
                                                 IsVisible="{Binding CanEdit}"
                                                 IsEnabled="{Binding !IsSavingContent}" ToolTip.Tip="Изменить категорию">
                                             <PathIcon Data="M3,11 L3,14 L6,14 L14,6 L11,3 Z M10,4 L13,7 M3,14 L7,13" />
@@ -89,7 +95,7 @@
                             </Border>
 
                             <Border Classes="card section-card">
-                                <StackPanel Spacing="14">
+                                <StackPanel Spacing="8">
                                     <Grid ColumnDefinitions="*,Auto">
                                         <TextBlock Classes="h2" Text="Теги" />
                                         <Button Grid.Column="1" Classes="primary" Content="Добавить тег"
@@ -128,62 +134,88 @@
             </TabItem>
 
             <TabItem Header="Версии">
-                <Grid Margin="0,16,0,0" ColumnDefinitions="300,16,*">
-                    <Border Classes="card section-card">
-                        <Grid RowDefinitions="Auto,14,*">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <TextBlock Classes="h2" Text="Версии" VerticalAlignment="Center" />
-                                <Button Grid.Column="1" Classes="primary compact" Content="Добавить"
-                                        IsVisible="{Binding CanEdit}"
-                                        Command="{Binding AddVersionCommand}" />
-                            </Grid>
-                            <TextBlock Grid.Row="2" IsVisible="{Binding HasNoVersions}"
-                                       Text="У контента пока нет версий."
-                                       Foreground="{StaticResource TextSecondaryBrush}" />
-                            <ScrollViewer Grid.Row="2" IsVisible="{Binding HasVersions}">
-                                <ItemsControl ItemsSource="{Binding Versions}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate x:DataType="domain:ContentVersionDto">
-                                            <Button Margin="0,0,0,4" Padding="8,6" HorizontalContentAlignment="Stretch"
-                                                    Click="OnVersionClick">
-                                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-                                                    <TextBlock FontWeight="SemiBold" Text="{Binding Name}"
-                                                               VerticalAlignment="Center" />
-                                                    <TextBlock Grid.Column="1" Classes="caption"
-                                                               Text="{Binding Status}" VerticalAlignment="Center" />
-                                                </Grid>
-                                            </Button>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </ScrollViewer>
-                        </Grid>
-                    </Border>
-
-                    <ScrollViewer Grid.Column="2" HorizontalScrollBarVisibility="Disabled">
-                        <StackPanel Spacing="16" IsVisible="{Binding HasSelectedVersion}">
+                <Grid Margin="0,12,0,0" RowDefinitions="Auto,8,Auto,12,*">
+                    <ListBox ItemsSource="{Binding VersionPlatforms}"
+                             SelectedItem="{Binding SelectedVersionPlatform, Mode=TwoWay}"
+                             SelectionMode="Single" IsEnabled="{Binding !IsVersionBusy}"
+                             Background="Transparent" BorderThickness="0" Padding="0">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="4" />
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                        <ListBox.Styles>
+                            <Style Selector="ListBoxItem">
+                                <Setter Property="MinHeight" Value="32" />
+                                <Setter Property="Padding" Value="12,4" />
+                                <Setter Property="CornerRadius" Value="6" />
+                            </Style>
+                            <Style Selector="ListBoxItem:selected">
+                                <Setter Property="Background" Value="{StaticResource SurfaceSelectedBrush}" />
+                            </Style>
+                        </ListBox.Styles>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:DataType="vm:VersionPlatformOption">
+                                <TextBlock Text="{Binding Name}" />
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <Grid Grid.Row="2" ColumnDefinitions="Auto,8,*,8,Auto">
+                        <TextBlock Classes="label" Text="Версия" VerticalAlignment="Center" />
+                        <ComboBox Grid.Column="2" ItemsSource="{Binding FilteredVersions}"
+                                  SelectedItem="{Binding SelectedVersion, Mode=OneWay}"
+                                  SelectionChanged="OnVersionSelectionChanged"
+                                  DisplayMemberBinding="{Binding Name}"
+                                  HorizontalAlignment="Stretch" IsEnabled="{Binding !IsVersionBusy}" />
+                        <Button Grid.Column="4" Classes="primary compact" Content="Добавить"
+                                IsVisible="{Binding CanEdit}" Command="{Binding AddVersionCommand}" />
+                    </Grid>
+                    <TextBlock Grid.Row="4" IsVisible="{Binding HasNoPlatformVersions}"
+                               Classes="caption" Text="Для выбранной платформы пока нет версий." />
+                    <ScrollViewer Grid.Row="4" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Spacing="12" IsVisible="{Binding HasSelectedVersion}">
                             <Border Classes="card section-card">
-                                <StackPanel Spacing="14">
+                                <StackPanel Spacing="8">
                                     <TextBlock Classes="h2" Text="{Binding SelectedVersion.Name}" />
-                                    <Grid ColumnDefinitions="*,18,*" RowDefinitions="Auto,14,Auto,14,Auto">
-                                        <HeaderedContentControl Theme="{StaticResource InfoFieldTheme}"
-                                                                Header="Версия Revit" Content="{Binding SelectedVersion.ApplicationVersion}" />
-                                        <HeaderedContentControl Grid.Column="2" Theme="{StaticResource InfoFieldTheme}"
-                                                                Header="Статус" Content="{Binding SelectedVersion.Status}" />
-                                        <HeaderedContentControl Grid.Row="2" Theme="{StaticResource InfoFieldTheme}"
-                                                                Header="Дата версии" Content="{Binding SelectedVersionDateText}" />
-                                        <HeaderedContentControl Grid.Row="2" Grid.Column="2" Theme="{StaticResource InfoFieldTheme}"
-                                                                Header="Файлов" Content="{Binding VersionFiles.Count}" />
-                                        <HeaderedContentControl Grid.Row="4" Theme="{StaticResource InfoFieldTheme}"
-                                                                Header="Создано" Content="{Binding SelectedVersionCreatedAtText}" />
-                                        <HeaderedContentControl Grid.Row="4" Grid.Column="2" Theme="{StaticResource InfoFieldTheme}"
-                                                                Header="Обновлено" Content="{Binding SelectedVersionUpdatedAtText}" />
+                                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+                                        <Grid.Styles>
+                                            <Style Selector="TextBlock">
+                                                <Setter Property="Margin" Value="8,4" />
+                                                <Setter Property="VerticalAlignment" Value="Center" />
+                                                <Setter Property="TextWrapping" Value="Wrap" />
+                                            </Style>
+                                        </Grid.Styles>
+                                        <Border Grid.ColumnSpan="2" Background="{StaticResource SurfaceMutedBrush}" />
+                                        <Border Grid.Row="2" Grid.ColumnSpan="2" Background="{StaticResource SurfaceMutedBrush}" />
+                                        <Border Grid.Row="4" Grid.ColumnSpan="2" Background="{StaticResource SurfaceMutedBrush}" />
+                                        <TextBlock Classes="caption" Text="Версия приложения" />
+                                        <TextBlock Grid.Column="1" Text="{Binding SelectedVersion.ApplicationVersion}" />
+                                        <TextBlock Grid.Row="1" Classes="caption" Text="Платформа" />
+                                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedVersion.Platform}" />
+                                        <TextBlock Grid.Row="2" Classes="caption" Text="Дата версии" />
+                                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedVersionDateText}" />
+                                        <TextBlock Grid.Row="3" Classes="caption" Text="Файлов" />
+                                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding VersionFiles.Count}" />
+                                        <TextBlock Grid.Row="4" Classes="caption" Text="Создано" />
+                                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SelectedVersionCreatedAtText}" />
+                                        <TextBlock Grid.Row="5" Classes="caption" Text="Обновлено" />
+                                        <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding SelectedVersionUpdatedAtText}" />
+                                        <TextBlock Grid.Row="6" Classes="caption" Text="Статус публикации" />
+                                        <Grid Grid.Row="6" Grid.Column="1" ColumnDefinitions="*,8,Auto" Margin="8,4">
+                                            <ComboBox ItemsSource="{Binding PublishStatuses}"
+                                                      SelectedItem="{Binding SelectedPublishStatus}"
+                                                      DisplayMemberBinding="{Binding Name}"
+                                                      IsEnabled="{Binding CanChangePublishStatus}" />
+                                            <Button Grid.Column="2" Content="Сохранить статус"
+                                                    IsVisible="{Binding CanEdit}"
+                                                    Command="{Binding SavePublishStatusCommand}" />
+                                        </Grid>
                                     </Grid>
                                 </StackPanel>
                             </Border>
 
                             <Border Classes="card section-card">
-                                <StackPanel Spacing="14">
+                                <StackPanel Spacing="8">
                                     <Grid ColumnDefinitions="*,Auto,12,180,12,Auto">
                                         <TextBlock Classes="h2" Text="Файлы версии" VerticalAlignment="Center" />
                                         <Button Grid.Column="1" Classes="primary" Content="Загрузить в проект"
@@ -206,7 +238,7 @@
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate x:DataType="vm:ContentVersionFileItemViewModel">
                                                 <Border Classes="value-box" Margin="0,0,0,8">
-                                                    <Grid ColumnDefinitions="*,Auto,14,Auto,10,Auto">
+                                                    <Grid ColumnDefinitions="*,Auto,8,Auto,10,Auto">
                                                         <TextBlock Text="{Binding Name}" FontWeight="SemiBold"
                                                                    TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
                                                         <TextBlock Grid.Column="1" Classes="caption" Text="{Binding RoleName}" />
@@ -221,6 +253,18 @@
                                     </ItemsControl>
                                 </StackPanel>
                             </Border>
+                            <Border Classes="card section-card">
+                                <StackPanel Spacing="8">
+                                    <TextBlock Classes="h2" Text="Метаданные версии" />
+                                    <revitViews:RevitFamilyReadResultView DataContext="{Binding VersionFamilyMetadata}"
+                                                                         IsVisible="{Binding IsRevitVersion}" />
+                                    <TextBlock Classes="caption" Text="{Binding VersionMetadataMessage}"
+                                               TextWrapping="Wrap" />
+                                    <TextBox Text="{Binding VersionMetadataJson}" IsReadOnly="True"
+                                             IsVisible="{Binding HasGenericVersionMetadata}"
+                                             AcceptsReturn="True" TextWrapping="Wrap" MaxHeight="320" />
+                                </StackPanel>
+                            </Border>
                         </StackPanel>
                     </ScrollViewer>
                 </Grid>
@@ -228,7 +272,7 @@
 
             <TabItem Header="История изменений">
                 <Border Margin="0,16,0,0" Classes="card section-card">
-                    <Grid RowDefinitions="Auto,14,*">
+                    <Grid RowDefinitions="Auto,8,*">
                         <TextBlock Classes="h2" Text="История изменений контента и версий" />
                         <TextBlock Grid.Row="2" IsVisible="{Binding HasNoHistory}"
                                    Text="История изменений пока пуста."

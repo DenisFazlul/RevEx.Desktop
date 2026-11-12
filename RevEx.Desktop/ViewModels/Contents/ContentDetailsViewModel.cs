@@ -138,7 +138,7 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
     public bool HasSelectedVersion => SelectedVersion is not null;
     public bool HasVersionFiles => VersionFiles.Count > 0;
     public bool HasNoVersionFiles => HasSelectedVersion && !HasVersionFiles && !IsLoadingVersion;
-    public bool IsVersionBusy => IsLoadingVersion || IsSavingVersionFile;
+    public bool IsVersionBusy => IsLoadingVersion || IsSavingVersionFile || IsSavingPublishStatus;
     public bool CanLoadVersionIntoProject => HasVersionFiles && !IsVersionBusy;
     public string SelectedVersionDateText => SelectedVersion?.Date.ToLocalTime().ToString("dd.MM.yyyy HH:mm") ?? string.Empty;
     public string SelectedVersionCreatedAtText => SelectedVersion?.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm") ?? string.Empty;
@@ -173,6 +173,8 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         _name = content.Name;
         _description = content.Description;
         _selectedFileRole = FileRoles[0];
+        _selectedVersionPlatform = VersionPlatforms[0];
+        Versions.CollectionChanged += (_, _) => NotifyPlatformVersionsChanged();
     }
 
     public override async Task ActivateAsync()
@@ -233,9 +235,18 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         }
     }
 
-    protected override void OnLoadingStateChanged() => NotifyCollectionStateChanged();
+    protected override void OnLoadingStateChanged()
+    {
+        NotifyCollectionStateChanged();
+        NotifyVersionStateChanged();
+    }
     partial void OnPreviewImageChanged(Bitmap? value) => NotifyCollectionStateChanged();
-    partial void OnSelectedVersionChanged(ContentVersionDto? value) => NotifyVersionStateChanged();
+    partial void OnSelectedVersionChanged(ContentVersionDto? value)
+    {
+        SynchronizeVersionPlatform(value);
+        SelectedPublishStatus = PublishStatuses.FirstOrDefault(status => status.Value == value?.PublishStatus);
+        NotifyVersionStateChanged();
+    }
     partial void OnIsLoadingVersionChanged(bool value) => NotifyVersionStateChanged();
     partial void OnIsSavingVersionFileChanged(bool value) => NotifyVersionStateChanged();
 
@@ -344,8 +355,10 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
 
     private void ReplaceVersionFiles(IEnumerable<ContentFileDto> files)
     {
+        var versionFiles = files.ToArray();
+        UpdateVersionMetadata(versionFiles);
         VersionFiles.Clear();
-        foreach (var file in files.OrderBy(item => item.Role).ThenBy(item => item.OriginalFileName))
+        foreach (var file in versionFiles.OrderBy(item => item.Role).ThenBy(item => item.OriginalFileName))
         {
             VersionFiles.Add(new ContentVersionFileItemViewModel(file, CanEdit));
         }
@@ -364,6 +377,7 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
 
     private void NotifyCollectionStateChanged()
     {
+        NotifyPlatformVersionsChanged();
         OnPropertyChanged(nameof(HasVersions));
         OnPropertyChanged(nameof(HasNoVersions));
         OnPropertyChanged(nameof(HasHistory));
@@ -385,6 +399,7 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         OnPropertyChanged(nameof(SelectedVersionDateText));
         OnPropertyChanged(nameof(SelectedVersionCreatedAtText));
         OnPropertyChanged(nameof(SelectedVersionUpdatedAtText));
+        NotifyPublishStatusStateChanged();
     }
 
     private UpdateContentDto CreateUpdateRequest(

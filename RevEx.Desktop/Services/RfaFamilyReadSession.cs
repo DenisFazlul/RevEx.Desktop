@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using Newtonsoft.Json.Linq;
@@ -30,6 +31,11 @@ public sealed class RfaFamilyReadSession : IDisposable
         get;
     }
     public string ContentName => Path.GetFileNameWithoutExtension(FileName);
+    public IReadOnlyList<SelectedLocalFile> AuxiliaryFiles
+    {
+        get;
+        internal set;
+    } = [];
     public ConnectorDescriptor Connector
     {
         get;

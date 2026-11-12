@@ -9,7 +9,6 @@ namespace RevEx.Desktop.ViewModels.Revit;
 public partial class RevitFamilyReadResultViewModel : ViewModelBase
 {
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(Types))]
     [NotifyPropertyChangedFor(nameof(HasFamily))]
     [NotifyPropertyChangedFor(nameof(HasTypes))]
     private RevitFamilyReadResult? _family;
@@ -23,6 +22,8 @@ public partial class RevitFamilyReadResultViewModel : ViewModelBase
 
     public IReadOnlyList<RevitFamilyReadResultTypeParameter> Parameters => SelectedType?.Parameters ?? [];
 
+    public IReadOnlyList<RevitFamilyParameterGroupViewModel> ParameterGroups { get; private set; } = [];
+
     public bool HasFamily => Family is not null;
 
     public bool HasTypes => Types.Count > 0;
@@ -31,6 +32,22 @@ public partial class RevitFamilyReadResultViewModel : ViewModelBase
 
     partial void OnFamilyChanged(RevitFamilyReadResult? value)
     {
+        OnPropertyChanged(nameof(Types));
         SelectedType = value?.Types.FirstOrDefault();
+    }
+
+    partial void OnSelectedTypeChanged(RevitFamilyReadResultType? value)
+    {
+        ParameterGroups = Parameters
+            .GroupBy(parameter => (
+                Id: string.IsNullOrWhiteSpace(parameter.GroupId) ? null : parameter.GroupId,
+                Name: string.IsNullOrWhiteSpace(parameter.GroupId) ? parameter.GroupName : null))
+            .Select(group => new RevitFamilyParameterGroupViewModel(
+                group.Key.Id,
+                group.Select(parameter => parameter.GroupName)
+                    .FirstOrDefault(name => !string.IsNullOrWhiteSpace(name)) ?? group.Key.Id ?? "Прочее",
+                group.ToArray()))
+            .ToArray();
+        OnPropertyChanged(nameof(ParameterGroups));
     }
 }

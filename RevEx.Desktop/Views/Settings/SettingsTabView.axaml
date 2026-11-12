@@ -7,12 +7,12 @@
              mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="650"
              x:DataType="vm:SettingsTabViewModel" x:Class="RevEx.Desktop.Views.Settings.SettingsTabView">
     <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-        <Grid Margin="32,30" RowDefinitions="Auto,22,Auto,16,Auto" MaxWidth="880"
-              HorizontalAlignment="Center">
+        <Grid Margin="12" RowDefinitions="Auto,12,Auto,12,Auto" MaxWidth="880"
+              HorizontalAlignment="Left">
             <HeaderedContentControl Theme="{StaticResource PageHeaderTheme}" Header="Настройки"
                                     Content="Подключение и параметры рабочего пространства" />
             <Border Grid.Row="2" Classes="card settings-card">
-                <Grid RowDefinitions="Auto,18,Auto,14,Auto,18,Auto,Auto">
+                <Grid RowDefinitions="Auto,12,Auto,8,Auto,12,Auto,Auto">
                     <StackPanel Spacing="4">
                         <TextBlock Classes="h2" Text="Подключения" />
                         <TextBlock Classes="caption"
@@ -40,7 +40,7 @@
             </Border>
 
             <Border Grid.Row="4" Classes="card settings-card">
-                <Grid RowDefinitions="Auto,18,Auto">
+                <Grid RowDefinitions="Auto,12,Auto">
                     <Grid ColumnDefinitions="*,Auto">
                         <StackPanel Spacing="4">
                             <TextBlock Classes="h2" Text="Подключённые Connector" />
@@ -52,7 +52,7 @@
                                 IsEnabled="{Binding !IsLoadingConnectors}" />
                     </Grid>
 
-                    <Grid Grid.Row="2" MinHeight="90">
+                    <Grid Grid.Row="2" MinHeight="48">
                         <ProgressBar IsVisible="{Binding IsLoadingConnectors}" IsIndeterminate="True"
                                      VerticalAlignment="Top" />
                         <TextBlock IsVisible="{Binding HasNoConnectors}" Classes="caption"
@@ -66,7 +66,7 @@
                                     <Border Classes="value-box" Margin="0,0,0,10">
                                         <Grid ColumnDefinitions="*,Auto,8,Auto"
                                               RowDefinitions="Auto,8,Auto,8,Auto">
-                                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
                                                 <TextBlock Classes="h2" Text="{Binding Name}" />
                                                 <TextBlock Classes="caption"
                                                            Text="{Binding Product, StringFormat='Продукт: {0}'}" />
@@ -82,13 +82,13 @@
                                                     IsEnabled="{Binding !IsChecking}" />
 
                                             <Grid Grid.Row="2" Grid.ColumnSpan="4"
-                                                  ColumnDefinitions="Auto,18,*">
+                                                  ColumnDefinitions="Auto,12,*">
                                                 <TextBlock Classes="label" Text="Документ" />
                                                 <TextBlock Grid.Column="2" Text="{Binding ActiveDocument}" />
                                             </Grid>
 
                                             <Grid Grid.Row="4" Grid.ColumnSpan="4"
-                                                  ColumnDefinitions="Auto,18,*,24,Auto,12,Auto">
+                                                  ColumnDefinitions="Auto,12,*,12,Auto,12,Auto">
                                                 <TextBlock Classes="label" Text="Адрес" />
                                                 <TextBlock Grid.Column="2" FontFamily="monospace"
                                                            Text="{Binding Address}" />

@@ -1,4 +1,5 @@
 using RevEx.Domain.Contracts.ContentVersion;
+using RevEx.Domain.Entities;
 
 namespace RevEx.Desktop.Core.Interfaces;
 
@@ -11,6 +12,9 @@ public interface IContentVersionRepository
     Task<ContentVersionDto> CreateAsync(
         CreateContentVersionDto request,
         CancellationToken cancellationToken = default);
+
+    Task UpdatePublishStatusAsync(
+        int versionId, PublishStatus publishStatus, CancellationToken cancellationToken = default);
 
     Task<ContentVersionDto> UploadFileAsync(
         int versionId,

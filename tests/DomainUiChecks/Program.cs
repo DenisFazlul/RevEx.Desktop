@@ -18,6 +18,7 @@ using RevEx.Domain.Contracts.Tag;
 AppBuilder.Configure<App>().UseHeadless(new AvaloniaHeadlessPlatformOptions()).SetupWithoutStarting();
 ConnectorChecks.Run();
 RfaImportChecks.Run();
+VersionPublicationChecks.Run();
 DialogChecks.Run();
 RevitFamilyMetadataChecks.Run();
 var now=DateTimeOffset.Parse("2026-10-29T10:00:00+03:00");

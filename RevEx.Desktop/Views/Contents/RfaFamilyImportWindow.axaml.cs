@@ -1,4 +1,4 @@
-using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Interactivity;
 using RevEx.Desktop.ViewModels.Contents;
@@ -16,12 +16,6 @@ public partial class RfaFamilyImportWindow : DialogWindow
     public RfaFamilyImportWindow(RfaFamilyImportViewModel viewModel) : this()
     {
         DataContext = viewModel;
-        Opened += OnOpened;
-    }
-
-    private async void OnOpened(object? sender, EventArgs eventArgs)
-    {
-        await ChooseFileAsync();
     }
 
     private async void OnChooseFileClick(object? sender, RoutedEventArgs eventArgs)
@@ -36,10 +30,11 @@ public partial class RfaFamilyImportWindow : DialogWindow
             return;
         }
 
-        var file = await LocalFilePicker.OpenAsync(this, "Выберите семейство Revit", LocalFilePicker.RevitFamily);
-        if (file is not null)
+        var files = await LocalFilePicker.OpenMultipleAsync(
+            this, "Выберите одно семейство RFA и вспомогательные CSV или IFC", LocalFilePicker.RevitFamilyWithAuxiliaryFiles);
+        if (files.Count > 0)
         {
-            await viewModel.LoadFileAsync(file.Path);
+            await viewModel.LoadFilesAsync(files.Select(file => file.Path).ToArray());
         }
     }
 }

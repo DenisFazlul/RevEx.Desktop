@@ -4,7 +4,7 @@
              xmlns:vm="using:RevEx.Desktop.ViewModels.Categories"
              x:Class="RevEx.Desktop.Views.Categories.CategoryAdminTabView"
              x:DataType="vm:CategoryAdminTabViewModel">
-    <Grid Margin="32,30" RowDefinitions="Auto,22,*,Auto">
+    <Grid Margin="12" RowDefinitions="Auto,12,*,Auto">
         <Grid ColumnDefinitions="*,Auto">
             <HeaderedContentControl Theme="{StaticResource PageHeaderTheme}"
                                     Header="Категории"
@@ -14,8 +14,8 @@
                     IsEnabled="{Binding !IsSaving}" />
         </Grid>
 
-        <Border Grid.Row="2" Classes="card section-card">
-            <Grid RowDefinitions="Auto,14,*">
+        <Border Grid.Row="2" Classes="card section-card" VerticalAlignment="Top">
+            <Grid RowDefinitions="Auto,8,*">
                 <Grid ColumnDefinitions="*,Auto">
                     <TextBlock Classes="h2" Text="Список категорий" />
                     <TextBlock Grid.Column="1" Classes="caption"

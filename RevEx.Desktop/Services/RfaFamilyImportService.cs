@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -12,6 +13,7 @@ using RevEx.Domain.Contracts.Connectors;
 using RevEx.Domain.Contracts.Content;
 using RevEx.Domain.Contracts.ContentVersion;
 using RevEx.Domain.Contracts.Revit;
+using RevEx.Domain.Entities;
 
 namespace RevEx.Desktop.Services;
 
@@ -29,7 +31,25 @@ public sealed class RfaFamilyImportService
         _registry = registry;
     }
 
-    public async Task<RfaFamilyReadSession> ReadAsync(string path)
+    public event EventHandler? ConnectorsChanged
+    {
+        add
+        {
+            _registry.Changed += value;
+        }
+        remove
+        {
+            _registry.Changed -= value;
+        }
+    }
+
+    public IReadOnlyCollection<ConnectorDescriptor> GetAvailableConnectors()
+    {
+        return _registry.GetAll();
+    }
+
+    public async Task<RfaFamilyReadSession> ReadAsync(
+        string path, ConnectorDescriptor connector, IReadOnlyCollection<string>? auxiliaryPaths = null)
     {
         if (!string.Equals(Path.GetExtension(path), ".rfa", StringComparison.OrdinalIgnoreCase) || !File.Exists(path))
         {
@@ -42,7 +62,32 @@ public sealed class RfaFamilyImportService
             throw new InvalidOperationException("Размер семейства должен быть от 1 байта до 100 МБ.");
         }
 
-        var connector = await FindReaderAsync();
+        var auxiliaryFiles = (auxiliaryPaths ?? []).Select(Path.GetFullPath)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Select(filePath => new SelectedLocalFile(filePath, Path.GetFileName(filePath)))
+            .ToArray();
+        if (auxiliaryFiles.GroupBy(file => file.Name, StringComparer.OrdinalIgnoreCase).Any(group => group.Count() > 1))
+        {
+            throw new InvalidOperationException("Вспомогательные файлы должны иметь разные имена.");
+        }
+
+        foreach (var auxiliaryFile in auxiliaryFiles)
+        {
+            var extension = Path.GetExtension(auxiliaryFile.Path);
+            if ((!string.Equals(extension, ".csv", StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(extension, ".ifc", StringComparison.OrdinalIgnoreCase)) || !File.Exists(auxiliaryFile.Path))
+            {
+                throw new InvalidOperationException("В качестве вспомогательных файлов выберите существующие CSV или IFC.");
+            }
+
+            var auxiliaryInfo = new FileInfo(auxiliaryFile.Path);
+            if (auxiliaryInfo.Length == 0 || auxiliaryInfo.Length > 100 * 1024 * 1024)
+            {
+                throw new InvalidOperationException($"Размер файла «{auxiliaryFile.Name}» должен быть от 1 байта до 100 МБ.");
+            }
+        }
+
+        await ValidateReaderAsync(connector);
         var directory = Path.Combine(Path.GetTempPath(), "RevEx", "RfaImport", Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(directory);
         var session = new RfaFamilyReadSession(directory, Path.GetFileName(path), connector);
@@ -55,6 +100,18 @@ public sealed class RfaFamilyImportService
                 await source.CopyToAsync(destination);
             }
 
+            var copiedFiles = new List<SelectedLocalFile>();
+            foreach (var auxiliaryFile in auxiliaryFiles)
+            {
+                var copyPath = Path.Combine(directory, auxiliaryFile.Name);
+                await using var source = File.OpenRead(auxiliaryFile.Path);
+                await using var destination = File.Create(copyPath);
+                await source.CopyToAsync(destination);
+                copiedFiles.Add(new SelectedLocalFile(copyPath, auxiliaryFile.Name));
+            }
+
+            session.AuxiliaryFiles = copiedFiles;
+
             var file = new ContentVersionExecuteDto(Guid.NewGuid(), session.FileName, session.FilePath);
             var task = new ConnectorTask(Guid.NewGuid(), $"Чтение {session.FileName}", ConnectorCommand.ReadFiles);
             var response = await _client.ExecuteAsync<ConnecterReadFileRequest, JObject>(
@@ -65,7 +122,19 @@ public sealed class RfaFamilyImportService
                 throw new InvalidOperationException("Коннектор не вернул метаданные выбранного семейства.");
             }
 
-            // Preserve the original JSON, including fields unknown to the current Revit DTO.
+            // Accept older connectors, but persist the unambiguous Revit field name.
+            var legacyCategory = metadata.Property("Category", StringComparison.OrdinalIgnoreCase);
+            if (legacyCategory is not null)
+            {
+                if (metadata.GetValue("RevitCategory", StringComparison.OrdinalIgnoreCase) is null)
+                {
+                    metadata["RevitCategory"] = legacyCategory.Value.DeepClone();
+                }
+
+                legacyCategory.Remove();
+            }
+
+            // Preserve fields unknown to the current Revit DTO.
             session.Metadata = (JObject)metadata.DeepClone();
             session.Family = metadata.ToObject<RevitFamilyReadResult>()
                 ?? throw new InvalidOperationException("Не удалось прочитать ответ коннектора.");
@@ -120,34 +189,52 @@ public sealed class RfaFamilyImportService
                 Name = versionName.Trim(),
                 Date = DateTimeOffset.UtcNow,
                 Status = "draft",
+                PublishStatus = PublishStatus.Draft,
                 Application = "revit",
+                Platform = Platform.Revit,
                 ApplicationVersion = applicationVersion
             });
 
-            if (!session.IsFileUploaded)
+            // Reconcile all uploaded files so retries resume interrupted auxiliary uploads.
+            var current = await _api.ContentVersions.GetByIdAsync(session.SavedVersion.Id)
+                ?? throw new InvalidOperationException("Созданная версия больше не существует.");
+            session.SavedVersion = current;
+            var uploadedAuxiliaryFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var fileId in current.FileIds)
             {
-                // A retry after an interrupted upload must reuse the version already created.
-                var current = await _api.ContentVersions.GetByIdAsync(session.SavedVersion.Id)
-                    ?? throw new InvalidOperationException("Созданная версия больше не существует.");
-                foreach (var fileId in current.FileIds)
+                var file = await _api.ContentFiles.GetByIdAsync(fileId);
+                if (file?.Role == "primary")
                 {
-                    var file = await _api.ContentFiles.GetByIdAsync(fileId);
-                    if (file?.Role == "primary")
-                    {
-                        session.SavedVersion = current;
-                        session.IsFileUploaded = true;
-                        break;
-                    }
-                }
-
-                if (!session.IsFileUploaded)
-                {
-                    await using var stream = File.OpenRead(session.FilePath);
-                    session.SavedVersion = await _api.ContentVersions.UploadFileAsync(
-                        current.Id, stream, session.FileName, "primary",
-                        metadataJson: session.Metadata.ToString(Formatting.None));
                     session.IsFileUploaded = true;
                 }
+                else if (file?.Role is "lookup-table" or "attachment")
+                {
+                    uploadedAuxiliaryFiles.Add(file.Role + ":" + file.OriginalFileName);
+                }
+            }
+
+            if (!session.IsFileUploaded)
+            {
+                await using var stream = File.OpenRead(session.FilePath);
+                session.SavedVersion = await _api.ContentVersions.UploadFileAsync(
+                    current.Id, stream, session.FileName, "primary",
+                    metadataJson: session.Metadata.ToString(Formatting.None));
+                session.IsFileUploaded = true;
+            }
+
+            foreach (var auxiliaryFile in session.AuxiliaryFiles)
+            {
+                var role = string.Equals(Path.GetExtension(auxiliaryFile.Name), ".csv", StringComparison.OrdinalIgnoreCase)
+                    ? "lookup-table"
+                    : "attachment";
+                if (uploadedAuxiliaryFiles.Contains(role + ":" + auxiliaryFile.Name))
+                {
+                    continue;
+                }
+
+                await using var stream = File.OpenRead(auxiliaryFile.Path);
+                session.SavedVersion = await _api.ContentVersions.UploadFileAsync(
+                    current.Id, stream, auxiliaryFile.Name, role);
             }
 
             return session.SavedVersion;
@@ -158,32 +245,20 @@ public sealed class RfaFamilyImportService
         }
     }
 
-    private async Task<ConnectorDescriptor> FindReaderAsync()
+    private async Task ValidateReaderAsync(ConnectorDescriptor connector)
     {
-        var candidates = _registry.GetAll()
-            .Where(connector => connector.Product is ConnectorProduct.Revit or ConnectorProduct.Mock)
-            .OrderBy(connector => connector.Product == ConnectorProduct.Mock)
-            .ThenByDescending(connector => connector.ProductVersion, StringComparer.OrdinalIgnoreCase)
-            .ThenBy(connector => connector.InstanceId);
-        foreach (var connector in candidates)
+        if (!_registry.GetAll().Any(item => item.InstanceId == connector.InstanceId))
         {
-            try
-            {
-                using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(3));
-                var task = new ConnectorTask(Guid.NewGuid(), "Проверка чтения RFA", ConnectorCommand.GetCommands);
-                var commands = await _client.ExecuteAsync<object, ConnectorCommand[]>(
-                    connector, task, new object(), timeout.Token);
-                if (commands.Contains(ConnectorCommand.ReadFiles))
-                {
-                    return connector;
-                }
-            }
-            catch (Exception exception) when (exception is IOException or InvalidOperationException or OperationCanceledException)
-            {
-                // Continue searching if a registration has become unavailable.
-            }
+            throw new InvalidOperationException("Выбранный коннектор больше недоступен. Выберите другой коннектор.");
         }
 
-        throw new InvalidOperationException("Не найден доступный коннектор чтения RFA. Запустите коннектор Revit или мок-коннектор с командой ReadFiles и повторите выбор файла.");
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+        var task = new ConnectorTask(Guid.NewGuid(), "Проверка чтения RFA", ConnectorCommand.GetCommands);
+        var commands = await _client.ExecuteAsync<object, ConnectorCommand[]>(
+            connector, task, new object(), timeout.Token);
+        if (!commands.Contains(ConnectorCommand.ReadFiles))
+        {
+            throw new InvalidOperationException($"Коннектор «{connector.Name}» не поддерживает чтение RFA. Выберите другой коннектор.");
+        }
     }
 }

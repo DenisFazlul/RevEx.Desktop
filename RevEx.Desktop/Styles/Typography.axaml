@@ -13,9 +13,9 @@
     </Style>
 
     <Style Selector="TextBlock.h1">
-        <Setter Property="FontSize" Value="28" />
+        <Setter Property="FontSize" Value="20" />
         <Setter Property="FontWeight" Value="SemiBold" />
-        <Setter Property="LineHeight" Value="34" />
+        <Setter Property="LineHeight" Value="28" />
         <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
     </Style>
     <Style Selector="TextBlock.h2">
@@ -40,7 +40,7 @@
         <Setter Property="Foreground" Value="{StaticResource TextTertiaryBrush}" />
     </Style>
     <Style Selector="TextBlock.body-copy">
-        <Setter Property="Margin" Value="0,20,0,0" />
+        <Setter Property="Margin" Value="0,8,0,0" />
         <Setter Property="FontSize" Value="14" />
         <Setter Property="LineHeight" Value="23" />
         <Setter Property="TextWrapping" Value="Wrap" />

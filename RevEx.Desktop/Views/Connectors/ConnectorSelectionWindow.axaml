@@ -8,7 +8,7 @@
         Title="Выбор Connector" Width="540" Height="330"
         MinWidth="480" MinHeight="300" WindowStartupLocation="CenterOwner"
         CanResize="False">
-    <Grid Margin="24" RowDefinitions="Auto,18,*,Auto">
+    <Grid Margin="16" RowDefinitions="Auto,12,*,Auto">
         <HeaderedContentControl Theme="{StaticResource DialogHeaderTheme}"
                                 Header="Загрузка версии в проект"
                                 Content="Выберите приложение, в активный проект которого нужно загрузить файлы" />

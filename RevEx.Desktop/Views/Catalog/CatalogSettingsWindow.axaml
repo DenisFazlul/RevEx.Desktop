@@ -8,27 +8,35 @@
         x:Class="RevEx.Desktop.Views.Catalog.CatalogSettingsWindow"
         x:DataType="vm:CatalogSettingsViewModel"
         Title="Категории и теги"
-        Width="680" Height="560"
-        MinWidth="560" MinHeight="460"
+        Width="640" Height="440"
+        MinWidth="560" MinHeight="340"
         WindowStartupLocation="CenterOwner">
+    <Window.Styles>
+        <Style Selector="ListBox.filter-options ListBoxItem">
+            <Setter Property="Padding" Value="4,0" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="MinHeight" Value="32" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        </Style>
+    </Window.Styles>
     <Grid RowDefinitions="Auto,*,Auto">
-        <StackPanel Margin="24,22,24,18" Spacing="5">
+        <StackPanel Margin="12,12,12,8" Spacing="4">
             <TextBlock Classes="h2" Text="Фильтр каталога" />
             <TextBlock Classes="caption"
                        Text="Выберите категории и теги материалов, которые нужно показать" />
         </StackPanel>
 
-        <Grid Grid.Row="1" Margin="24,0" ColumnDefinitions="*,16,*">
+        <Grid Grid.Row="1" Margin="12,0" ColumnDefinitions="*,12,*">
             <Border Classes="content-pane">
-                <Grid RowDefinitions="Auto,12,*">
-                    <StackPanel Spacing="3">
+                <Grid RowDefinitions="Auto,8,*">
+                    <StackPanel Spacing="4">
                         <TextBlock FontSize="15" FontWeight="SemiBold" Text="Категории" />
                         <TextBlock Classes="caption" Text="Можно выбрать несколько" />
                     </StackPanel>
-                    <ListBox Grid.Row="2" Classes="clean-list" ItemsSource="{Binding Categories}">
+                    <ListBox Grid.Row="2" Classes="clean-list filter-options" ItemsSource="{Binding Categories}">
                         <ListBox.ItemTemplate>
                             <DataTemplate x:DataType="models:FilterItemViewModel">
-                                <CheckBox Margin="4,7" Content="{Binding Name}"
+                                <CheckBox Margin="0" MinHeight="28" Padding="4,0" Content="{Binding Name}"
                                           IsChecked="{Binding IsSelected}" />
                             </DataTemplate>
                         </ListBox.ItemTemplate>
@@ -37,15 +45,15 @@
             </Border>
 
             <Border Grid.Column="2" Classes="content-pane">
-                <Grid RowDefinitions="Auto,12,*">
-                    <StackPanel Spacing="3">
+                <Grid RowDefinitions="Auto,8,*">
+                    <StackPanel Spacing="4">
                         <TextBlock FontSize="15" FontWeight="SemiBold" Text="Теги" />
-                        <TextBlock Classes="caption" Text="Материал должен содержать все выбранные теги" />
+                        <TextBlock Classes="caption" Text="Материал должен содержать все выбранные теги" TextWrapping="Wrap" />
                     </StackPanel>
-                    <ListBox Grid.Row="2" Classes="clean-list" ItemsSource="{Binding Tags}">
+                    <ListBox Grid.Row="2" Classes="clean-list filter-options" ItemsSource="{Binding Tags}">
                         <ListBox.ItemTemplate>
                             <DataTemplate x:DataType="models:FilterItemViewModel">
-                                <CheckBox Margin="4,7" Content="{Binding Name}"
+                                <CheckBox Margin="0" MinHeight="28" Padding="4,0" Content="{Binding Name}"
                                           IsChecked="{Binding IsSelected}" />
                             </DataTemplate>
                         </ListBox.ItemTemplate>
@@ -54,9 +62,9 @@
             </Border>
         </Grid>
 
-        <Border Grid.Row="2" Margin="0,18,0,0" BorderBrush="{StaticResource BorderBrush}"
-                BorderThickness="0,1,0,0" Padding="24,14">
-            <Grid ColumnDefinitions="Auto,*,Auto,10,Auto">
+        <Border Grid.Row="2" Margin="0,8,0,0" BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,1,0,0" Padding="12,8">
+            <Grid ColumnDefinitions="Auto,*,Auto,8,Auto">
                 <Button Classes="secondary" Content="Сбросить" Command="{Binding ResetCommand}" />
                 <Button Grid.Column="2" Classes="secondary" Content="Отмена" Command="{Binding CancelCommand}" />
                 <Button Grid.Column="4" Classes="primary" Content="Применить" Command="{Binding ApplyCommand}" />

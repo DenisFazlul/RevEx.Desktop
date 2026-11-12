@@ -5,34 +5,34 @@
              x:Class="RevEx.Desktop.Views.Contents.ContentEditorTabView"
              x:DataType="vm:ContentEditorTabViewModel">
     <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-        <Grid Margin="32,30" RowDefinitions="Auto,22,Auto" MaxWidth="880" HorizontalAlignment="Center">
+        <Grid Margin="12" RowDefinitions="Auto,12,Auto" MaxWidth="880" HorizontalAlignment="Left">
             <HeaderedContentControl Theme="{StaticResource PageHeaderTheme}"
                                     Header="{Binding Title}"
                                     Content="{Binding PageDescription}" />
 
             <Border Grid.Row="2" Classes="card section-card">
-                <StackPanel Spacing="18">
-                    <StackPanel IsVisible="{Binding IsCreatingContent}" Spacing="14">
+                <StackPanel Spacing="12">
+                    <StackPanel IsVisible="{Binding IsCreatingContent}" Spacing="8">
                         <TextBlock Classes="h2" Text="Карточка контента" />
-                        <Grid ColumnDefinitions="*,18,*" RowDefinitions="Auto,14,Auto">
-                            <StackPanel Spacing="7">
+                        <Grid ColumnDefinitions="*,12,*" RowDefinitions="Auto,8,Auto">
+                            <StackPanel Spacing="4">
                                 <TextBlock Classes="label" Text="Название" />
                                 <TextBox Text="{Binding ContentName}" Watermark="Например, Дверь одностворчатая" />
                             </StackPanel>
-                            <StackPanel Grid.Column="2" Spacing="7">
+                            <StackPanel Grid.Column="2" Spacing="4">
                                 <TextBlock Classes="label" Text="Категория" />
                                 <ComboBox ItemsSource="{Binding Categories}"
                                           SelectedItem="{Binding SelectedCategory}"
                                           DisplayMemberBinding="{Binding Name}"
                                           IsEnabled="{Binding !IsLoading}" />
                             </StackPanel>
-                            <StackPanel Grid.Row="2" Grid.ColumnSpan="3" Spacing="7">
+                            <StackPanel Grid.Row="2" Grid.ColumnSpan="3" Spacing="4">
                                 <TextBlock Classes="label" Text="Описание" />
                                 <TextBox Text="{Binding Description}" AcceptsReturn="True" TextWrapping="Wrap"
-                                         MinHeight="92" Watermark="Для чего используется семейство" />
+                                         MinHeight="64" Watermark="Для чего используется семейство" />
                             </StackPanel>
                         </Grid>
-                        <StackPanel Spacing="9">
+                        <StackPanel Spacing="8">
                             <Grid ColumnDefinitions="*,Auto">
                                 <TextBlock Classes="label" Text="Теги" VerticalAlignment="Center" />
                                 <Button Grid.Column="1" Classes="compact secondary" Content="Добавить тег"
@@ -48,7 +48,7 @@
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate x:DataType="vm:ContentTagItemViewModel">
                                         <Border Classes="tag">
-                                            <StackPanel Orientation="Horizontal" Spacing="7">
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
                                                 <TextBlock Text="{Binding Name, StringFormat='#{0}'}"
                                                            VerticalAlignment="Center" />
                                                 <Button Classes="icon-sm" Command="{Binding RemoveCommand}"
@@ -61,7 +61,7 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
                         </StackPanel>
-                        <StackPanel Spacing="7">
+                        <StackPanel Spacing="4">
                             <TextBlock Classes="label" Text="Изображение контента" />
                             <Grid ColumnDefinitions="*,Auto">
                                 <Border Classes="value-box" Margin="0,0,12,0">
@@ -73,7 +73,7 @@
                         </StackPanel>
                     </StackPanel>
 
-                    <StackPanel IsVisible="{Binding IsAddingVersion}" Spacing="14">
+                    <StackPanel IsVisible="{Binding IsAddingVersion}" Spacing="8">
                         <TextBlock Classes="h2" Text="Существующий контент" />
                         <Border Classes="value-box">
                             <TextBlock Text="{Binding ExistingContentName}" />
@@ -82,19 +82,19 @@
 
                     <Border Classes="section-separator" />
                     <TextBlock Classes="h2" Text="Версия Revit-семейства" />
-                    <Grid ColumnDefinitions="*,18,*">
-                        <StackPanel Spacing="7">
+                    <Grid ColumnDefinitions="*,12,*">
+                        <StackPanel Spacing="4">
                             <TextBlock Classes="label" Text="Название версии" />
                             <TextBox Text="{Binding VersionName}" Watermark="Например, 1.0.0" />
                         </StackPanel>
-                        <StackPanel Grid.Column="2" Spacing="7">
+                        <StackPanel Grid.Column="2" Spacing="4">
                             <TextBlock Classes="label" Text="Версия Revit" />
                             <ComboBox ItemsSource="{Binding RevitVersions}"
                                       SelectedItem="{Binding RevitVersion}" />
                         </StackPanel>
                     </Grid>
 
-                    <StackPanel Spacing="7">
+                    <StackPanel Spacing="4">
                         <TextBlock Classes="label" Text="Файл семейства" />
                         <Grid ColumnDefinitions="*,Auto">
                             <Border Classes="value-box" Margin="0,0,12,0">

@@ -5,14 +5,14 @@
         xmlns:vm="using:RevEx.Desktop.ViewModels.Tags"
         x:Class="RevEx.Desktop.Views.Tags.TagSelectionWindow"
         x:DataType="vm:TagSelectionWindowViewModel"
-        Title="Добавить тег" Width="440" Height="500"
-        MinWidth="360" MinHeight="360" WindowStartupLocation="CenterOwner">
-    <Grid Margin="24" RowDefinitions="Auto,16,*,16,Auto">
-        <StackPanel Spacing="5">
+        Title="Добавить тег" Width="440" Height="400"
+        MinWidth="360" MinHeight="300" WindowStartupLocation="CenterOwner">
+    <Grid Margin="12" RowDefinitions="Auto,12,*,12,Auto">
+        <StackPanel Spacing="4">
             <TextBlock Classes="h2" Text="Доступные теги" />
             <TextBlock Classes="caption" Text="Выберите один тег для добавления к контенту" />
         </StackPanel>
-        <Border Grid.Row="2" Classes="value-box">
+        <Border Grid.Row="2" Classes="value-box" Padding="4">
             <Grid>
                 <TextBlock IsVisible="{Binding !HasTags}" Text="Все доступные теги уже добавлены."
                            TextWrapping="Wrap" HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -21,7 +21,7 @@
                          IsVisible="{Binding HasTags}" DoubleTapped="OnTagDoubleTapped">
                     <ListBox.ItemTemplate>
                         <DataTemplate x:DataType="domain:TagDto">
-                            <Grid Margin="10,8" ColumnDefinitions="*,Auto">
+                            <Grid Margin="4" ColumnDefinitions="*,Auto">
                                 <TextBlock Text="{Binding Name, StringFormat='#{0}'}" FontWeight="Medium" />
                                 <TextBlock Grid.Column="1" Text="{Binding TagGroupName}" Classes="caption" />
                             </Grid>
@@ -30,7 +30,7 @@
                 </ListBox>
             </Grid>
         </Border>
-        <Grid Grid.Row="4" ColumnDefinitions="*,12,*">
+        <Grid Grid.Row="4" ColumnDefinitions="*,8,*">
             <Button Content="Отмена" Command="{Binding CancelCommand}" />
             <Button Grid.Column="2" Classes="primary" Content="Добавить" Command="{Binding AcceptCommand}" />
         </Grid>

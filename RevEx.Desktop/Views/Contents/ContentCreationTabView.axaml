@@ -4,11 +4,11 @@
              x:Class="RevEx.Desktop.Views.Contents.ContentCreationTabView"
              x:DataType="vm:ContentCreationTabViewModel">
     <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-        <Grid Margin="32,30" RowDefinitions="Auto,22,Auto" MaxWidth="880" HorizontalAlignment="Center">
+        <Grid Margin="12" RowDefinitions="Auto,12,Auto" MaxWidth="880" HorizontalAlignment="Left">
             <HeaderedContentControl Theme="{StaticResource PageHeaderTheme}"
                                     Header="Добавление контента"
                                     Content="Выберите способ добавления материала в каталог" />
-            <StackPanel Grid.Row="2" Spacing="16">
+            <StackPanel Grid.Row="2" Spacing="12">
                 <Border Classes="card section-card">
                     <StackPanel Spacing="12">
                         <TextBlock Classes="h2" Text="Семейство Revit" />

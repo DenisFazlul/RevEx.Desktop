@@ -7,7 +7,7 @@
         Title="Подтверждение удаления" Width="440" Height="230"
         MinWidth="400" MinHeight="210" WindowStartupLocation="CenterOwner"
         CanResize="False">
-    <Grid Margin="24" RowDefinitions="Auto,14,*,Auto">
+    <Grid Margin="16" RowDefinitions="Auto,8,*,Auto">
         <TextBlock Classes="h2" Text="Удалить?" />
         <TextBlock Grid.Row="2" Text="{Binding Description}" TextWrapping="Wrap"
                    Foreground="{StaticResource TextSecondaryBrush}" />

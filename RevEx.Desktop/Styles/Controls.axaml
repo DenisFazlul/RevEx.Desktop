@@ -1,14 +1,16 @@
-<Styles xmlns="https://github.com/avaloniaui">
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:converters="using:Avalonia.Data.Converters">
     <!-- Compact controls with quiet surfaces and strong, predictable states. -->
     <Style Selector="Button">
-        <Setter Property="MinHeight" Value="38" />
-        <Setter Property="Padding" Value="14,8" />
-        <Setter Property="CornerRadius" Value="9" />
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="Padding" Value="12,4" />
+        <Setter Property="CornerRadius" Value="6" />
         <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
         <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
-        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="FontWeight" Value="Normal" />
     </Style>
     <Style Selector="Button:pointerover">
         <Setter Property="Background" Value="{StaticResource SurfaceHoverBrush}" />
@@ -19,9 +21,9 @@
     </Style>
 
     <Style Selector="Button.primary">
-        <Setter Property="MinHeight" Value="38" />
-        <Setter Property="Padding" Value="16,8" />
-        <Setter Property="CornerRadius" Value="9" />
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="Padding" Value="12,4" />
+        <Setter Property="CornerRadius" Value="6" />
         <Setter Property="Background" Value="{StaticResource AccentBrush}" />
         <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
         <Setter Property="Foreground" Value="White" />
@@ -68,8 +70,8 @@
         <Setter Property="Height" Value="32" />
         <Setter Property="MinWidth" Value="32" />
         <Setter Property="MinHeight" Value="32" />
-        <Setter Property="Padding" Value="7" />
-        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="8" />
+        <Setter Property="CornerRadius" Value="6" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
@@ -95,7 +97,7 @@
         <Setter Property="Height" Value="24" />
         <Setter Property="MinWidth" Value="24" />
         <Setter Property="MinHeight" Value="24" />
-        <Setter Property="Padding" Value="5" />
+        <Setter Property="Padding" Value="4" />
         <Setter Property="CornerRadius" Value="6" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
@@ -111,7 +113,7 @@
     </Style>
     <Style Selector="Button.compact">
         <Setter Property="MinHeight" Value="32" />
-        <Setter Property="Padding" Value="11,6" />
+        <Setter Property="Padding" Value="8,4" />
     </Style>
     <Style Selector="Button.full-width">
         <Setter Property="HorizontalAlignment" Value="Stretch" />
@@ -119,8 +121,9 @@
     </Style>
 
     <Style Selector="TextBox, ComboBox">
-        <Setter Property="MinHeight" Value="40" />
-        <Setter Property="CornerRadius" Value="9" />
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="Padding" Value="8,4" />
+        <Setter Property="CornerRadius" Value="6" />
         <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
         <Setter Property="BorderBrush" Value="{StaticResource BorderStrongBrush}" />
         <Setter Property="BorderThickness" Value="1" />
@@ -130,15 +133,15 @@
     </Style>
 
     <Style Selector="TextBox.search">
-        <Setter Property="MinHeight" Value="40" />
-        <Setter Property="Padding" Value="38,9,14,9" />
-        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="Padding" Value="32,4,8,4" />
+        <Setter Property="CornerRadius" Value="6" />
         <Setter Property="Background" Value="{StaticResource SurfaceMutedBrush}" />
         <Setter Property="BorderBrush" Value="Transparent" />
     </Style>
     <Style Selector="TextBox.multiline">
-        <Setter Property="MinHeight" Value="120" />
-        <Setter Property="Padding" Value="12,10" />
+        <Setter Property="MinHeight" Value="80" />
+        <Setter Property="Padding" Value="8" />
         <Setter Property="TextWrapping" Value="Wrap" />
         <Setter Property="AcceptsReturn" Value="True" />
     </Style>
@@ -161,8 +164,8 @@
     </Style>
     <Style Selector="ListBox.content-list ListBoxItem">
         <Setter Property="Padding" Value="0" />
-        <Setter Property="Margin" Value="0,0,0,6" />
-        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="Margin" Value="0,0,0,4" />
+        <Setter Property="CornerRadius" Value="6" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
     </Style>
 
@@ -177,6 +180,23 @@
     </Style>
     <Style Selector="CheckBox:checked">
         <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+    </Style>
+
+    <Style Selector="TabItem">
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="Padding" Value="12,4" />
+        <Setter Property="FontSize" Value="14" />
+    </Style>
+    <Style Selector="Expander">
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="Padding" Value="8" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+    </Style>
+
+    <!-- Empty feedback should not reserve a line and a gap in every section. -->
+    <Style Selector="TextBlock.status-message, TextBlock.validation-message">
+        <Setter Property="IsVisible"
+                Value="{Binding Text, RelativeSource={RelativeSource Self}, Converter={x:Static converters:StringConverters.IsNotNullOrEmpty}}" />
     </Style>
 
     <Style Selector="TextBlock.validation-message">

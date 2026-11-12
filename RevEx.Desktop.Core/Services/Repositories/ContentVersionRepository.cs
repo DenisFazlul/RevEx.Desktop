@@ -1,5 +1,6 @@
 using RevEx.Domain.Contracts.ContentVersion;
 using RevEx.Desktop.Core.Interfaces;
+using RevEx.Domain.Entities;
 
 namespace RevEx.Desktop.Core.Services;
 
@@ -19,6 +20,13 @@ public sealed class ContentVersionRepository(RevExApiTransport transport) : ICon
             "api/content-versions",
             request,
             cancellationToken);
+
+    public Task UpdatePublishStatusAsync(
+        int versionId, PublishStatus publishStatus, CancellationToken cancellationToken = default)
+    {
+        var request = new UpdatePublishStatusDto { PublishStatus = publishStatus };
+        return transport.PutAsJsonAsync($"api/content-versions/{versionId}/publish-status", request, cancellationToken);
+    }
 
     public async Task<ContentVersionDto> UploadFileAsync(
         int versionId,

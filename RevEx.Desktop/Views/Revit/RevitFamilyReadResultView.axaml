@@ -9,17 +9,17 @@
         <TextBlock Classes="caption" Text="Нет метаданных семейства."
                    IsVisible="{Binding !HasFamily}" />
         <StackPanel Spacing="12" IsVisible="{Binding HasFamily}">
-            <Grid ColumnDefinitions="*,16,*">
+            <Grid ColumnDefinitions="*,12,*">
                 <HeaderedContentControl Theme="{StaticResource InfoFieldTheme}"
                                         Header="Название семейства" Content="{Binding Family.Name}" />
                 <HeaderedContentControl Grid.Column="2" Theme="{StaticResource InfoFieldTheme}"
-                                        Header="Категория" Content="{Binding Family.Category}" />
+                                        Header="Категория Revit" Content="{Binding Family.RevitCategory}" />
             </Grid>
             <HeaderedContentControl Theme="{StaticResource InfoFieldTheme}"
                                     Header="Описание семейства" Content="{Binding Family.Description}" />
             <HeaderedContentControl Theme="{StaticResource InfoFieldTheme}"
                                     Header="Путь" Content="{Binding Family.Path}" />
-            <Grid ColumnDefinitions="*,16,*,16,*">
+            <Grid ColumnDefinitions="*,12,*,12,*">
                 <HeaderedContentControl Theme="{StaticResource InfoFieldTheme}"
                                         Header="Версия Revit" Content="{Binding Family.ApplicationVersion}" />
                 <HeaderedContentControl Grid.Column="2" Theme="{StaticResource InfoFieldTheme}"
@@ -44,24 +44,34 @@
                 <TextBlock x:Name="EmptyParametersText" Classes="caption"
                            Text="У выбранного типоразмера нет параметров."
                            IsVisible="{Binding !HasParameters}" />
-                <StackPanel Spacing="6" IsVisible="{Binding HasParameters}">
-                    <Grid ColumnDefinitions="2*,12,2*,12,*">
-                        <TextBlock Classes="label" Text="Параметр" />
-                        <TextBlock Grid.Column="2" Classes="label" Text="Значение" />
-                        <TextBlock Grid.Column="4" Classes="label" Text="Тип хранения" />
-                    </Grid>
-                    <ItemsControl x:Name="ParametersList" ItemsSource="{Binding Parameters}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="revit:RevitFamilyReadResultTypeParameter">
-                                <Grid ColumnDefinitions="2*,12,2*,12,*" Margin="0,3">
-                                    <TextBlock Text="{Binding Name}" TextWrapping="Wrap" />
-                                    <TextBlock Grid.Column="2" Text="{Binding Value}" TextWrapping="Wrap" />
-                                    <TextBlock Grid.Column="4" Text="{Binding StorageType}" TextWrapping="Wrap" />
-                                </Grid>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </StackPanel>
+                <ItemsControl x:Name="ParameterGroupsList" ItemsSource="{Binding ParameterGroups}"
+                              IsVisible="{Binding HasParameters}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:RevitFamilyParameterGroupViewModel">
+                            <Expander Header="{Binding Name}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}"
+                                      HorizontalAlignment="Stretch" Margin="0,0,0,8">
+                                <StackPanel Spacing="4">
+                                    <Grid ColumnDefinitions="2*,12,2*,12,*">
+                                        <TextBlock Classes="label" Text="Параметр" />
+                                        <TextBlock Grid.Column="2" Classes="label" Text="Значение" />
+                                        <TextBlock Grid.Column="4" Classes="label" Text="Тип хранения" />
+                                    </Grid>
+                                    <ItemsControl ItemsSource="{Binding Parameters}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="revit:RevitFamilyReadResultTypeParameter">
+                                                <Grid ColumnDefinitions="2*,12,2*,12,*" Margin="0,3">
+                                                    <TextBlock Text="{Binding Name}" TextWrapping="Wrap" />
+                                                    <TextBlock Grid.Column="2" Text="{Binding Value}" TextWrapping="Wrap" />
+                                                    <TextBlock Grid.Column="4" Text="{Binding StorageType}" TextWrapping="Wrap" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Expander>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
             </StackPanel>
         </StackPanel>
     </StackPanel>

@@ -4,8 +4,8 @@
              xmlns:vm="using:RevEx.Desktop.ViewModels.Catalog"
              xmlns:contentVm="using:RevEx.Desktop.ViewModels.Contents"
              x:Class="RevEx.Desktop.Views.Catalog.CatalogTabView" x:DataType="vm:CatalogTabViewModel">
-    <Grid Margin="28" RowDefinitions="Auto,22,*,Auto">
-        <Grid ColumnDefinitions="*,Auto,12,304">
+    <Grid Margin="12" RowDefinitions="Auto,12,*,Auto">
+        <Grid ColumnDefinitions="*,Auto,8,240">
             <HeaderedContentControl Theme="{StaticResource PageHeaderTheme}" Header="Каталог"
                                     Content="Материалы, инструкции и документы команды" />
             <Button Grid.Column="1" Classes="secondary" VerticalAlignment="Center"
@@ -13,7 +13,7 @@
             <Grid Grid.Column="3" VerticalAlignment="Center">
                 <TextBox Classes="search" Watermark="Поиск по названию…"
                          Text="{Binding ContentNameQuery}" />
-                <PathIcon Width="16" Height="16" Margin="14,0,0,0" HorizontalAlignment="Left"
+                <PathIcon Width="16" Height="16" Margin="8,0,0,0" HorizontalAlignment="Left"
                           Foreground="{StaticResource TextSecondaryBrush}" IsHitTestVisible="False"
                           Data="M8,2 A6,6 0 1 0 8,14 A6,6 0 1 0 8,2 M12.5,12.5 L17,17" />
             </Grid>
@@ -21,13 +21,14 @@
 
         <Grid Grid.Row="2">
             <Border Classes="content-pane">
-                <Grid RowDefinitions="Auto,14,*">
+                <Grid RowDefinitions="Auto,8,*">
                     <Grid ColumnDefinitions="*,Auto">
                         <StackPanel Spacing="3">
                             <TextBlock Classes="h2" Text="Материалы" />
                             <TextBlock Classes="caption" Text="Дважды нажмите, чтобы открыть" />
                         </StackPanel>
-                        <Border Grid.Column="1" Padding="9,4" CornerRadius="8" Background="{StaticResource SurfaceMutedBrush}">
+                        <Border Grid.Column="1" Padding="8,4" CornerRadius="4" VerticalAlignment="Center"
+                                Background="{StaticResource SurfaceMutedBrush}">
                             <TextBlock Text="БИБЛИОТЕКА" Foreground="{StaticResource TextSecondaryBrush}"
                                        FontSize="10" FontWeight="SemiBold" />
                         </Border>
@@ -42,10 +43,10 @@
                                  IsVisible="{Binding !IsContentLoading}">
                             <ListBox.ItemTemplate>
                                 <DataTemplate x:DataType="contentVm:ContentItemViewModel">
-                                    <Border Classes="content-row" Margin="0,0,0,8"
+                                    <Border Classes="content-row"
                                             DoubleTapped="OnContentDoubleTapped">
-                                        <Grid ColumnDefinitions="84,14,*">
-                                            <Border Width="84" Height="72" CornerRadius="8" ClipToBounds="True"
+                                        <Grid ColumnDefinitions="64,12,*">
+                                            <Border Width="64" Height="56" CornerRadius="8" ClipToBounds="True"
                                                     Background="{StaticResource SurfaceMutedBrush}">
                                                 <Grid>
                                                     <TextBlock Text="Нет фото" Classes="caption"
@@ -55,7 +56,7 @@
                                                            IsVisible="{Binding HasPreview}" />
                                                 </Grid>
                                             </Border>
-                                            <StackPanel Grid.Column="2" Spacing="7" VerticalAlignment="Center">
+                                            <StackPanel Grid.Column="2" Spacing="4" VerticalAlignment="Center">
                                                 <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="15" />
                                                 <WrapPanel Orientation="Horizontal">
                                                     <ItemsControl ItemsSource="{Binding VisibleTags}">
@@ -64,14 +65,14 @@
                                                         </ItemsControl.ItemsPanel>
                                                         <ItemsControl.ItemTemplate>
                                                             <DataTemplate>
-                                                                <Border Classes="value-box" Padding="8,3" Margin="0,0,6,0">
+                                                                <Border Classes="value-box" Padding="8,0" Margin="0,0,6,0">
                                                                     <TextBlock Text="{Binding StringFormat='#{0}'}" Classes="caption"
                                                                                Foreground="{StaticResource AccentBrush}" />
                                                                 </Border>
                                                             </DataTemplate>
                                                         </ItemsControl.ItemTemplate>
                                                     </ItemsControl>
-                                                    <Border Classes="value-box" Padding="8,3"
+                                                    <Border Classes="value-box" Padding="8,0"
                                                             IsVisible="{Binding HasAdditionalTags}">
                                                         <TextBlock Text="{Binding AdditionalTagsText}" Classes="caption"
                                                                    Foreground="{StaticResource AccentBrush}" />
