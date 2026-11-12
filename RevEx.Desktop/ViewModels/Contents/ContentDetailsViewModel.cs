@@ -19,18 +19,19 @@ using RevEx.Connector.Contracts;
 using RevEx.Domain.Contracts.Connectors;
 using RevEx.Configuration;
 using RevEx.Connector.Client;
+using RevEx.Desktop.Services;
 
 namespace RevEx.Desktop.ViewModels.Contents;
 
 /// <summary>Модель карточки контента. Хранит данные и состояние экрана; операции разделены по тематическим файлам.</summary>
 public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
 {
-    private readonly Action _openVersionEditor;
     private readonly Action _close;
     private readonly Action<string, string, int> _contentUpdated;
     private readonly IRevExApiService _apiService;
     private readonly IConnectorClient _connectorClient;
     private readonly IConnectorRegistry _connectorRegistry;
+    private readonly RfaFamilyImportService _rfaImportService;
     private ContentDto? _content;
     private IReadOnlyCollection<TagDto> _allTags = [];
     private IReadOnlyCollection<CategoryDto> _categories = [];
@@ -153,8 +154,8 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         IRevExApiService apiService,
         IConnectorClient connectorClient,
         IConnectorRegistry connectorRegistry,
+        RfaFamilyImportService rfaImportService,
         bool canEdit,
-        Action openVersionEditor,
         Action close,
         Action<string, string, int> contentUpdated)
         : base(
@@ -165,8 +166,8 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         _apiService = apiService;
         _connectorClient = connectorClient;
         _connectorRegistry = connectorRegistry;
+        _rfaImportService = rfaImportService;
         CanEdit = canEdit;
-        _openVersionEditor = openVersionEditor;
         _close = close;
         _contentUpdated = contentUpdated;
         Id = content.Id;
@@ -219,8 +220,12 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         }
     }
 
-    [RelayCommand]
-    private void AddVersion() => _openVersionEditor();
+    public RfaFamilyImportViewModel CreateRfaVersionImport()
+    {
+        var content = _content
+            ?? throw new InvalidOperationException("Данные карточки ещё не загружены.");
+        return new RfaFamilyImportViewModel(_apiService, _rfaImportService, content);
+    }
 
     private async Task RefreshHistoryAsync()
     {

@@ -7,10 +7,12 @@ using RevEx.Connector.Protocol.Implementations.Tcp;
 using RevEx.Desktop.Core.Interfaces;
 using RevEx.Desktop.Core.Services;
 using RevEx.Desktop.ViewModels.Contents;
+using RevEx.Desktop.Services;
 using RevEx.Desktop.Views.Contents;
 using RevEx.Domain.Contracts.Content;
 using RevEx.Domain.Contracts.ContentVersion;
 using RevEx.Domain.Entities;
+using RevEx.Domain.Identifiers;
 using RevEx.LoadingQueue;
 
 internal static class VersionPublicationChecks
@@ -30,6 +32,7 @@ internal static class VersionPublicationChecks
         var category = (await api.Categories.GetAllAsync()).First();
         var content = await api.Contents.CreateAsync(new CreateContentDto
         {
+            Cid = Uuid7.Create(),
             Name = "Status check",
             Description = "Status check",
             CategoryId = category.Id
@@ -44,9 +47,11 @@ internal static class VersionPublicationChecks
         });
         using var transport = new TcpConnectorTransport();
         using var client = new TcpConnectorClient(transport, new ConnectorTaskQueue());
+        var registry = new ConnectorRegistry();
+        var import = new RfaFamilyImportService(api, client, registry);
         using var item = new ContentItemViewModel(content);
-        using var model = new ContentDetailsViewModel(item, api, client, new ConnectorRegistry(), true,
-            () => { }, () => { }, (_, _, _) => { });
+        using var model = new ContentDetailsViewModel(item, api, client, registry, import, true,
+            () => { }, (_, _, _) => { });
         await model.ActivateAsync();
         var view = new ContentDetailsView { DataContext = model };
         var window = new Window { Content = view, Width = 1200, Height = 900 };
@@ -111,8 +116,8 @@ internal static class VersionPublicationChecks
             "Retry did not save the selected status.");
         window.Close();
 
-        using var readOnly = new ContentDetailsViewModel(item, api, client, new ConnectorRegistry(), false,
-            () => { }, () => { }, (_, _, _) => { });
+        using var readOnly = new ContentDetailsViewModel(item, api, client, registry, import, false,
+            () => { }, (_, _, _) => { });
         await readOnly.ActivateAsync();
         readOnly.SelectedPublishStatus = readOnly.PublishStatuses.Single(option => option.Value == PublishStatus.Withdrawn);
         Require(!readOnly.CanChangePublishStatus && !readOnly.SavePublishStatusCommand.CanExecute(null),

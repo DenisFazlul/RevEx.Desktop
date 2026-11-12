@@ -18,6 +18,7 @@ using RevEx.Domain.Contracts.Connectors;
 using RevEx.Domain.Contracts.Content;
 using RevEx.Domain.Contracts.ContentVersion;
 using RevEx.Domain.Entities;
+using RevEx.Domain.Identifiers;
 using RevEx.LoadingQueue;
 
 internal static class RfaImportChecks
@@ -116,7 +117,9 @@ internal static class RfaImportChecks
             await using var reader = new ConnectorHost(new ConnectorHostOptions(
                 "RFA mock reader", ConnectorProduct.Mock, "2026", DiscoveryDirectory: directory));
             var readerExecutor = new ReadExecutor();
+            var writerExecutor = new WriteExecutor();
             reader.RegisterExecutor(readerExecutor);
+            reader.RegisterExecutor(writerExecutor);
             await reader.StartAsync();
             var readerDescriptor = (await discovery.FindAsync(default)).Single(
                 connector => connector.InstanceId == reader.InstanceId);
@@ -146,6 +149,7 @@ internal static class RfaImportChecks
             var category = (await api.Categories.GetAllAsync()).First();
             await api.Contents.CreateAsync(new CreateContentDto
             {
+                Cid = Uuid7.Create(),
                 Name = name + "-similar",
                 Description = "Substring must not match",
                 CategoryId = category.Id
@@ -153,6 +157,7 @@ internal static class RfaImportChecks
 
             var before = (await api.ContentVersions.GetAllAsync()).Count;
             int contentId;
+            Guid? firstVid;
             using (var first = new RfaFamilyImportViewModel(api, import))
             {
                 first.SelectedConnector = first.Connectors.Single(connector => connector.InstanceId == reader.InstanceId);
@@ -183,8 +188,16 @@ internal static class RfaImportChecks
                 Require(!await first.SaveAsync() && first.CanSave, "Expected a lost IFC upload response with retry available.");
                 Require(await first.SaveAsync(), first.Message ?? "Retry failed.");
                 contentId = first.SavedVersion!.ContentId;
+                firstVid = first.SavedVersion.Vid;
                 Require(first.SavedVersion.Platform == Platform.Revit && first.SavedVersion.PublishStatus == PublishStatus.Draft,
                     "RFA import must explicitly create a Revit draft even when using a mock connector.");
+                Require(Uuid7.IsValid(first.SavedVersion.Vid ?? Guid.Empty)
+                    && Uuid7.IsValid((await api.Contents.GetByIdAsync(contentId))!.Cid),
+                    "Identified RFA import must persist UUID v7 CID and VID.");
+                Require(writerExecutor.WriteCount == 1
+                    && writerExecutor.LastCid == (await api.Contents.GetByIdAsync(contentId))!.Cid
+                    && writerExecutor.LastVid == first.SavedVersion.Vid,
+                    "Desktop did not ask the selected connector to write the persisted CID and VID.");
                 Require((await api.ContentVersions.GetAllAsync()).Count == before + 1, "Retry created another version.");
                 var uploadedFiles = new List<RevEx.Domain.Contracts.ContentFile.ContentFileDto>();
                 foreach (var fileId in first.SavedVersion.FileIds)
@@ -219,7 +232,9 @@ internal static class RfaImportChecks
                 Require(!first.CanSave, "Completed import can be saved twice.");
             }
 
-            using (var second = new RfaFamilyImportViewModel(api, import))
+            var existingContent = await api.Contents.GetByIdAsync(contentId)
+                ?? throw new InvalidOperationException("Imported content is missing.");
+            using (var second = new RfaFamilyImportViewModel(api, import, existingContent))
             {
                 readerExecutor.UseLegacyCategory = false;
                 second.SelectedConnector = second.Connectors.Single(connector => connector.InstanceId == reader.InstanceId);
@@ -229,6 +244,8 @@ internal static class RfaImportChecks
                 Require(!second.IsNewContent && !second.CanEditContent, "Existing content was not detected.");
                 Require(await second.SaveAsync(), second.Message ?? "Second import failed.");
                 Require(second.SavedVersion!.ContentId == contentId, "Second import created a different card.");
+                Require(second.SavedVersion.Vid != firstVid && Uuid7.IsValid(second.SavedVersion.Vid ?? Guid.Empty),
+                    "Each new identified version must receive a different UUID v7 VID.");
                 Require(second.SavedVersion.FileIds.Count == 1, "RFA-only import saved unexpected CSV files.");
             }
             Require((await api.ContentVersions.GetAllAsync()).Count == before + 2, "Each completed import must create a new version.");
@@ -299,6 +316,37 @@ internal static class RfaImportChecks
                     ["future"] = new JObject { ["nested"] = new JArray("unknown", new JObject { ["value"] = 42 }) }
                 })
             };
+        }
+    }
+
+    private sealed class WriteExecutor
+        : ConnectorCommandExecutor<WriteRfaIdentifiersRequest, WriteRfaIdentifiersResponse>
+    {
+        public WriteExecutor()
+            : base(
+                ConnectorCommand.WriteRfaIdentifiers,
+                "Writes CID and VID to a mock family.")
+        {
+        }
+
+        public int WriteCount { get; private set; }
+        public Guid? LastCid { get; private set; }
+        public Guid? LastVid { get; private set; }
+
+        protected override Task<WriteRfaIdentifiersResponse> ExecuteAsync(
+            WriteRfaIdentifiersRequest request,
+            IConnectorCommandContext context,
+            CancellationToken token)
+        {
+            Require(Uuid7.IsValid(request.Cid) && Uuid7.IsValid(request.Vid),
+                "Desktop sent non-v7 identifiers to the connector.");
+            WriteCount++;
+            LastCid = request.Cid;
+            LastVid = request.Vid;
+            File.AppendAllText(
+                request.File.Path,
+                $"{Environment.NewLine}RevEx_CID={request.Cid:D}{Environment.NewLine}RevEx_VID={request.Vid:D}");
+            return Task.FromResult(new WriteRfaIdentifiersResponse(request.Cid, request.Vid));
         }
     }
 

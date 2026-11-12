@@ -45,14 +45,14 @@ internal static class MockApiData
 
     internal static readonly List<ContentVersionDto> ContentVersions =
     [
-        new(1, 1, [1], "Версия 1.0", CreatedAt, "published", RevEx.Domain.Entities.PublishStatus.Ready,
+        new(1, null, 1, [1], "Версия 1.0", CreatedAt, "published", RevEx.Domain.Entities.PublishStatus.Ready,
             RevEx.Domain.Entities.Platform.Revit, "revit", "2026", CreatedAt, UpdatedAt)
     ];
 
     internal static readonly List<ContentDto> Contents =
     [
-        new(1, "Пример материала", "Тестовый материал из мок-сервиса.", 1, 2, 2, [1, 2], CreatedAt, UpdatedAt),
-        new(2, "Рабочий документ", "Материал без превью.", 2, 1, null, [2], CreatedAt, UpdatedAt)
+        new(1, Guid.Parse("019a7b4c-0000-7000-8000-000000000101"), "Пример материала", "Тестовый материал из мок-сервиса.", 1, 2, 2, [1, 2], CreatedAt, UpdatedAt),
+        new(2, Guid.Parse("019a7b4c-0000-7000-8000-000000000102"), "Рабочий документ", "Материал без превью.", 2, 1, null, [2], CreatedAt, UpdatedAt)
     ];
 
     internal static readonly List<ContentHistoryEventDto> ContentHistory =

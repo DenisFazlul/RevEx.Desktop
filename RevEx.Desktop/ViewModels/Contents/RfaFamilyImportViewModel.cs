@@ -16,6 +16,7 @@ using RevEx.Desktop.Core.Interfaces;
 using RevEx.Desktop.Services;
 using RevEx.Domain.Contracts.Category;
 using RevEx.Domain.Contracts.Connectors;
+using RevEx.Domain.Contracts.Content;
 using RevEx.Domain.Contracts.ContentVersion;
 
 namespace RevEx.Desktop.ViewModels.Contents;
@@ -25,6 +26,7 @@ public partial class RfaFamilyImportViewModel : DialogViewModel<ContentVersionDt
 {
     private readonly IRevExApiService _api;
     private readonly RfaFamilyImportService _import;
+    private readonly ContentDto? _targetContent;
     private RfaFamilyReadSession? _session;
     private bool _disposed;
 
@@ -82,10 +84,14 @@ public partial class RfaFamilyImportViewModel : DialogViewModel<ContentVersionDt
         get; private set;
     }
 
-    public RfaFamilyImportViewModel(IRevExApiService api, RfaFamilyImportService import)
+    public RfaFamilyImportViewModel(
+        IRevExApiService api,
+        RfaFamilyImportService import,
+        ContentDto? targetContent = null)
     {
         _api = api;
         _import = import;
+        _targetContent = targetContent;
         _import.ConnectorsChanged += OnConnectorsChanged;
         UpdateConnectors();
     }
@@ -144,7 +150,7 @@ public partial class RfaFamilyImportViewModel : DialogViewModel<ContentVersionDt
                 Categories.Add(category);
             }
 
-            _session = await _import.ReadAsync(path, connector, auxiliaryPaths);
+            _session = await _import.ReadAsync(path, connector, auxiliaryPaths, _targetContent);
             AuxiliaryFileNames = _session.AuxiliaryFiles.Count == 0
                 ? "Вспомогательные файлы не выбраны"
                 : string.Join(Environment.NewLine, _session.AuxiliaryFiles.Select(file => file.Name));
@@ -156,7 +162,7 @@ public partial class RfaFamilyImportViewModel : DialogViewModel<ContentVersionDt
             MetadataJson = _session.Metadata.ToString(Formatting.Indented);
             FamilyMetadata.Family = _session.Family;
 
-            var existing = await _import.FindContentAsync(ContentName);
+            var existing = _session.SavedContent;
             IsNewContent = existing is null;
             Description = existing?.Description ?? _session.Family.Description ?? string.Empty;
             if (string.IsNullOrWhiteSpace(Description))
@@ -170,7 +176,7 @@ public partial class RfaFamilyImportViewModel : DialogViewModel<ContentVersionDt
             VersionName = DateTime.Now.ToString("yyyy.MM.dd HH:mm:ss");
             TargetDescription = existing is null
                 ? "Будет создана новая карточка контента и первая версия."
-                : $"Новая версия будет добавлена к «{existing.Name}» (№ {existing.Id}).";
+                : $"Новая версия будет добавлена к «{existing.Name}» (CID {existing.Cid:D}).";
             Message = "Данные прочитаны. Проверьте поля и сохраните версию.";
         }
         catch (Exception exception) when (exception is HttpRequestException or IOException or InvalidOperationException or UnauthorizedAccessException or OperationCanceledException or JsonException)

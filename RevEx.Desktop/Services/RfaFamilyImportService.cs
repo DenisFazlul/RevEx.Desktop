@@ -14,6 +14,7 @@ using RevEx.Domain.Contracts.Content;
 using RevEx.Domain.Contracts.ContentVersion;
 using RevEx.Domain.Contracts.Revit;
 using RevEx.Domain.Entities;
+using RevEx.Domain.Identifiers;
 
 namespace RevEx.Desktop.Services;
 
@@ -49,11 +50,19 @@ public sealed class RfaFamilyImportService
     }
 
     public async Task<RfaFamilyReadSession> ReadAsync(
-        string path, ConnectorDescriptor connector, IReadOnlyCollection<string>? auxiliaryPaths = null)
+        string path,
+        ConnectorDescriptor connector,
+        IReadOnlyCollection<string>? auxiliaryPaths = null,
+        ContentDto? targetContent = null)
     {
         if (!string.Equals(Path.GetExtension(path), ".rfa", StringComparison.OrdinalIgnoreCase) || !File.Exists(path))
         {
             throw new InvalidOperationException("Выберите существующий файл семейства (*.rfa).");
+        }
+
+        if (targetContent is not null && !Uuid7.IsValid(targetContent.Cid))
+        {
+            throw new InvalidOperationException("CID выбранного контента отсутствует или не является UUID v7.");
         }
 
         var fileInfo = new FileInfo(path);
@@ -138,6 +147,11 @@ public sealed class RfaFamilyImportService
             session.Metadata = (JObject)metadata.DeepClone();
             session.Family = metadata.ToObject<RevitFamilyReadResult>()
                 ?? throw new InvalidOperationException("Не удалось прочитать ответ коннектора.");
+            var fileCid = ParseIdentifier(session.Family.CID?.Value);
+            session.SavedContent = targetContent ?? (fileCid is Guid cid
+                ? await FindContentAsync(cid)
+                : null);
+            session.Cid = session.SavedContent?.Cid ?? await _api.Contents.GenerateUuid7Async();
             return session;
         }
         catch
@@ -147,17 +161,9 @@ public sealed class RfaFamilyImportService
         }
     }
 
-    public async Task<ContentDto?> FindContentAsync(string name)
+    public Task<ContentDto?> FindContentAsync(Guid cid)
     {
-        var contents = await _api.Contents.GetAllAsync(new ContentQueryDto { Name = name });
-        var matches = contents.Where(content =>
-            string.Equals(content.Name.Trim(), name, StringComparison.OrdinalIgnoreCase)).ToArray();
-        if (matches.Length > 1)
-        {
-            throw new InvalidOperationException($"Найдено несколько карточек «{name}». Устраните совпадение имён перед добавлением версии.");
-        }
-
-        return matches.SingleOrDefault();
+        return _api.Contents.GetByCidAsync(cid);
     }
 
     public async Task<ContentVersionDto> SaveAsync(
@@ -166,8 +172,10 @@ public sealed class RfaFamilyImportService
         await _saveGate.WaitAsync();
         try
         {
+            await WriteIdentifiersAsync(session);
+
             // Recheck immediately before saving: the card may have appeared while the form was open.
-            session.SavedContent ??= await FindContentAsync(session.ContentName);
+            session.SavedContent ??= await FindContentAsync(session.Cid);
             if (session.SavedContent is null)
             {
                 if (categoryId is null || string.IsNullOrWhiteSpace(description))
@@ -177,6 +185,7 @@ public sealed class RfaFamilyImportService
 
                 session.SavedContent = await _api.Contents.CreateAsync(new CreateContentDto
                 {
+                    Cid = session.Cid,
                     Name = session.ContentName,
                     Description = description.Trim(),
                     CategoryId = categoryId.Value
@@ -185,6 +194,8 @@ public sealed class RfaFamilyImportService
 
             session.SavedVersion ??= await _api.ContentVersions.CreateAsync(new CreateContentVersionDto
             {
+                Cid = session.Cid,
+                Vid = session.Vid,
                 ContentId = session.SavedContent.Id,
                 Name = versionName.Trim(),
                 Date = DateTimeOffset.UtcNow,
@@ -256,5 +267,105 @@ public sealed class RfaFamilyImportService
         {
             throw new InvalidOperationException($"Коннектор «{connector.Name}» не поддерживает чтение RFA. Выберите другой коннектор.");
         }
+
+        if (!connector.Commands.Any(command => command.Name == ConnectorCommand.WriteRfaIdentifiers))
+        {
+            throw new InvalidOperationException($"Коннектор «{connector.Name}» не поддерживает запись CID и VID. Выберите другой коннектор.");
+        }
+    }
+
+    private async Task WriteIdentifiersAsync(RfaFamilyReadSession session)
+    {
+        if (session.AreIdentifiersWritten)
+        {
+            return;
+        }
+
+        ValidateReader(session.Connector);
+        session.Vid ??= await _api.Contents.GenerateUuid7Async();
+        var file = new ContentVersionExecuteDto(Guid.NewGuid(), session.FileName, session.FilePath);
+        var request = new WriteRfaIdentifiersRequest(file, session.Cid, session.Vid.Value);
+        var task = new ConnectorTask(
+            Guid.NewGuid(),
+            $"Запись CID и VID в {session.FileName}",
+            ConnectorCommand.WriteRfaIdentifiers);
+        var response = await _client.ExecuteAsync<WriteRfaIdentifiersRequest, WriteRfaIdentifiersResponse>(
+            session.Connector,
+            task,
+            request);
+        if (response.Cid != session.Cid || response.Vid != session.Vid.Value)
+        {
+            throw new InvalidOperationException("Коннектор вернул CID или VID, отличающийся от записанного значения.");
+        }
+
+        UpdateIdentifierMetadata(session, response.Cid, response.Vid);
+        session.AreIdentifiersWritten = true;
+    }
+
+    private static Guid? ParseIdentifier(string? value)
+    {
+        if (!Guid.TryParse(value, out var identifier) || !Uuid7.IsValid(identifier))
+        {
+            return null;
+        }
+
+        return identifier;
+    }
+
+    private static void UpdateIdentifierMetadata(RfaFamilyReadSession session, Guid cid, Guid vid)
+    {
+        var cidParameter = CreateIdentifierParameter("RevEx_CID", cid);
+        var vidParameter = CreateIdentifierParameter("RevEx_VID", vid);
+        session.Family.CID = cidParameter;
+        session.Family.VID = vidParameter;
+
+        session.Metadata["CID"] = JObject.FromObject(cidParameter);
+        session.Metadata["VID"] = JObject.FromObject(vidParameter);
+        if (session.Metadata["Types"] is not JArray types)
+        {
+            return;
+        }
+
+        foreach (var type in types.OfType<JObject>())
+        {
+            if (type["Parameters"] is not JArray parameters)
+            {
+                continue;
+            }
+
+            ReplaceIdentifierParameter(parameters, cidParameter);
+            ReplaceIdentifierParameter(parameters, vidParameter);
+        }
+    }
+
+    private static RevitFamilyReadResultTypeParameter CreateIdentifierParameter(string name, Guid value)
+    {
+        return new RevitFamilyReadResultTypeParameter
+        {
+            Name = name,
+            Value = value.ToString("D"),
+            StorageType = "String",
+            GroupId = "PG_IDENTITY_DATA",
+            GroupName = "Данные идентификации"
+        };
+    }
+
+    private static void ReplaceIdentifierParameter(
+        JArray parameters,
+        RevitFamilyReadResultTypeParameter parameter)
+    {
+        var existing = parameters.OfType<JObject>().FirstOrDefault(item =>
+            string.Equals(
+                item.GetValue("Name", StringComparison.OrdinalIgnoreCase)?.Value<string>(),
+                parameter.Name,
+                StringComparison.Ordinal));
+        var value = JObject.FromObject(parameter);
+        if (existing is null)
+        {
+            parameters.Add(value);
+            return;
+        }
+
+        existing.Replace(value);
     }
 }

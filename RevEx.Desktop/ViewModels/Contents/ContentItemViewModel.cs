@@ -16,6 +16,10 @@ public partial class ContentItemViewModel : ViewModelBase, IDisposable
     {
         get;
     }
+    public Guid Cid
+    {
+        get;
+    }
     [ObservableProperty]
     private int _categoryId;
     public int ContentStatusId
@@ -54,6 +58,7 @@ public partial class ContentItemViewModel : ViewModelBase, IDisposable
         byte[]? previewBytes = null)
     {
         Id = dto.Id;
+        Cid = dto.Cid;
         _categoryId = dto.CategoryId;
         ContentStatusId = dto.ContentStatusId;
         TagIds = dto.TagIds;

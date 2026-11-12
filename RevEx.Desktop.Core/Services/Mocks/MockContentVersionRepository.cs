@@ -2,6 +2,7 @@ using RevEx.Domain.Contracts.ContentFile;
 using RevEx.Domain.Contracts.ContentVersion;
 using RevEx.Desktop.Core.Interfaces;
 using RevEx.Domain.Entities;
+using RevEx.Domain.Identifiers;
 using static RevEx.Desktop.Core.Services.MockApiData;
 
 namespace RevEx.Desktop.Core.Services;
@@ -27,8 +28,36 @@ internal sealed class MockContentVersionRepository : IContentVersionRepository
             throw new InvalidOperationException("Укажите допустимые платформу и статус публикации версии.");
         }
 
+        if (request.Vid.HasValue)
+        {
+            if (!request.Cid.HasValue ||
+                !Uuid7.IsValid(request.Cid.Value) ||
+                !Uuid7.IsValid(request.Vid.Value))
+            {
+                throw new InvalidOperationException("CID и VID должны быть UUID v7.");
+            }
+
+            var content = Contents.FirstOrDefault(item => item.Id == request.ContentId);
+            if (content is null || content.Cid != request.Cid.Value)
+            {
+                throw new InvalidOperationException("CID не соответствует карточке контента.");
+            }
+
+            var existing = ContentVersions.FirstOrDefault(item => item.Vid == request.Vid.Value);
+            if (existing is not null)
+            {
+                if (existing.ContentId != request.ContentId)
+                {
+                    throw new InvalidOperationException("VID уже принадлежит другой карточке контента.");
+                }
+
+                return Task.FromResult(existing);
+            }
+        }
+
         var version = new ContentVersionDto(
             ContentVersions.Count == 0 ? 1 : ContentVersions.Max(item => item.Id) + 1,
+            request.Vid,
             request.ContentId,
             [],
             request.Name ?? "Новая версия",

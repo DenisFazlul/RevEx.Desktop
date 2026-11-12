@@ -6,6 +6,11 @@ namespace RevEx.Desktop.Core.Services;
 
 public sealed class ContentRepository(RevExApiTransport transport) : IContentRepository
 {
+    public Task<Guid> GenerateUuid7Async(CancellationToken cancellationToken = default)
+    {
+        return transport.PostAsJsonAsync<object, Guid>("api/identifiers/uuid-v7", new object(), cancellationToken);
+    }
+
     public Task<IReadOnlyCollection<ContentDto>> GetAllAsync(
         ContentQueryDto query,
         CancellationToken cancellationToken = default) =>
@@ -13,6 +18,14 @@ public sealed class ContentRepository(RevExApiTransport transport) : IContentRep
 
     public Task<ContentDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default) =>
         transport.GetByIdAsync<ContentDto>("api/content", id, cancellationToken);
+
+    public async Task<ContentDto?> GetByCidAsync(Guid cid, CancellationToken cancellationToken = default)
+    {
+        var matches = await transport.GetAllAsync<ContentDto>(
+            $"api/content/query?Cid={cid:D}",
+            cancellationToken);
+        return matches.SingleOrDefault();
+    }
 
     public Task<ContentDto> CreateAsync(
         CreateContentDto request,
@@ -47,6 +60,11 @@ public sealed class ContentRepository(RevExApiTransport transport) : IContentRep
             .Distinct()
             .Select(id => $"CategoryIds={id.ToString(CultureInfo.InvariantCulture)}")
             .ToList();
+
+        if (query.Cid is Guid cid)
+        {
+            parameters.Add($"Cid={cid:D}");
+        }
 
         parameters.AddRange(query.TagIds
             .Distinct()

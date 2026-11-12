@@ -168,7 +168,7 @@
                                   DisplayMemberBinding="{Binding Name}"
                                   HorizontalAlignment="Stretch" IsEnabled="{Binding !IsVersionBusy}" />
                         <Button Grid.Column="4" Classes="primary compact" Content="Добавить"
-                                IsVisible="{Binding CanEdit}" Command="{Binding AddVersionCommand}" />
+                                IsVisible="{Binding CanEdit}" Click="OnAddRfaVersionClick" />
                     </Grid>
                     <TextBlock Grid.Row="4" IsVisible="{Binding HasNoPlatformVersions}"
                                Classes="caption" Text="Для выбранной платформы пока нет версий." />

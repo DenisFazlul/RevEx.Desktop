@@ -83,11 +83,11 @@ internal static class DesktopControlChecks
             var commands = await httpClient.GetStringAsync(
                 $"connectors/{connector.InstanceId:D}/commands");
             Require(
-                commands.Contains("LoadContentVersion", StringComparison.Ordinal),
+                commands.Contains(ConnectorCommand.LoadContentVersion, StringComparison.Ordinal),
                 "Desktop connector commands are missing.");
 
             var executeResponse = await httpClient.PostAsJsonAsync(
-                $"connectors/{connector.InstanceId:D}/commands/LoadContentVersion",
+                $"connectors/{connector.InstanceId:D}/commands/{ConnectorCommand.LoadContentVersion}",
                 new
                 {
                     taskName = "Load from MCP",
@@ -100,7 +100,7 @@ internal static class DesktopControlChecks
             var executeJson = await executeResponse.Content.ReadAsStringAsync();
 
             Require(
-                executeJson.Contains("LoadContentVersion", StringComparison.Ordinal),
+                executeJson.Contains(ConnectorCommand.LoadContentVersion, StringComparison.Ordinal),
                 "Desktop command response is invalid.");
             Require(
                 client.LastCommand == ConnectorCommand.LoadContentVersion,

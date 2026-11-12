@@ -1,4 +1,4 @@
-using System.Security.Cryptography;
+using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RevEx.Connector.Client;
@@ -10,6 +10,7 @@ using RevEx.Desktop.Services;
 using RevEx.Desktop.ViewModels.Contents;
 using RevEx.Domain.Contracts.Connectors;
 using RevEx.Domain.Contracts.Content;
+using RevEx.Domain.Identifiers;
 
 if (args.Length != 2 || !int.TryParse(args[1], out var connectorPort))
 {
@@ -19,7 +20,7 @@ if (args.Length != 2 || !int.TryParse(args[1], out var connectorPort))
 
 var path = Path.GetFullPath(args[0]);
 DesktopUpdates.Initialize();
-var sourceHash = SHA256.HashData(await File.ReadAllBytesAsync(path));
+var sourceBytes = await File.ReadAllBytesAsync(path);
 var configuration = new ConfigurationBuilder()
     .AddJsonFile(Path.Combine(AppContext.BaseDirectory, "appsettings.json"))
     .Build();
@@ -37,9 +38,10 @@ var api = provider.GetRequiredService<IRevExApiService>();
 var importer = provider.GetRequiredService<RfaFamilyImportService>();
 var existingVersions = await api.ContentVersions.GetAllAsync();
 int? contentId = null;
+ContentDto? targetContent = null;
 for (var addition = 1; addition <= 2; addition++)
 {
-    using var form = new RfaFamilyImportViewModel(api, importer);
+    using var form = new RfaFamilyImportViewModel(api, importer, targetContent);
     form.SelectedConnector = form.Connectors.Single(connector => connector.InstanceId == descriptor.InstanceId);
     await form.LoadFileAsync(path);
     if (form.HasError || !form.CanSave)
@@ -55,6 +57,7 @@ for (var addition = 1; addition <= 2; addition++)
 
     var version = form.SavedVersion!;
     contentId ??= version.ContentId;
+    targetContent ??= await api.Contents.GetByIdAsync(version.ContentId);
     if (version.ContentId != contentId)
     {
         throw new InvalidOperationException("Repeated import created a different content card.");
@@ -68,12 +71,21 @@ for (var addition = 1; addition <= 2; addition++)
     }
 
     var downloaded = await api.ContentFiles.DownloadAsync(fileId);
-    if (!SHA256.HashData(downloaded).SequenceEqual(sourceHash))
+    var preparedText = Encoding.UTF8.GetString(downloaded);
+    if (!Uuid7.IsValid(version.Vid ?? Guid.Empty) ||
+        targetContent is null ||
+        !preparedText.Contains($"RevEx_CID={targetContent.Cid:D}", StringComparison.Ordinal) ||
+        !preparedText.Contains($"RevEx_VID={version.Vid:D}", StringComparison.Ordinal))
     {
-        throw new InvalidOperationException("The stored RFA differs from the source read by the mock.");
+        throw new InvalidOperationException("The stored RFA does not contain the catalog CID and VID written by the mock.");
     }
 
     Console.WriteLine($"PASS: addition {addition}, content {contentId}, version {version.Id}, file {fileId}, bytes {downloaded.Length}, metadata returned by HTTP.");
+}
+
+if (!sourceBytes.SequenceEqual(await File.ReadAllBytesAsync(path)))
+{
+    throw new InvalidOperationException("The original RFA was modified.");
 }
 
 var matching = await api.Contents.GetAllAsync(new ContentQueryDto { Name = Path.GetFileNameWithoutExtension(path) });

@@ -10,6 +10,7 @@ using CommunityToolkit.Mvvm.Input;
 using RevEx.Domain.Contracts.Category;
 using RevEx.Domain.Contracts.Content;
 using RevEx.Domain.Contracts.ContentVersion;
+using RevEx.Domain.Identifiers;
 using RevEx.Domain.Contracts.Tag;
 using RevEx.Desktop.Core.Interfaces;
 using RevEx.Desktop.Configuration;
@@ -174,9 +175,16 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
         {
             IsSaving = true;
             ErrorMessage = null;
-            Message = "Сохраняем контент и загружаем Revit-семейство…";
+            Message = "Сохраняем данные…";
 
             var createdContent = IsCreatingContent ? await CreateContentWithPreviewAsync() : null;
+            if (createdContent is not null && string.IsNullOrWhiteSpace(SelectedFamilyFilePath))
+            {
+                ResetForm(true);
+                Message = "Карточка контента успешно создана.";
+                return;
+            }
+
             var contentId = createdContent?.Id ?? _existingContent!.Id;
             var version = await CreateVersionWithFamilyFileAsync(contentId);
 
@@ -217,17 +225,24 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
         }
 
 
-        if (IsCreatingContent &&
-            (string.IsNullOrWhiteSpace(SelectedPreviewPath) || !File.Exists(SelectedPreviewPath)))
+        if (IsCreatingContent && !string.IsNullOrWhiteSpace(SelectedPreviewPath) &&
+            !File.Exists(SelectedPreviewPath))
         {
             message = "Выберите изображение контента.";
             return false;
         }
 
-        if (IsCreatingContent && !ContentImageUploadConfiguration.IsSupported(SelectedPreviewPath!))
+        if (IsCreatingContent && !string.IsNullOrWhiteSpace(SelectedPreviewPath) &&
+            !ContentImageUploadConfiguration.IsSupported(SelectedPreviewPath))
         {
             message = "Изображение должно быть в формате JPEG, PNG, WebP или GIF.";
             return false;
+        }
+
+        if (IsCreatingContent && string.IsNullOrWhiteSpace(SelectedFamilyFilePath))
+        {
+            message = string.Empty;
+            return true;
         }
 
         if (string.IsNullOrWhiteSpace(VersionName))
@@ -270,7 +285,12 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
             TagIds = SelectedTags.Select(tag => tag.Id).ToArray()
         });
 
-        await using var previewStream = File.OpenRead(SelectedPreviewPath!);
+        if (string.IsNullOrWhiteSpace(SelectedPreviewPath))
+        {
+            return content;
+        }
+
+        await using var previewStream = File.OpenRead(SelectedPreviewPath);
         return await _apiService.Contents.UploadPreviewAsync(
             content.Id,
             previewStream,

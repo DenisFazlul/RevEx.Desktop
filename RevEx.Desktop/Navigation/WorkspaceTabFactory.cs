@@ -130,11 +130,8 @@ public sealed class WorkspaceTabFactory : IWorkspaceTabFactory
             _revExApiService,
             _connectorClient,
             _connectorRegistry,
+            _rfaImportService,
             CanEditContent(),
-            () => context.OpenTab(new WorkspaceTabRequest(
-                typeof(ContentEditorTabViewModel),
-                content.Id,
-                new ContentVersionEditorParameter(content, details!.AddOrUpdateVersion))),
             () => context.CloseTab(details!),
             (name, description, categoryId) =>
             {

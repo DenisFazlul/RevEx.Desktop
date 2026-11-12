@@ -138,6 +138,21 @@ public partial class ContentDetailsView : UserControl
         }
     }
 
+    private async void OnAddRfaVersionClick(object? sender, Avalonia.Interactivity.RoutedEventArgs eventArgs)
+    {
+        if (!this.TryGetContext<ContentDetailsViewModel>(out var owner, out var viewModel))
+        {
+            return;
+        }
+
+        var window = new RfaVersionImportWindow(viewModel.CreateRfaVersionImport());
+        var version = await window.ShowDialog<ContentVersionDto?>(owner);
+        if (version is not null)
+        {
+            viewModel.AddOrUpdateVersion(version);
+        }
+    }
+
     private async void OnVersionSelectionChanged(object? sender, SelectionChangedEventArgs eventArgs)
     {
         if (sender is ComboBox { SelectedItem: ContentVersionDto version } &&

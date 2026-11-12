@@ -30,7 +30,17 @@ public sealed class RfaFamilyReadSession : IDisposable
     {
         get;
     }
-    public string ContentName => Path.GetFileNameWithoutExtension(FileName);
+    public string ContentName => SavedContent?.Name ?? Path.GetFileNameWithoutExtension(FileName);
+    public Guid Cid
+    {
+        get;
+        internal set;
+    }
+    public Guid? Vid
+    {
+        get;
+        internal set;
+    }
     public IReadOnlyList<SelectedLocalFile> AuxiliaryFiles
     {
         get;
@@ -53,6 +63,11 @@ public sealed class RfaFamilyReadSession : IDisposable
     public bool IsFileUploaded
     {
         get; internal set;
+    }
+    public bool AreIdentifiersWritten
+    {
+        get;
+        internal set;
     }
 
     public void Dispose()
