@@ -254,14 +254,17 @@ internal static class RfaImportChecks
 
     private sealed class ReadExecutor : ConnectorCommandExecutor<ConnecterReadFileRequest, JObject>
     {
+        public ReadExecutor()
+            : base(ConnectorCommand.ReadFiles)
+        {
+        }
+
         public bool UseLegacyCategory { get; set; } = true;
         public int ReadCount
         {
             get;
             private set;
         }
-
-        public override ConnectorCommand Command => ConnectorCommand.ReadFiles;
 
         protected override async Task<JObject> ExecuteAsync(ConnecterReadFileRequest request, IConnectorCommandContext context, CancellationToken token)
         {

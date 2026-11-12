@@ -252,7 +252,7 @@ public sealed class RfaFamilyImportService
             throw new InvalidOperationException("Выбранный коннектор больше недоступен. Выберите другой коннектор.");
         }
 
-        if (!connector.Commands.Any(command => command.Command == ConnectorCommand.ReadFiles))
+        if (!connector.Commands.Any(command => command.Name == ConnectorCommand.ReadFiles))
         {
             throw new InvalidOperationException($"Коннектор «{connector.Name}» не поддерживает чтение RFA. Выберите другой коннектор.");
         }

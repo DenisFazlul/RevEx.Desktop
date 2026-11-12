@@ -62,7 +62,7 @@ internal static class ConnectorChecks
             await item.PingAsync(timeout.Token);
             Require(item.IsAvailable && item.Status == "Доступен", "Desktop health check failed.");
             var loadContract = descriptor.Commands.SingleOrDefault(
-                command => command.Command == ConnectorCommand.LoadContentVersion)
+                command => command.Name == ConnectorCommand.LoadContentVersion)
                 ?? throw new InvalidOperationException(
                     "Registered command is not available to Desktop.");
             Require(
@@ -107,7 +107,10 @@ internal static class ConnectorChecks
 
     private sealed class LoadExecutor : ConnectorCommandExecutor<ConnectorLoadRequest, LoadContentVersionResponse>
     {
-        public override ConnectorCommand Command => ConnectorCommand.LoadContentVersion;
+        public LoadExecutor()
+            : base(ConnectorCommand.LoadContentVersion)
+        {
+        }
 
         protected override async Task<LoadContentVersionResponse> ExecuteAsync(
             ConnectorLoadRequest request, IConnectorCommandContext context, CancellationToken cancellationToken)

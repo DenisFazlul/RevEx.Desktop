@@ -177,8 +177,7 @@ public sealed class DesktopControlBridge : IAsyncDisposable
         }
 
         var commandContract = connector.Commands.FirstOrDefault(candidate =>
-            string.Equals(candidate.Command.ToString(), command, StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(candidate.ProtocolName, command, StringComparison.OrdinalIgnoreCase));
+            string.Equals(candidate.Name, command, StringComparison.Ordinal));
         if (commandContract is null)
         {
             return Results.BadRequest(new
@@ -187,10 +186,10 @@ public sealed class DesktopControlBridge : IAsyncDisposable
             });
         }
 
-        var connectorCommand = commandContract.Command;
+        var connectorCommand = commandContract.Name;
         var taskId = Guid.NewGuid();
         var taskName = string.IsNullOrWhiteSpace(request.TaskName)
-            ? connectorCommand.ToString()
+            ? connectorCommand
             : request.TaskName!;
         var task = new ConnectorTask(taskId, taskName, connectorCommand);
         var payload = request.Payload.ValueKind == JsonValueKind.Undefined
@@ -204,7 +203,7 @@ public sealed class DesktopControlBridge : IAsyncDisposable
         var response = new JObject
         {
             ["taskId"] = taskId,
-            ["command"] = connectorCommand.ToString(),
+            ["command"] = connectorCommand,
             ["result"] = result
         };
 
@@ -224,8 +223,7 @@ public sealed class DesktopControlBridge : IAsyncDisposable
         ConnectorCommandContract contract)
     {
         return new DesktopConnectorCommandDescription(
-            contract.Command.ToString(),
-            contract.ProtocolName,
+            contract.Name,
             contract.RequiresExclusiveExecution,
             contract.Input,
             contract.Output);

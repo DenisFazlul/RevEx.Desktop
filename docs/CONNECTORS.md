@@ -85,14 +85,19 @@ Desktop хранит задачи в общем `IConnectorTaskQueue` / `Connect
 
 ## Исполнитель
 
-Коннектор выбирает `IConnectorCommandExecutor` по enum `ConnectorCommand` из Domain.
+Коннектор выбирает `IConnectorCommandExecutor` по строковому имени команды. Имена
+встроенных команд доступны как константы `ConnectorCommand`, а пользовательское имя
+можно передать непосредственно в конструктор базового executor.
 Внешний обработчик наследует типизированную базу:
 
 ```csharp
 public sealed class LoadExecutor
     : ConnectorCommandExecutor<ConnectorLoadRequest, LoadContentVersionResponse>
 {
-    public override ConnectorCommand Command => ConnectorCommand.LoadContentVersion;
+    public LoadExecutor()
+        : base(ConnectorCommand.LoadContentVersion)
+    {
+    }
 
     protected override async Task<LoadContentVersionResponse> ExecuteAsync(
         ConnectorLoadRequest request, IConnectorCommandContext context,
@@ -115,10 +120,10 @@ Accepted и Done публикуются общим сервисом автома
 Исполнители по умолчанию требуют исключительного выполнения. Следующая такая задача
 при занятости получает ответ с ошибкой. Служебные health/statuses не блокируются загрузкой
 и при обычном служебном запросе не создают пользовательскую историю. Повторная регистрация
-команды отклоняется. Новые команды добавляются в enum Domain. Все executors должны
+команды отклоняется. Новое имя команды задаётся в конструкторе executor без изменения Domain. Все executors должны
 быть зарегистрированы до `StartAsync`: опубликованный `ConnectorDescriptor.Commands`
 является неизменяемым снимком поддерживаемых команд. Для каждой команды указаны
-protocol name, `Input`, `Output` и признак эксклюзивного выполнения; дополнительный
+строковое имя, `Input`, `Output` и признак эксклюзивного выполнения; дополнительный
 сетевой запрос для показа команд не выполняется.
 
 `IConnectorClient.ExecuteAsync<TRequest, TResponse>` отправляет произвольную прикладную
@@ -153,7 +158,7 @@ Desktop обновляет известные ему задачи; очеред�
 
 ## Протокол версии 2
 
-Регистрация содержит ProtocolVersion = 2 и объект Connector (ConnectorDescriptor).
+Регистрация содержит ProtocolVersion = 4 и объект Connector (ConnectorDescriptor).
 TCP-кадр: 4 байта длины big-endian, затем UTF-8 JSON до 8 MiB.
 Envelope: Version = 2, Kind, Id, Name, TaskName, Payload, Error.
 Name содержит wire-имя команды либо имя события; TaskName — название задачи.

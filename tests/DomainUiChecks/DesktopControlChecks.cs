@@ -77,7 +77,7 @@ internal static class DesktopControlChecks
                 connectorDescriptions.Single().InstanceId == connector.InstanceId,
                 "Desktop connector list is invalid.");
             Require(
-                connectorDescriptions.Single().Commands.Single().Name == nameof(ConnectorCommand.LoadContentVersion),
+                connectorDescriptions.Single().Commands.Single().Name == ConnectorCommand.LoadContentVersion,
                 "Desktop connector list does not contain command contracts.");
 
             var commands = await httpClient.GetStringAsync(
@@ -142,7 +142,6 @@ internal static class DesktopControlChecks
 
         return new ConnectorCommandContract(
             ConnectorCommand.LoadContentVersion,
-            "load",
             true,
             input,
             output);
@@ -150,7 +149,7 @@ internal static class DesktopControlChecks
 
     private sealed class TestConnectorClient : IConnectorClient
     {
-        public ConnectorCommand? LastCommand { get; private set; }
+        public string? LastCommand { get; private set; }
 
         public Task<TResponse> ExecuteAsync<TRequest, TResponse>(
             ConnectorDescriptor connector,
