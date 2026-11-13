@@ -44,6 +44,7 @@ public static class ServiceExtensions
         services.AddTransient<IContentVersionRepository, ContentVersionRepository>();
         services.AddTransient<IContentFileRepository, ContentFileRepository>();
         services.AddTransient<IContentHistoryRepository, ContentHistoryRepository>();
+        services.AddTransient<IRfaImportRepository, RfaImportRepository>();
         services.AddSingleton<IConnectorRegistry, ConnectorRegistry>();
         services.AddSingleton<IConnectorTaskQueue, ConnectorTaskQueue>();
         services.AddSingleton<IConnectorDiscovery, FileConnectorDiscovery>();

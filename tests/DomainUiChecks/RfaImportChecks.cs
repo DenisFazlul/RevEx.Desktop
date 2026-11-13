@@ -83,7 +83,8 @@ internal static class RfaImportChecks
             var mock = new MockRevExApiService();
             var versions = new RetryVersionRepository(mock.ContentVersions);
             var api = new RevExApiService(mock.Contents, mock.Categories, mock.Tags, mock.TagGroups,
-                mock.ContentStatuses, versions, mock.ContentFiles, mock.ContentHistory);
+                mock.ContentStatuses, versions, mock.ContentFiles, mock.ContentHistory,
+                new CompositeRfaImportRepository(mock.Contents, versions, mock.ContentFiles));
             var registry = new ConnectorRegistry();
             using var transport = new TcpConnectorTransport();
             using var client = new TcpConnectorClient(transport, new ConnectorTaskQueue());

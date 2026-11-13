@@ -178,81 +178,22 @@ public sealed class RfaFamilyImportService
         try
         {
             await WriteIdentifiersAsync(session);
-
-            // Recheck immediately before saving: the card may have appeared while the form was open.
-            session.SavedContent ??= await FindContentAsync(session.Cid);
-            if (session.SavedContent is null)
-            {
-                if (categoryId is null || string.IsNullOrWhiteSpace(description))
-                {
-                    throw new InvalidOperationException("Для нового контента укажите описание и категорию.");
-                }
-
-                session.SavedContent = await _api.Contents.CreateAsync(new CreateContentDto
-                {
-                    Cid = session.Cid,
-                    Name = session.ContentName,
-                    Description = description.Trim(),
-                    CategoryId = categoryId.Value
-                });
-            }
-
-            session.SavedVersion ??= await _api.ContentVersions.CreateAsync(new CreateContentVersionDto
-            {
-                Cid = session.Cid,
-                Vid = session.Vid,
-                ContentId = session.SavedContent.Id,
-                Name = versionName.Trim(),
-                Date = DateTimeOffset.UtcNow,
-                Status = "draft",
-                PublishStatus = PublishStatus.Draft,
-                Application = "revit",
-                Platform = Platform.Revit,
-                ApplicationVersion = applicationVersion
-            });
-
-            // Reconcile all uploaded files so retries resume interrupted auxiliary uploads.
-            var current = await _api.ContentVersions.GetByIdAsync(session.SavedVersion.Id)
-                ?? throw new InvalidOperationException("Созданная версия больше не существует.");
-            session.SavedVersion = current;
-            var uploadedAuxiliaryFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            foreach (var fileId in current.FileIds)
-            {
-                var file = await _api.ContentFiles.GetByIdAsync(fileId);
-                if (file?.Role == "primary")
-                {
-                    session.IsFileUploaded = true;
-                }
-                else if (file?.Role is "lookup-table" or "attachment")
-                {
-                    uploadedAuxiliaryFiles.Add(file.Role + ":" + file.OriginalFileName);
-                }
-            }
-
-            if (!session.IsFileUploaded)
-            {
-                await using var stream = File.OpenRead(session.SourceFilePath);
-                session.SavedVersion = await _api.ContentVersions.UploadFileAsync(
-                    current.Id, stream, session.FileName, "primary",
-                    metadataJson: session.Metadata.ToString(Formatting.None));
-                session.IsFileUploaded = true;
-            }
-
-            foreach (var auxiliaryFile in session.AuxiliaryFiles)
-            {
-                var role = string.Equals(Path.GetExtension(auxiliaryFile.Name), ".csv", StringComparison.OrdinalIgnoreCase)
-                    ? "lookup-table"
-                    : "attachment";
-                if (uploadedAuxiliaryFiles.Contains(role + ":" + auxiliaryFile.Name))
-                {
-                    continue;
-                }
-
-                await using var stream = File.OpenRead(auxiliaryFile.Path);
-                session.SavedVersion = await _api.ContentVersions.UploadFileAsync(
-                    current.Id, stream, auxiliaryFile.Name, role);
-            }
-
+            var request = new RfaImportRequest(
+                session.Cid,
+                session.Vid!.Value,
+                session.ContentName,
+                string.IsNullOrWhiteSpace(description) ? null : description.Trim(),
+                categoryId,
+                versionName.Trim(),
+                DateTimeOffset.UtcNow,
+                applicationVersion,
+                session.SourceFilePath,
+                session.FileName,
+                session.Metadata.ToString(Formatting.None),
+                session.AuxiliaryFiles
+                    .Select(file => new RfaImportAuxiliaryFile(file.Path, file.Name))
+                    .ToArray());
+            session.SavedVersion = await _api.RfaImports.ImportAsync(request);
             return session.SavedVersion;
         }
         finally
