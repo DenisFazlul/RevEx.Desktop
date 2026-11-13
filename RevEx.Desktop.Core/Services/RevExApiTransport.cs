@@ -54,7 +54,7 @@ public sealed class RevExApiTransport(HttpClient httpClient)
         }
 
         return await PostMultipartAsync<RevEx.Domain.Contracts.ContentVersion.ContentVersionDto>(
-            "api/rfa-imports",
+            "api/imports/rfa",
             content,
             cancellationToken);
     }
