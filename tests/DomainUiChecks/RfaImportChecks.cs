@@ -27,7 +27,7 @@ internal static class RfaImportChecks
     {
         CheckConnectorSelection();
         Task.Run(CheckAsync).GetAwaiter().GetResult();
-        Console.WriteLine("PASS: RFA connector selection, deferred RFA-only reading, CSV/IFC attachments, Revit draft platform/status, metadata, upload retries without duplicate files and source preservation.");
+        Console.WriteLine("PASS: RFA connector selection, deferred RFA-only reading, source CID/VID updates, CSV/IFC attachments, Revit draft platform/status, metadata and upload retries without duplicate files.");
     }
 
     private static void CheckConnectorSelection()
@@ -198,6 +198,12 @@ internal static class RfaImportChecks
                     && writerExecutor.LastCid == (await api.Contents.GetByIdAsync(contentId))!.Cid
                     && writerExecutor.LastVid == first.SavedVersion.Vid,
                     "Desktop did not ask the selected connector to write the persisted CID and VID.");
+                var sourceAfterFirstSave = await File.ReadAllTextAsync(path);
+                Require(sourceAfterFirstSave.Contains($"RevEx_CID={writerExecutor.LastCid:D}", StringComparison.Ordinal)
+                    && sourceAfterFirstSave.Contains($"RevEx_VID={first.SavedVersion.Vid:D}", StringComparison.Ordinal),
+                    "The connector did not write CID and VID to the user's source RFA file.");
+                Require(versions.UploadedContents[Path.GetFileName(path)].SequenceEqual(await File.ReadAllBytesAsync(path)),
+                    "The uploaded RFA differs from the user's source file.");
                 Require((await api.ContentVersions.GetAllAsync()).Count == before + 1, "Retry created another version.");
                 var uploadedFiles = new List<RevEx.Domain.Contracts.ContentFile.ContentFileDto>();
                 foreach (var fileId in first.SavedVersion.FileIds)
@@ -247,10 +253,15 @@ internal static class RfaImportChecks
                 Require(second.SavedVersion.Vid != firstVid && Uuid7.IsValid(second.SavedVersion.Vid ?? Guid.Empty),
                     "Each new identified version must receive a different UUID v7 VID.");
                 Require(second.SavedVersion.FileIds.Count == 1, "RFA-only import saved unexpected CSV files.");
+                var sourceAfterSecondSave = await File.ReadAllTextAsync(path);
+                Require(sourceAfterSecondSave.Contains($"RevEx_VID={second.SavedVersion.Vid:D}", StringComparison.Ordinal),
+                    "The user's source RFA does not contain the latest VID.");
+                Require(versions.UploadedContents[Path.GetFileName(path)].SequenceEqual(await File.ReadAllBytesAsync(path)),
+                    "The second uploaded RFA differs from the user's source file.");
             }
             Require((await api.ContentVersions.GetAllAsync()).Count == before + 2, "Each completed import must create a new version.");
             Require((await api.Contents.GetAllAsync(new ContentQueryDto { Name = name })).Count == 2, "Duplicate content created.");
-            Require(original.SequenceEqual(await File.ReadAllBytesAsync(path)), "Connector modified the user's original file.");
+            Require(!original.SequenceEqual(await File.ReadAllBytesAsync(path)), "Connector did not modify the user's source RFA file.");
             Require(originalFirstCsv.SequenceEqual(await File.ReadAllBytesAsync(firstCsv))
                 && originalSecondCsv.SequenceEqual(await File.ReadAllBytesAsync(secondCsv)), "Import modified the source CSV files.");
             Require(originalIfc.SequenceEqual(await File.ReadAllBytesAsync(ifcPath)), "Import modified the source IFC file.");

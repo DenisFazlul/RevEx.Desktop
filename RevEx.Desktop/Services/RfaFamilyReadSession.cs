@@ -14,14 +14,23 @@ public sealed class RfaFamilyReadSession : IDisposable
 {
     private readonly string _workingDirectory;
 
-    internal RfaFamilyReadSession(string directory, string fileName, ConnectorDescriptor connector)
+    internal RfaFamilyReadSession(
+        string directory,
+        string sourceFilePath,
+        string fileName,
+        ConnectorDescriptor connector)
     {
         _workingDirectory = directory;
+        SourceFilePath = sourceFilePath;
         FileName = fileName;
         FilePath = Path.Combine(directory, fileName);
         Connector = connector;
     }
 
+    public string SourceFilePath
+    {
+        get;
+    }
     public string FileName
     {
         get;

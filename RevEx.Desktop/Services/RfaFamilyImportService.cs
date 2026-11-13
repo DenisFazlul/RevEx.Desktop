@@ -65,7 +65,8 @@ public sealed class RfaFamilyImportService
             throw new InvalidOperationException("CID выбранного контента отсутствует или не является UUID v7.");
         }
 
-        var fileInfo = new FileInfo(path);
+        var sourceFilePath = Path.GetFullPath(path);
+        var fileInfo = new FileInfo(sourceFilePath);
         if (fileInfo.Length == 0 || fileInfo.Length > 100 * 1024 * 1024)
         {
             throw new InvalidOperationException("Размер семейства должен быть от 1 байта до 100 МБ.");
@@ -99,11 +100,15 @@ public sealed class RfaFamilyImportService
         ValidateReader(connector);
         var directory = Path.Combine(Path.GetTempPath(), "RevEx", "RfaImport", Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(directory);
-        var session = new RfaFamilyReadSession(directory, Path.GetFileName(path), connector);
+        var session = new RfaFamilyReadSession(
+            directory,
+            sourceFilePath,
+            Path.GetFileName(sourceFilePath),
+            connector);
         try
         {
-            // Revit may prepare and save the document. Work on a copy and upload that same copy.
-            await using (var source = File.OpenRead(path))
+            // Revit reads a working copy so another process can open the selected family safely.
+            await using (var source = File.OpenRead(session.SourceFilePath))
             await using (var destination = File.Create(session.FilePath))
             {
                 await source.CopyToAsync(destination);
@@ -226,7 +231,7 @@ public sealed class RfaFamilyImportService
 
             if (!session.IsFileUploaded)
             {
-                await using var stream = File.OpenRead(session.FilePath);
+                await using var stream = File.OpenRead(session.SourceFilePath);
                 session.SavedVersion = await _api.ContentVersions.UploadFileAsync(
                     current.Id, stream, session.FileName, "primary",
                     metadataJson: session.Metadata.ToString(Formatting.None));
@@ -283,7 +288,7 @@ public sealed class RfaFamilyImportService
 
         ValidateReader(session.Connector);
         session.Vid ??= await _api.Contents.GenerateUuid7Async();
-        var file = new ContentVersionExecuteDto(Guid.NewGuid(), session.FileName, session.FilePath);
+        var file = new ContentVersionExecuteDto(Guid.NewGuid(), session.FileName, session.SourceFilePath);
         var request = new WriteRfaIdentifiersRequest(file, session.Cid, session.Vid.Value);
         var task = new ConnectorTask(
             Guid.NewGuid(),

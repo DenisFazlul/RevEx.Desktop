@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using System.Threading;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -95,6 +96,7 @@ public partial class App : Application
 
     private static async Task StartDesktopAsync(IClassicDesktopStyleApplicationLifetime desktop)
     {
+        AuthenticationProgressWindow? authenticationWindow = null;
         try
         {
             if (!await Services.GetRequiredService<StartupUpdateCoordinator>().RunAsync())
@@ -102,10 +104,23 @@ public partial class App : Application
                 desktop.Shutdown();
                 return;
             }
+            authenticationWindow = new AuthenticationProgressWindow(
+                Services.GetRequiredService<IAuthenticationBrowser>());
+            desktop.MainWindow = authenticationWindow;
+            authenticationWindow.Show();
+
+            using var authenticationTimeout = new CancellationTokenSource(TimeSpan.FromMinutes(3));
+            using var authenticationCancellation = CancellationTokenSource.CreateLinkedTokenSource(
+                authenticationTimeout.Token,
+                authenticationWindow.CancellationToken);
+            var authenticationService = Services.GetRequiredService<IAuthenticationService>();
+            var accessToken = await authenticationService.GetAccessTokenAsync(
+                authenticationCancellation.Token);
+            authenticationWindow.Complete();
+            authenticationWindow = null;
+
             await Services.GetRequiredService<IConnectorRuntime>().StartAsync();
             await Services.GetRequiredService<DesktopControlBridge>().StartAsync();
-            var authenticationService = Services.GetRequiredService<IAuthenticationService>();
-            var accessToken = await authenticationService.GetAccessTokenAsync();
             try
             {
                 using var timeout = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(10));
@@ -123,15 +138,34 @@ public partial class App : Application
             desktop.ShutdownMode = ShutdownMode.OnLastWindowClose;
             mainWindow.Show();
         }
+        catch (OperationCanceledException) when (
+            authenticationWindow?.CancellationToken.IsCancellationRequested == true)
+        {
+            desktop.Shutdown();
+        }
+        catch (OperationCanceledException)
+        {
+            authenticationWindow?.Complete();
+            ShowAuthenticationError(
+                desktop,
+                "Время ожидания входа истекло. Запустите RevEx и попробуйте снова.");
+        }
         catch (Exception exception)
         {
             Console.Error.WriteLine($"OIDC startup authentication failed: {exception}");
-
-            var errorWindow = new AuthenticationErrorWindow(exception.Message);
-            desktop.MainWindow = errorWindow;
-            errorWindow.Closed += (_, _) => desktop.Shutdown(1);
-            errorWindow.Show();
+            authenticationWindow?.Complete();
+            ShowAuthenticationError(desktop, exception.Message);
         }
+    }
+
+    private static void ShowAuthenticationError(
+        IClassicDesktopStyleApplicationLifetime desktop,
+        string message)
+    {
+        var errorWindow = new AuthenticationErrorWindow(message);
+        desktop.MainWindow = errorWindow;
+        errorWindow.Closed += (_, _) => desktop.Shutdown(1);
+        errorWindow.Show();
     }
 
     private IConfigurationRoot CreateConfig()

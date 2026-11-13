@@ -20,7 +20,6 @@ if (args.Length != 2 || !int.TryParse(args[1], out var connectorPort))
 
 var path = Path.GetFullPath(args[0]);
 DesktopUpdates.Initialize();
-var sourceBytes = await File.ReadAllBytesAsync(path);
 var configuration = new ConfigurationBuilder()
     .AddJsonFile(Path.Combine(AppContext.BaseDirectory, "appsettings.json"))
     .Build();
@@ -80,12 +79,13 @@ for (var addition = 1; addition <= 2; addition++)
         throw new InvalidOperationException("The stored RFA does not contain the catalog CID and VID written by the mock.");
     }
 
-    Console.WriteLine($"PASS: addition {addition}, content {contentId}, version {version.Id}, file {fileId}, bytes {downloaded.Length}, metadata returned by HTTP.");
-}
+    var source = await File.ReadAllBytesAsync(path);
+    if (!source.SequenceEqual(downloaded))
+    {
+        throw new InvalidOperationException("The stored RFA differs from the user's source file.");
+    }
 
-if (!sourceBytes.SequenceEqual(await File.ReadAllBytesAsync(path)))
-{
-    throw new InvalidOperationException("The original RFA was modified.");
+    Console.WriteLine($"PASS: addition {addition}, content {contentId}, version {version.Id}, file {fileId}, bytes {downloaded.Length}, metadata returned by HTTP.");
 }
 
 var matching = await api.Contents.GetAllAsync(new ContentQueryDto { Name = Path.GetFileNameWithoutExtension(path) });
@@ -96,4 +96,4 @@ if (matching.Count(content => content.Id == contentId) != 1 ||
     throw new InvalidOperationException("Expected one content card with two new versions.");
 }
 
-Console.WriteLine("PASS: running Desktop import model -> external mock TCP connector -> authenticated HTTP API -> file storage; one card, two new versions, original RFA preserved.");
+Console.WriteLine("PASS: running Desktop import model -> external mock TCP connector -> authenticated HTTP API -> file storage; one card, two new versions, source RFA updated.");
