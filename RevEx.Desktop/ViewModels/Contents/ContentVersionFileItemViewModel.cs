@@ -1,3 +1,4 @@
+using RevEx.Desktop.IfcViewer;
 using RevEx.Domain.Contracts.ContentFile;
 
 namespace RevEx.Desktop.ViewModels.Contents;
@@ -25,12 +26,17 @@ public sealed class ContentVersionFileItemViewModel
     {
         get;
     }
+    public bool IsIfc
+    {
+        get;
+    }
 
     public ContentVersionFileItemViewModel(ContentFileDto file, bool canEdit = true)
     {
         CanEdit = canEdit;
         Id = file.Id;
         Name = file.OriginalFileName;
+        IsIfc = IfcViewerFile.IsSupported(Name);
         RoleName = file.Role switch
         {
             "primary" => "Основной файл",

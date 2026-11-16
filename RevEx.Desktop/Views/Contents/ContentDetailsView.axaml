@@ -3,6 +3,7 @@
              xmlns:domain="using:RevEx.Domain.Contracts.ContentVersion"
         xmlns:history="using:RevEx.Desktop.ViewModels.Contents"
              xmlns:revitViews="using:RevEx.Desktop.Views.Revit"
+             xmlns:contentViews="using:RevEx.Desktop.Views.Contents"
              xmlns:vm="using:RevEx.Desktop.ViewModels.Contents"
              x:Class="RevEx.Desktop.Views.Contents.ContentDetailsView"
              x:DataType="vm:ContentDetailsViewModel">
@@ -164,10 +165,20 @@
                         <ComboBox Grid.Column="2" ItemsSource="{Binding FilteredVersions}"
                                   SelectedItem="{Binding SelectedVersion, Mode=OneWay}"
                                   SelectionChanged="OnVersionSelectionChanged"
-                                  DisplayMemberBinding="{Binding Name}"
-                                  HorizontalAlignment="Stretch" IsEnabled="{Binding !IsVersionBusy}" />
+                                  HorizontalAlignment="Stretch" IsEnabled="{Binding !IsVersionBusy}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate x:DataType="domain:ContentVersionDto">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="{Binding Name}" />
+                                        <TextBlock Classes="caption"
+                                                   Text="{Binding PublishStatus, Converter={StaticResource PublishStatusConverter}, StringFormat='({0})'}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
                         <Button Grid.Column="4" Classes="primary compact" Content="Добавить"
-                                IsVisible="{Binding CanEdit}" Click="OnAddRfaVersionClick" />
+                                IsVisible="{Binding CanEdit}" IsEnabled="{Binding CanAddVersion}"
+                                Click="OnAddVersionClick" />
                     </Grid>
                     <TextBlock Grid.Row="4" IsVisible="{Binding HasNoPlatformVersions}"
                                Classes="caption" Text="Для выбранной платформы пока нет версий." />
@@ -230,14 +241,17 @@
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate x:DataType="vm:ContentVersionFileItemViewModel">
                                                 <Border Classes="value-box" Margin="0,0,0,8">
-                                                    <Grid ColumnDefinitions="*,Auto,8,Auto,12,Auto,8,Auto">
+                                                    <Grid ColumnDefinitions="*,Auto,8,Auto,12,Auto,8,Auto,8,Auto">
                                                         <TextBlock Text="{Binding Name}" FontWeight="SemiBold"
                                                                    TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
                                                         <TextBlock Grid.Column="1" Classes="caption" Text="{Binding RoleName}" />
                                                         <TextBlock Grid.Column="3" Classes="caption" Text="{Binding SizeText}" />
                                                         <Button Grid.Column="5" Classes="secondary compact" Content="Скачать"
                                                                 Click="OnDownloadVersionFileClick" />
-                                                        <Button Grid.Column="7" Classes="compact danger" Content="Удалить"
+                                                        <Button Grid.Column="7" Classes="secondary compact" Content="Просмотр"
+                                                                IsVisible="{Binding IsIfc}"
+                                                                Click="OnPreviewIfcFileClick" />
+                                                        <Button Grid.Column="9" Classes="compact danger" Content="Удалить"
                                                                 IsVisible="{Binding CanEdit}"
                                                                 Click="OnDeleteVersionFileClick" />
                                                     </Grid>
@@ -250,8 +264,12 @@
                             <Border Classes="card section-card">
                                 <StackPanel Spacing="8">
                                     <TextBlock Classes="h2" Text="Метаданные версии" />
-                                    <revitViews:RevitFamilyReadResultView DataContext="{Binding VersionFamilyMetadata}"
-                                                                         IsVisible="{Binding IsRevitVersion}" />
+                                    <Border IsVisible="{Binding IsRevitVersion}">
+                                        <revitViews:RevitFamilyReadResultView DataContext="{Binding VersionFamilyMetadata}" />
+                                    </Border>
+                                    <Border IsVisible="{Binding IsOtherVersion}">
+                                        <contentViews:OtherFileMetadataView DataContext="{Binding OtherFileMetadata}" />
+                                    </Border>
                                     <TextBlock Classes="caption" Text="{Binding VersionMetadataMessage}"
                                                TextWrapping="Wrap" />
                                     <TextBox Text="{Binding VersionMetadataJson}" IsReadOnly="True"

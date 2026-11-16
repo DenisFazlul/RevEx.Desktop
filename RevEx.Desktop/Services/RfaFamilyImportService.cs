@@ -128,13 +128,20 @@ public sealed class RfaFamilyImportService
 
             var file = new ContentVersionExecuteDto(Guid.NewGuid(), session.FileName, session.FilePath);
             var task = new ConnectorTask(Guid.NewGuid(), $"Чтение {session.FileName}", ConnectorCommand.ReadFiles);
-            var response = await _client.ExecuteAsync<ConnecterReadFileRequest, JObject>(
+            var response = await _client.ExecuteAsync<ConnecterReadFileRequest, ConnectorReadFilesResponse>(
                 connector, task, new ConnecterReadFileRequest([file]));
-            var results = response.GetValue("FamilyReadResults", StringComparison.OrdinalIgnoreCase) as JArray;
-            if (results is null || results.Count != 1 || results[0] is not JObject metadata)
+            if (response.Files.Count != 1)
             {
                 throw new InvalidOperationException("Коннектор не вернул метаданные выбранного семейства.");
             }
+
+            var result = response.Files.Single();
+            if (result.File.Id != file.Id || string.IsNullOrWhiteSpace(result.MetadataJson))
+            {
+                throw new InvalidOperationException("Коннектор вернул метаданные другого файла.");
+            }
+
+            var metadata = JObject.Parse(result.MetadataJson);
 
             // Accept older connectors, but persist the unambiguous Revit field name.
             var legacyCategory = metadata.Property("Category", StringComparison.OrdinalIgnoreCase);

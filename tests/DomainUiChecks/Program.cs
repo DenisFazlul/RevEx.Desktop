@@ -20,6 +20,8 @@ ConnectorChecks.Run();
 DesktopControlChecks.Run();
 RfaImportChecks.Run();
 VersionPublicationChecks.Run();
+FileVersionImportChecks.Run();
+OtherFileMetadataChecks.Run();
 DialogChecks.Run();
 RevitFamilyMetadataChecks.Run();
 var now=DateTimeOffset.Parse("2026-10-29T10:00:00+03:00");
@@ -33,6 +35,8 @@ Window[] windows = [new MainWindow(),
     new ContentHistoryDetailsWindow(history),
     new RfaFamilyImportWindow(),
     new RfaVersionImportWindow(),
+    new FileVersionImportWindow(),
+    new Window { Content = new OtherFileMetadataView() },
     new TagEditorWindow(),
     new TagGroupEditorWindow(),
     new DeleteConfirmationWindow("Confirm"),

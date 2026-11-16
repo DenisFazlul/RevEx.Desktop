@@ -17,7 +17,7 @@
                         <Grid ColumnDefinitions="*,12,*" RowDefinitions="Auto,8,Auto">
                             <StackPanel Spacing="4">
                                 <TextBlock Classes="label" Text="Название" />
-                                <TextBox Text="{Binding ContentName}" Watermark="Например, Дверь одностворчатая" />
+                                <TextBox Text="{Binding ContentName}" PlaceholderText="Например, Дверь одностворчатая" />
                             </StackPanel>
                             <StackPanel Grid.Column="2" Spacing="4">
                                 <TextBlock Classes="label" Text="Категория" />
@@ -29,7 +29,7 @@
                             <StackPanel Grid.Row="2" Grid.ColumnSpan="3" Spacing="4">
                                 <TextBlock Classes="label" Text="Описание" />
                                 <TextBox Text="{Binding Description}" AcceptsReturn="True" TextWrapping="Wrap"
-                                         MinHeight="64" Watermark="Для чего используется семейство" />
+                                         MinHeight="64" PlaceholderText="Для чего используется семейство" />
                             </StackPanel>
                         </Grid>
                         <StackPanel Spacing="8">
@@ -85,7 +85,7 @@
                     <Grid ColumnDefinitions="*,12,*">
                         <StackPanel Spacing="4">
                             <TextBlock Classes="label" Text="Название версии" />
-                            <TextBox Text="{Binding VersionName}" Watermark="Например, 1.0.0" />
+                            <TextBox Text="{Binding VersionName}" PlaceholderText="Например, 1.0.0" />
                         </StackPanel>
                         <StackPanel Grid.Column="2" Spacing="4">
                             <TextBlock Classes="label" Text="Версия Revit" />

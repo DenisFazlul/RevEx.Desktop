@@ -15,7 +15,7 @@
         <StackPanel Grid.Row="2" Spacing="4">
             <TextBlock Classes="label" Text="Название группы" />
             <TextBox x:Name="NameBox" Text="{Binding Text}" MaxLength="100"
-                     Watermark="Например, Платформа" />
+                     PlaceholderText="Например, Платформа" />
             <TextBlock Text="{Binding ValidationMessage}" Foreground="{StaticResource TextSecondaryBrush}" />
         </StackPanel>
         <Grid Grid.Row="4" ColumnDefinitions="Auto,*,Auto,10,Auto">

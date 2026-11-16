@@ -165,4 +165,32 @@ public partial class ContentDetailsViewModel
         }
     }
 
+    public async Task<byte[]?> DownloadVersionFileForPreviewAsync(ContentVersionFileItemViewModel file)
+    {
+        if (!file.IsIfc)
+        {
+            return null;
+        }
+
+        try
+        {
+            IsSavingVersionFile = true;
+            VersionErrorMessage = null;
+            VersionMessage = null;
+
+            var content = await _apiService.ContentFiles.DownloadAsync(file.Id);
+            return content;
+        }
+        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
+        {
+            VersionErrorMessage = $"Не удалось загрузить IFC для просмотра: {exception.Message}";
+            return null;
+        }
+        finally
+        {
+            IsSavingVersionFile = false;
+            NotifyVersionStateChanged();
+        }
+    }
+
 }

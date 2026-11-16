@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Avalonia.Controls;
 using Avalonia.Threading;
@@ -281,7 +282,7 @@ internal static class RfaImportChecks
         }
     }
 
-    private sealed class ReadExecutor : ConnectorCommandExecutor<ConnecterReadFileRequest, JObject>
+    private sealed class ReadExecutor : ConnectorCommandExecutor<ConnecterReadFileRequest, ConnectorReadFilesResponse>
     {
         public ReadExecutor()
             : base(
@@ -297,37 +298,36 @@ internal static class RfaImportChecks
             private set;
         }
 
-        protected override async Task<JObject> ExecuteAsync(ConnecterReadFileRequest request, IConnectorCommandContext context, CancellationToken token)
+        protected override async Task<ConnectorReadFilesResponse> ExecuteAsync(ConnecterReadFileRequest request, IConnectorCommandContext context, CancellationToken token)
         {
             ReadCount++;
             var file = request.Files.Single();
             Require(Path.GetExtension(file.Path).Equals(".rfa", StringComparison.OrdinalIgnoreCase),
                 "Only the RFA file may be sent to the reader.");
             await File.AppendAllTextAsync(file.Path, "Prepared by connector", token);
-            return new JObject
+            var metadata = new JObject
             {
-                ["FamilyReadResults"] = new JArray(new JObject
+                ["Name"] = file.Name,
+                ["Path"] = file.Path,
+                ["Description"] = "Mock description",
+                [UseLegacyCategory ? "Category" : "RevitCategory"] = "Двери",
+                ["ApplicationVersion"] = "2026",
+                ["Types"] = new JArray(new JObject
                 {
-                    ["Name"] = file.Name,
-                    ["Path"] = file.Path,
-                    ["Description"] = "Mock description",
-                    [UseLegacyCategory ? "Category" : "RevitCategory"] = "Двери",
-                    ["ApplicationVersion"] = "2026",
-                    ["Types"] = new JArray(new JObject
+                    ["Name"] = "Type A",
+                    ["Parameters"] = new JArray(new JObject
                     {
-                        ["Name"] = "Type A",
-                        ["Parameters"] = new JArray(new JObject
-                        {
-                            ["Name"] = "RevEx_Ширина",
-                            ["Value"] = "2.6246719160104988",
-                            ["StorageType"] = "Double",
-                            ["GroupId"] = "PG_GEOMETRY",
-                            ["GroupName"] = "Размеры"
-                        })
-                    }),
-                    ["future"] = new JObject { ["nested"] = new JArray("unknown", new JObject { ["value"] = 42 }) }
-                })
+                        ["Name"] = "RevEx_Ширина",
+                        ["Value"] = "2.6246719160104988",
+                        ["StorageType"] = "Double",
+                        ["GroupId"] = "PG_GEOMETRY",
+                        ["GroupName"] = "Размеры"
+                    })
+                }),
+                ["future"] = new JObject { ["nested"] = new JArray("unknown", new JObject { ["value"] = 42 }) }
             };
+            var result = new ConnectorFileMetadata(file, metadata.ToString(Formatting.None));
+            return new ConnectorReadFilesResponse([result]);
         }
     }
 

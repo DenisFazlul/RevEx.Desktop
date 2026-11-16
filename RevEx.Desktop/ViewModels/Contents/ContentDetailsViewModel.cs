@@ -227,6 +227,16 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         return new RfaFamilyImportViewModel(_apiService, _rfaImportService, content);
     }
 
+    public FileVersionImportViewModel CreateFileVersionImport()
+    {
+        if (_content is null)
+        {
+            throw new InvalidOperationException("Данные карточки ещё не загружены.");
+        }
+
+        return new FileVersionImportViewModel(_apiService, _content.Id);
+    }
+
     private async Task RefreshHistoryAsync()
     {
         try

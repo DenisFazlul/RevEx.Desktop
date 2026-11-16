@@ -8,7 +8,7 @@
             <Button Classes="secondary" VerticalAlignment="Center"
                     Content="Фильтры" Click="OnOpenCatalogSettingsClick" />
             <Grid Grid.Column="2" VerticalAlignment="Center">
-                <TextBox Classes="search" Watermark="Поиск по названию…"
+                <TextBox Classes="search" PlaceholderText="Поиск по названию…"
                          Text="{Binding ContentNameQuery}" />
                 <PathIcon Width="16" Height="16" Margin="8,0,0,0" HorizontalAlignment="Left"
                           Foreground="{StaticResource TextSecondaryBrush}" IsHitTestVisible="False"

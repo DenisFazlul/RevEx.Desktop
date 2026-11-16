@@ -15,7 +15,7 @@
         <StackPanel Grid.Row="2" Spacing="8">
             <TextBlock Classes="label" Text="Название тега" />
             <TextBox x:Name="NameBox" Text="{Binding Text}" MaxLength="100"
-                     Watermark="Например, Revit" />
+                     PlaceholderText="Например, Revit" />
             <TextBlock Classes="label" Text="Группа" Margin="0,5,0,0" />
             <ComboBox x:Name="GroupBox" ItemsSource="{Binding Groups}" SelectedItem="{Binding SelectedGroup}">
                 <ComboBox.ItemTemplate>

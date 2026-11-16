@@ -22,7 +22,7 @@
                     <HeaderedContentControl Grid.Row="2" Theme="{StaticResource FormFieldTheme}"
                                             Header="API-сервер">
                         <TextBox Text="{Binding ApiServerAddress}"
-                                 Watermark="http://localhost:8080/" />
+                                 PlaceholderText="http://localhost:8080/" />
                     </HeaderedContentControl>
 
                     <TextBlock Grid.Row="4" Classes="caption" TextWrapping="Wrap"

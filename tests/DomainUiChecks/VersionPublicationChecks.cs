@@ -69,6 +69,7 @@ internal static class VersionPublicationChecks
         var otherPlatformVersion = version with { Id = -100, Platform = Platform.AutoCad, Name = "AutoCAD check" };
         model.Versions.Add(otherPlatformVersion);
         model.SelectedVersionPlatform = model.VersionPlatforms.Single(option => option.Value == Platform.AutoCad);
+        Require(!model.CanAddVersion, "AutoCAD exposed a version form that is not implemented.");
         while (model.IsLoadingVersion)
         {
             await Task.Delay(1);
@@ -76,9 +77,11 @@ internal static class VersionPublicationChecks
         Require(model.FilteredVersions.Count == 1 && model.FilteredVersions[0].Id == -100
             && model.SelectedVersion?.Id == -100, "Platform selection did not filter and select the matching version.");
         model.SelectedVersionPlatform = model.VersionPlatforms.Single(option => option.Value == Platform.Other);
+        Require(model.CanAddVersion, "The generic file version form is unavailable for Other.");
         Require(model.HasNoPlatformVersions && model.SelectedVersion is null && model.VersionFiles.Count == 0
             && !model.VersionFamilyMetadata.HasFamily, "An empty platform retained stale version details.");
         model.SelectedVersionPlatform = model.VersionPlatforms.Single(option => option.Value == Platform.Revit);
+        Require(model.CanAddVersion, "The RFA version form is unavailable for Revit.");
         while (model.IsLoadingVersion)
         {
             await Task.Delay(1);

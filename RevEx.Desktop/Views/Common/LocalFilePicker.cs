@@ -10,6 +10,14 @@ namespace RevEx.Desktop.Views.Common;
 /// <summary>Выбор одного или нескольких локальных файлов. Отмена возвращает null или пустой список.</summary>
 public static class LocalFilePicker
 {
+    public static FilePickerFileType AllFiles
+    {
+        get;
+    } = new("Все файлы")
+    {
+        Patterns = ["*.*"]
+    };
+
     public static FilePickerFileType RevitFamily
     {
         get;

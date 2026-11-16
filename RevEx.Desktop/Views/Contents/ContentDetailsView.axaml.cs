@@ -12,6 +12,8 @@ using RevEx.Desktop.Views.Categories;
 using RevEx.Desktop.Views.Common;
 using RevEx.Desktop.Views.Connectors;
 using RevEx.Desktop.Views.Tags;
+using RevEx.Desktop.IfcViewer;
+using RevEx.Domain.Entities;
 
 namespace RevEx.Desktop.Views.Contents;
 
@@ -124,15 +126,29 @@ public partial class ContentDetailsView : UserControl
         }
     }
 
-    private async void OnAddRfaVersionClick(object? sender, Avalonia.Interactivity.RoutedEventArgs eventArgs)
+    private async void OnAddVersionClick(object? sender, Avalonia.Interactivity.RoutedEventArgs eventArgs)
     {
         if (!this.TryGetContext<ContentDetailsViewModel>(out var owner, out var viewModel))
         {
             return;
         }
 
-        var window = new RfaVersionImportWindow(viewModel.CreateRfaVersionImport());
-        var version = await window.ShowDialog<ContentVersionDto?>(owner);
+        ContentVersionDto? version;
+        if (viewModel.SelectedVersionPlatform?.Value == Platform.Revit)
+        {
+            var window = new RfaVersionImportWindow(viewModel.CreateRfaVersionImport());
+            version = await window.ShowDialog<ContentVersionDto?>(owner);
+        }
+        else if (viewModel.SelectedVersionPlatform?.Value == Platform.Other)
+        {
+            var window = new FileVersionImportWindow(viewModel.CreateFileVersionImport());
+            version = await window.ShowDialog<ContentVersionDto?>(owner);
+        }
+        else
+        {
+            return;
+        }
+
         if (version is not null)
         {
             viewModel.AddOrUpdateVersion(version);
@@ -188,6 +204,27 @@ public partial class ContentDetailsView : UserControl
         {
             await viewModel.DownloadVersionFileAsync(file, path);
         }
+    }
+
+    private async void OnPreviewIfcFileClick(
+        object? sender,
+        Avalonia.Interactivity.RoutedEventArgs eventArgs)
+    {
+        if (sender is not Control { DataContext: ContentVersionFileItemViewModel file } ||
+            !file.IsIfc ||
+            !this.TryGetContext<ContentDetailsViewModel>(out var owner, out var viewModel))
+        {
+            return;
+        }
+
+        var content = await viewModel.DownloadVersionFileForPreviewAsync(file);
+        if (content is null)
+        {
+            return;
+        }
+
+        var viewer = new IfcViewerWindow(file.Name, content);
+        viewer.Show(owner);
     }
 
     private async void OnLoadVersionIntoProjectClick(
