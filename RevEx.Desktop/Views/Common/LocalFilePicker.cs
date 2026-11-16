@@ -72,4 +72,24 @@ public static class LocalFilePicker
         var path = file?.TryGetLocalPath();
         return path is null || file is null ? null : new SelectedLocalFile(path, file.Name);
     }
+
+    public static async Task<string?> SaveAsync(
+        Control view,
+        string title,
+        string suggestedFileName)
+    {
+        var topLevel = TopLevel.GetTopLevel(view);
+        if (topLevel?.StorageProvider is null)
+        {
+            return null;
+        }
+
+        var file = await topLevel.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+        {
+            Title = title,
+            SuggestedFileName = suggestedFileName
+        });
+
+        return file?.TryGetLocalPath();
+    }
 }

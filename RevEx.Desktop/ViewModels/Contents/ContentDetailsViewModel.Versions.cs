@@ -142,4 +142,27 @@ public partial class ContentDetailsViewModel
         }
     }
 
+    public async Task DownloadVersionFileAsync(ContentVersionFileItemViewModel file, string path)
+    {
+        try
+        {
+            IsSavingVersionFile = true;
+            VersionErrorMessage = null;
+            VersionMessage = null;
+            var bytes = await _apiService.ContentFiles.DownloadAsync(file.Id);
+            await File.WriteAllBytesAsync(path, bytes);
+            VersionMessage = $"Файл «{file.Name}» сохранён.";
+        }
+        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException or
+                                             IOException or UnauthorizedAccessException)
+        {
+            VersionErrorMessage = $"Не удалось скачать файл: {exception.Message}";
+        }
+        finally
+        {
+            IsSavingVersionFile = false;
+            NotifyVersionStateChanged();
+        }
+    }
+
 }

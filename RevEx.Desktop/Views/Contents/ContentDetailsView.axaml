@@ -6,19 +6,8 @@
              xmlns:vm="using:RevEx.Desktop.ViewModels.Contents"
              x:Class="RevEx.Desktop.Views.Contents.ContentDetailsView"
              x:DataType="vm:ContentDetailsViewModel">
-    <Grid Margin="12" RowDefinitions="Auto,Auto,*" HorizontalAlignment="Stretch">
-        <HeaderedContentControl Theme="{StaticResource EyebrowHeaderTheme}"
-                                Header="{Binding Title}" Content="Карточка материала из базы знаний" />
-
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8">
-            <ToggleButton IsChecked="{Binding IsSubscribed, Mode=OneWay}"
-                          Command="{Binding ToggleSubscriptionCommand}" IsEnabled="{Binding !IsChangingSubscription}"
-                          ToolTip.Tip="{Binding SubscriptionTip}">
-                <PathIcon Width="20" Height="14" Data="M0,7 Q10,-5 20,7 Q10,19 0,7 Z M13,7 A3,3 0 1 1 7,7 A3,3 0 1 1 13,7" />
-            </ToggleButton>
-            <TextBlock Text="{Binding SubscriptionMessage}" VerticalAlignment="Center" />
-        </StackPanel>
-        <TabControl Grid.Row="2">
+    <Grid Margin="12" HorizontalAlignment="Stretch">
+        <TabControl>
             <TabItem Header="Основное">
                 <ScrollViewer HorizontalScrollBarVisibility="Disabled">
                     <Grid Margin="0,16,0,0" ColumnDefinitions="2*,12,3*">
@@ -124,6 +113,16 @@
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
                                     <TextBlock Text="{Binding TagMessage}" Classes="status-message" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <ToggleButton IsChecked="{Binding IsSubscribed, Mode=OneWay}"
+                                                      Command="{Binding ToggleSubscriptionCommand}"
+                                                      IsEnabled="{Binding !IsChangingSubscription}"
+                                                      ToolTip.Tip="{Binding SubscriptionTip}">
+                                            <PathIcon Width="20" Height="14"
+                                                      Data="M0,7 Q10,-5 20,7 Q10,19 0,7 Z M13,7 A3,3 0 1 1 7,7 A3,3 0 1 1 13,7" />
+                                        </ToggleButton>
+                                        <TextBlock Text="{Binding SubscriptionMessage}" VerticalAlignment="Center" />
+                                    </StackPanel>
                                 </StackPanel>
                             </Border>
                             <TextBlock Text="{Binding ErrorMessage}" TextWrapping="Wrap"
@@ -216,18 +215,11 @@
 
                             <Border Classes="card section-card">
                                 <StackPanel Spacing="8">
-                                    <Grid ColumnDefinitions="*,Auto,12,180,12,Auto">
+                                    <Grid ColumnDefinitions="*,Auto">
                                         <TextBlock Classes="h2" Text="Файлы версии" VerticalAlignment="Center" />
                                         <Button Grid.Column="1" Classes="primary" Content="Загрузить в проект"
                                                 Click="OnLoadVersionIntoProjectClick"
                                                 IsEnabled="{Binding CanLoadVersionIntoProject}" />
-                                        <ComboBox Grid.Column="3" ItemsSource="{Binding FileRoles}"
-                                                  IsVisible="{Binding CanEdit}"
-                                                  SelectedItem="{Binding SelectedFileRole}"
-                                                  DisplayMemberBinding="{Binding Name}" />
-                                        <Button Grid.Column="5" Classes="secondary" Content="Добавить файл"
-                                                IsVisible="{Binding CanEdit}"
-                                                Click="OnAddVersionFileClick" IsEnabled="{Binding !IsVersionBusy}" />
                                     </Grid>
                                     <ProgressBar IsVisible="{Binding IsVersionBusy}" IsIndeterminate="True" />
                                     <TextBlock IsVisible="{Binding HasNoVersionFiles}" Classes="caption"
@@ -238,12 +230,14 @@
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate x:DataType="vm:ContentVersionFileItemViewModel">
                                                 <Border Classes="value-box" Margin="0,0,0,8">
-                                                    <Grid ColumnDefinitions="*,Auto,8,Auto,10,Auto">
+                                                    <Grid ColumnDefinitions="*,Auto,8,Auto,12,Auto,8,Auto">
                                                         <TextBlock Text="{Binding Name}" FontWeight="SemiBold"
                                                                    TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
                                                         <TextBlock Grid.Column="1" Classes="caption" Text="{Binding RoleName}" />
                                                         <TextBlock Grid.Column="3" Classes="caption" Text="{Binding SizeText}" />
-                                                        <Button Grid.Column="5" Classes="compact danger" Content="Удалить"
+                                                        <Button Grid.Column="5" Classes="secondary compact" Content="Скачать"
+                                                                Click="OnDownloadVersionFileClick" />
+                                                        <Button Grid.Column="7" Classes="compact danger" Content="Удалить"
                                                                 IsVisible="{Binding CanEdit}"
                                                                 Click="OnDeleteVersionFileClick" />
                                                     </Grid>
@@ -278,7 +272,7 @@
                                    Text="История изменений пока пуста."
                                    Foreground="{StaticResource TextSecondaryBrush}" />
                         <Grid Grid.Row="2" IsVisible="{Binding HasHistory}" RowDefinitions="Auto,*">
-                            <Border Classes="value-box" Padding="12">
+                            <Border Classes="value-box" Padding="8,4">
                                 <Grid ColumnDefinitions="180,*,180,150">
                                     <TextBlock FontWeight="SemiBold" Text="Время" />
                                     <TextBlock Grid.Column="1" FontWeight="SemiBold" Text="Описание" />
@@ -290,13 +284,14 @@
                                 <ItemsControl ItemsSource="{Binding History}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate x:DataType="history:ContentHistoryEventViewModel">
-                                            <Border Classes="value-box" Margin="0,8,0,0" Padding="12">
+                                            <Border Classes="value-box" Margin="0,4,0,0" Padding="8,4">
                                                 <Grid ColumnDefinitions="180,*,180,150">
-                                                    <TextBlock Text="{Binding OccurredAtText}" />
+                                                    <TextBlock Text="{Binding OccurredAtText}" VerticalAlignment="Center" />
                                                     <TextBlock Grid.Column="1" Text="{Binding Description}"
-                                                               TextTrimming="CharacterEllipsis" MaxLines="2" Margin="12,0" />
+                                                               TextTrimming="CharacterEllipsis" MaxLines="2" Margin="8,0"
+                                                               VerticalAlignment="Center" />
                                                     <TextBlock Grid.Column="2" Text="{Binding Author}"
-                                                               TextTrimming="CharacterEllipsis" />
+                                                               TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
                                                     <Button Grid.Column="3" Classes="secondary compact"
                                                             Content="Показать детали"
                                                             Click="OnShowHistoryDetailsClick" />

@@ -124,20 +124,6 @@ public partial class ContentDetailsView : UserControl
         }
     }
 
-    private async void OnAddVersionFileClick(object? sender, Avalonia.Interactivity.RoutedEventArgs eventArgs)
-    {
-        if (DataContext is not ContentDetailsViewModel viewModel)
-        {
-            return;
-        }
-
-        var file = await LocalFilePicker.OpenAsync(this, "Выберите файл версии", FilePickerFileTypes.All);
-        if (file is not null)
-        {
-            await viewModel.AddVersionFileAsync(file.Path, file.Name);
-        }
-    }
-
     private async void OnAddRfaVersionClick(object? sender, Avalonia.Interactivity.RoutedEventArgs eventArgs)
     {
         if (!this.TryGetContext<ContentDetailsViewModel>(out var owner, out var viewModel))
@@ -184,6 +170,23 @@ public partial class ContentDetailsView : UserControl
         if (await confirmation.ShowDialog<bool>(owner))
         {
             await viewModel.DeleteVersionFileAsync(file);
+        }
+    }
+
+    private async void OnDownloadVersionFileClick(
+        object? sender,
+        Avalonia.Interactivity.RoutedEventArgs eventArgs)
+    {
+        if (sender is not Control { DataContext: ContentVersionFileItemViewModel file } ||
+            DataContext is not ContentDetailsViewModel viewModel)
+        {
+            return;
+        }
+
+        var path = await LocalFilePicker.SaveAsync(this, "Сохранить файл версии", file.Name);
+        if (path is not null)
+        {
+            await viewModel.DownloadVersionFileAsync(file, path);
         }
     }
 
