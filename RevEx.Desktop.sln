@@ -4,13 +4,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevEx.Desktop", "RevEx.Desk
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevEx.Desktop.Core", "RevEx.Desktop.Core\RevEx.Desktop.Core.csproj", "{784CC236-4167-40D6-BFBD-16D533AFFDC1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevEx.Connector.Client", "../RevEx.Connector.Client/RevEx.Connector.Client/RevEx.Connector.Client.csproj", "{EB7D56CC-CB3D-43A7-9D33-EF3B71EC2999}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevEx.Connector.Client", "../RevEx.Connecter/RevEx.Connector.Client/RevEx.Connector.Client.csproj", "{EB7D56CC-CB3D-43A7-9D33-EF3B71EC2999}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevEx.LoadingQueue", "../RevEx.Connector.Client/RevEx.LoadingQueue/RevEx.LoadingQueue.csproj", "{972723A4-CA24-4166-A884-8CE1E37A96DC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevEx.LoadingQueue", "../RevEx.Connecter/RevEx.LoadingQueue/RevEx.LoadingQueue.csproj", "{972723A4-CA24-4166-A884-8CE1E37A96DC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevEx.Desktop.Updates", "RevEx.Desktop.Updates\RevEx.Desktop.Updates.csproj", "{1AD042BA-B7E4-4D1A-9487-3D81F4A046AB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevEx.Connector.Contracts", "../RevEx.Connector.Client/RevEx.Connector.Contracts/RevEx.Connector.Contracts.csproj", "{9FCC8A05-FDE9-41F4-9D1E-84956129D54D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevEx.Connector.Contracts", "../RevEx.Connecter/RevEx.Connector.Contracts/RevEx.Connector.Contracts.csproj", "{9FCC8A05-FDE9-41F4-9D1E-84956129D54D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevEx.Configuration", "..\RevEx.Connecter\RevEx.Configuration\RevEx.Configuration.csproj", "{D96244DA-11FD-4185-ABDB-5D4086106B3C}"
 EndProject

@@ -6,10 +6,10 @@
 | `RevEx.Desktop.Core` | DTO каталога, интерфейсы, фасад RevExApiService, предметные репозитории, RevExApiTransport, mock API, роли и Authentication. |
 | `RevEx.Desktop.Updates` | Стартовая проверка политики backend, окно обновления, пакеты и установка через Velopack. |
 | `RevEx.Configuration` | Пути настроек и загрузок, хранение user-settings.json, адрес регистрации. |
-| `RevEx.Connector.Contracts` | Интерфейс клиента из репозитория RevEx.Connector.Client; DTO находятся в Domain. |
+| `RevEx.Connector.Contracts` | Интерфейс клиента из репозитория RevEx.Connecter; DTO находятся в Domain. |
 | `RevEx.Connector.Client` | Внешний клиент: TCP-команды, реестр коннекторов и обнаружение. |
 | `RevEx.Connector.Protocol` | Общий TCP-протокол из RevEx.Connecter, без серверных исполнителей. |
-| `RevEx.LoadingQueue` | Клиентская очередь задач из RevEx.Connector.Client. |
+| `RevEx.LoadingQueue` | Клиентская очередь задач из RevEx.Connecter. |
 
 Desktop и реализация клиента нацелены на net8.0. Общий протокол поддерживает
 net472 и netstandard2.0 для совместимости с плагином Revit 2020.
@@ -53,8 +53,8 @@ WindowsAuthenticationService не выдаёт OIDC-токен и содержи
 Работа локального стенда проверялась только с Keycloak.
 
 
-Клиент, его интерфейс и очередь вынесены в соседний репозиторий RevEx.Connector.Client.
+Клиент, его интерфейс и очередь находятся в соседнем репозитории RevEx.Connecter.
 Серверная библиотека RevEx.Connector, её Host и Mock находятся в RevEx.Connecter;
 Desktop не ссылается на серверную библиотеку и не зависит от проектов Revit.
-Репозитории RevEx.Desktop, RevEx.Connector.Client, RevEx.Connecter и RevEx.Domain
+Репозитории RevEx.Desktop, RevEx.Connecter и RevEx.Domain
 должны находиться рядом. Ссылки на внешние проекты заданы в csproj и RevEx.Desktop.sln.

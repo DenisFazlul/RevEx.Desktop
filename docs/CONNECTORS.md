@@ -29,7 +29,7 @@
 dotnet run --project tests/DomainUiChecks -c Release
 ```
 
-Для ручной сквозной проверки запустите `RevEx.RevitPlugin.TestHub`, возьмите порт
+Для ручной сквозной проверки запустите `RevEx.Connector.TestHub`, возьмите порт
 из его TCP-адреса и выполните из RevEx.Desktop:
 
 ```powershell
@@ -57,8 +57,8 @@ dotnet run --project tests/DomainUiChecks -c Release
 
 Приёмник команд находится в RevEx.Connecter/RevEx.Connector. Общий TCP-протокол и
 регистрация в каталоге находятся в RevEx.Connecter/RevEx.Connector.Protocol
-(net472 и netstandard2.0). Клиент и очередь задач находятся в отдельном репозитории
-RevEx.Connector.Client. Desktop подключает клиент, Revit — приёмник команд.
+(net472 и netstandard2.0). Клиент и очередь задач находятся в RevEx.Connecter.
+Desktop подключает клиент, Revit — приёмник команд.
 
 ## Задача
 
@@ -168,22 +168,22 @@ Name содержит wire-имя команды либо имя события;
 Id запроса — GUID задачи. Ответ содержит тот же Id. Kind = task означает прикладную
 задачу с жизненным циклом; Kind = request — служебный запрос без записи в историю.
 
-Команды: `Health = 1` (health), `GetTaskStatuses = 2` (statuses),
-`LoadContentVersion = 3` (load). Информационные уведомления идут событием `taskStatus`
+Команды `Health`, `GetTaskStatuses` и `LoadContentVersion` задаются строковыми именами.
+Информационные уведомления идут событием `taskStatus`
 с ConnectorTaskUpdate. Payload загрузки содержит Files с локальными путями.
 Результаты и статусы передаются по TCP-соединению.
 
 ## TestHub и проверки
 
-TestHub создаёт один коннектор и регистрирует один MockLoadExecutor без аргументов.
+TestHub создаёт один коннектор и регистрирует проверочные исполнители команд.
 Он ожидает команды от Desktop и завершается по Enter. Mock имитирует загрузку и
 сообщает текст через контекст; Revit не требуется.
 
-Из корня RevEx.RevitPlugin:
+Из корня RevEx.Connecter:
 
 ```powershell
 dotnet build tests/DomainIntegrationHost/DomainIntegrationHost.csproj
-dotnet run --project ../RevEx.Connector.Client/tests/DomainIntegrationChecks/DomainIntegrationChecks.csproj -- tests/DomainIntegrationHost/bin/Debug/net472/DomainIntegrationHost.exe
+dotnet run --project tests/DomainIntegrationChecks/DomainIntegrationChecks.csproj -- tests/DomainIntegrationHost/bin/Debug/net472/DomainIntegrationHost.exe
 ```
 
 Проверяются три состояния, произвольные сообщения, независимость Id задачи от файлов,

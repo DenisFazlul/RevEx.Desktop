@@ -17,9 +17,10 @@ Keycloak — `http://localhost:8081/realms/revex`.
 
 
 Клиент коннектора, его интерфейс и очередь задач находятся в соседнем репозитории
-`RevEx.Connector.Client`. Приёмник команд и общий TCP-протокол находятся в
+`RevEx.Connecter` (проекты `RevEx.Connector.Client`, `RevEx.Connector.Contracts`
+и `RevEx.LoadingQueue`). Приёмник команд и общий TCP-протокол находятся в
 [RevEx.Connecter](https://github.com/DenisFazlul/RevEx.Connecter).
-Для сборки расположите `RevEx.Desktop`, `RevEx.Connector.Client`, `RevEx.Connecter`
+Для сборки расположите `RevEx.Desktop`, `RevEx.Connecter`
 и `RevEx.Domain` рядом. Desktop подключает клиент через ProjectReference;
 внешние проекты клиента, очереди, контрактов и протокола добавлены в RevEx.Desktop.sln.
 
