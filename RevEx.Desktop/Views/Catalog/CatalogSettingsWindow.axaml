@@ -12,19 +12,16 @@
         MinWidth="560" MinHeight="340"
         WindowStartupLocation="CenterOwner">
     <Window.Styles>
-        <Style Selector="Expander.selected-tag-group">
-            <Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
-            <Setter Property="BorderThickness" Value="1" />
+        <Style Selector="Expander.tag-group">
+            <Setter Property="Background" Value="{DynamicResource CanvasBrush}" />
         </Style>
-        <Style Selector="TextBlock.selected-tag-group-name">
-            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
-            <Setter Property="FontWeight" Value="SemiBold" />
+        <Style Selector="Expander.tag-group /template/ ToggleButton">
+            <Setter Property="Background" Value="{DynamicResource CanvasBrush}" />
         </Style>
     </Window.Styles>
     <Window.Resources>
         <DataTemplate x:Key="FilterItem" x:DataType="models:FilterItemViewModel">
-            <CheckBox MinHeight="32" Padding="4,0" IsChecked="{Binding IsSelected}">
+            <CheckBox IsChecked="{Binding IsSelected}">
                 <StackPanel Orientation="Horizontal" Spacing="6">
                     <Ellipse Width="10" Height="10" Fill="{Binding ColorBrush}"
                              IsVisible="{Binding ColorBrush, Converter={x:Static ObjectConverters.IsNotNull}}" />
@@ -64,7 +61,6 @@
                 <Grid RowDefinitions="Auto,8,*">
                     <StackPanel Spacing="4">
                         <TextBlock FontWeight="SemiBold" Text="Теги" />
-                        <TextBlock Classes="caption" Text="Материал должен содержать все выбранные теги" TextWrapping="Wrap" />
                         <TextBox PlaceholderText="Поиск по тегам"
                                  AutomationProperties.Name="Поиск по тегам"
                                  Text="{Binding TagSearchText, UpdateSourceTrigger=PropertyChanged}" />
@@ -73,8 +69,7 @@
                         <ItemsControl ItemsSource="{Binding VisibleTagGroups}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="vm:CatalogFilterGroupViewModel">
-                                    <Expander Padding="8,4" Margin="0,0,0,4"
-                                              Classes.selected-tag-group="{Binding HasSelection}"
+                                    <Expander Classes="tag-group" Padding="8,4" Margin="0,0,0,4"
                                               IsExpanded="{Binding IsSearchActive, Mode=OneWay}"
                                               HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                                         <Expander.Header>
@@ -86,7 +81,6 @@
                                                         Content="Снять все" Command="{Binding ClearCommand}" />
                                                 </StackPanel>
                                                 <TextBlock Margin="0,0,4,0" VerticalAlignment="Center"
-                                                           Classes.selected-tag-group-name="{Binding HasSelection}"
                                                            TextWrapping="Wrap" Text="{Binding DisplayName}" />
                                             </DockPanel>
                                         </Expander.Header>

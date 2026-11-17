@@ -37,6 +37,18 @@ public partial class CatalogTabViewModel : WorkspaceTabViewModel
     public ObservableCollection<TagFilterItemViewModel> Tags { get; } = [];
     public ObservableCollection<ContentItemViewModel> Contents { get; } = [];
 
+    public string FilterSummary
+    {
+        get
+        {
+            var categories = Categories.Where(item => item.IsSelected).Select(item => item.Name).ToArray();
+            var tags = Tags.Where(item => item.IsSelected).Select(item => item.Name).ToArray();
+            var categoryText = categories.Length > 0 ? string.Join(", ", categories) : "Все категории";
+            var tagText = tags.Length > 0 ? string.Join(", ", tags) : "Не выбраны";
+            return $"Категории\n{categoryText}\n\nТеги\n{tagText}";
+        }
+    }
+
     public CatalogTabViewModel(IRevExApiService revExApiService, Action<ContentItemViewModel> openContent)
         : base(
             "Каталог",
@@ -144,6 +156,7 @@ public partial class CatalogTabViewModel : WorkspaceTabViewModel
 
     private void ScheduleContentLoad()
     {
+        OnPropertyChanged(nameof(FilterSummary));
         if (_disposed || _isApplyingFilters)
         {
             return;

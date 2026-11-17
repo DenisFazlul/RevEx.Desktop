@@ -4,11 +4,8 @@
              xmlns:vm="using:RevEx.Desktop.ViewModels.Categories"
              x:Class="RevEx.Desktop.Views.Categories.CategoryAdminTabView"
              x:DataType="vm:CategoryAdminTabViewModel">
-    <Grid Margin="12" RowDefinitions="Auto,12,*,Auto">
+    <Grid Margin="0,16,0,0" RowDefinitions="Auto,12,*,Auto">
         <Grid ColumnDefinitions="*,Auto">
-            <HeaderedContentControl Theme="{StaticResource PageHeaderTheme}"
-                                    Header="Категории"
-                                    Content="Управление категориями контента" />
             <Button Grid.Column="1" Classes="primary" Content="Создать категорию"
                     Click="OnCreateClick" VerticalAlignment="Center"
                     IsEnabled="{Binding !IsSaving}" />

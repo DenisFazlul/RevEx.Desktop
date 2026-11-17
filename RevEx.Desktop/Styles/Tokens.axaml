@@ -21,6 +21,9 @@
                     <SolidColorBrush x:Key="AccentBrush" Color="#171717" />
                     <SolidColorBrush x:Key="AccentHoverBrush" Color="#303030" />
                     <SolidColorBrush x:Key="AccentSoftBrush" Color="#F1F1F1" />
+                    <SolidColorBrush x:Key="CheckBoxSelectedBackgroundBrush" Color="#E8E8E8" />
+                    <SolidColorBrush x:Key="CheckBoxSelectedHoverBackgroundBrush" Color="#DCDCDC" />
+                    <SolidColorBrush x:Key="CheckBoxSelectedForegroundBrush" Color="#171717" />
                     <SolidColorBrush x:Key="DangerBrush" Color="#B42318" />
                     <SolidColorBrush x:Key="DangerSoftBrush" Color="#FFF0EF" />
                     <SolidColorBrush x:Key="SuccessBrush" Color="#147647" />
@@ -42,6 +45,9 @@
                     <SolidColorBrush x:Key="AccentBrush" Color="#75451D" />
                     <SolidColorBrush x:Key="AccentHoverBrush" Color="#573215" />
                     <SolidColorBrush x:Key="AccentSoftBrush" Color="#FFF0D9" />
+                    <SolidColorBrush x:Key="CheckBoxSelectedBackgroundBrush" Color="#FFF0D9" />
+                    <SolidColorBrush x:Key="CheckBoxSelectedHoverBackgroundBrush" Color="#FFE2B3" />
+                    <SolidColorBrush x:Key="CheckBoxSelectedForegroundBrush" Color="#75451D" />
                     <SolidColorBrush x:Key="DangerBrush" Color="#C13D3D" />
                     <SolidColorBrush x:Key="DangerSoftBrush" Color="#FFF1F1" />
                     <SolidColorBrush x:Key="SuccessBrush" Color="#1F8A5B" />
@@ -63,6 +69,9 @@
                     <SolidColorBrush x:Key="AccentBrush" Color="#ECECEC" />
                     <SolidColorBrush x:Key="AccentHoverBrush" Color="#D8D8D8" />
                     <SolidColorBrush x:Key="AccentSoftBrush" Color="#383838" />
+                    <SolidColorBrush x:Key="CheckBoxSelectedBackgroundBrush" Color="#424242" />
+                    <SolidColorBrush x:Key="CheckBoxSelectedHoverBackgroundBrush" Color="#505050" />
+                    <SolidColorBrush x:Key="CheckBoxSelectedForegroundBrush" Color="#FAFAFA" />
                     <SolidColorBrush x:Key="DangerBrush" Color="#FF9898" />
                     <SolidColorBrush x:Key="DangerSoftBrush" Color="#46292B" />
                     <SolidColorBrush x:Key="SuccessBrush" Color="#79D4A1" />
@@ -84,6 +93,9 @@
                     <SolidColorBrush x:Key="AccentBrush" Color="#FFAB35" />
                     <SolidColorBrush x:Key="AccentHoverBrush" Color="#FFC169" />
                     <SolidColorBrush x:Key="AccentSoftBrush" Color="#403124" />
+                    <SolidColorBrush x:Key="CheckBoxSelectedBackgroundBrush" Color="#403124" />
+                    <SolidColorBrush x:Key="CheckBoxSelectedHoverBackgroundBrush" Color="#57402A" />
+                    <SolidColorBrush x:Key="CheckBoxSelectedForegroundBrush" Color="#FFAB35" />
                     <SolidColorBrush x:Key="DangerBrush" Color="#FF9890" />
                     <SolidColorBrush x:Key="DangerSoftBrush" Color="#472B28" />
                     <SolidColorBrush x:Key="SuccessBrush" Color="#7AD4A1" />

@@ -5,11 +5,8 @@
              x:Class="RevEx.Desktop.Views.Tags.TagAdminTabView"
              x:DataType="vm:TagAdminTabViewModel"
              HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
-    <Grid Margin="12" RowDefinitions="Auto,12,*,Auto">
+    <Grid Margin="0,16,0,0" RowDefinitions="Auto,12,*,Auto">
         <Grid ColumnDefinitions="*,Auto,10,Auto">
-            <HeaderedContentControl Theme="{StaticResource PageHeaderTheme}"
-                                    Header="Группы тегов"
-                                    Content="Группы и относящиеся к ним теги" />
             <Button Grid.Column="1" Content="+  Создать тег" Click="OnCreateTagClick"
                     IsEnabled="{Binding HasGroups}" VerticalAlignment="Center" />
             <Button Grid.Column="3" Classes="primary" Content="+  Создать группу"

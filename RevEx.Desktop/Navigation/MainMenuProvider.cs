@@ -41,8 +41,7 @@ public sealed class MainMenuProvider : IMainMenuProvider
         }
         if (_authenticationService.IsInRole(RevExRoles.Administrator))
         {
-            items.Add(WorkspaceTabDescriptor.Create<CategoryAdminTabViewModel>("Категории", "▦"));
-            items.Add(WorkspaceTabDescriptor.Create<TagAdminTabViewModel>("Группы тегов", "#"));
+            items.Add(WorkspaceTabDescriptor.Create<ClassificationAdminTabViewModel>("Категории и теги", "▦"));
         }
         items.Add(WorkspaceTabDescriptor.Create<SettingsTabViewModel>("Настройки", "⚙"));
 

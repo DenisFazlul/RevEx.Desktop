@@ -6,9 +6,13 @@
              xmlns:contentVm="using:RevEx.Desktop.ViewModels.Contents"
              x:Class="RevEx.Desktop.Views.Catalog.CatalogTabView" x:DataType="vm:CatalogTabViewModel">
     <Grid Margin="12" RowDefinitions="Auto,12,*">
-        <Grid ColumnDefinitions="Auto,8,240">
+        <Grid ColumnDefinitions="Auto,8,*">
             <Button Classes="secondary" VerticalAlignment="Center"
-                    Content="Фильтры" Click="OnOpenCatalogSettingsClick" />
+                    Content="Фильтры" Click="OnOpenCatalogSettingsClick">
+                <ToolTip.Tip>
+                    <TextBlock Text="{Binding FilterSummary}" TextWrapping="Wrap" MaxWidth="480" />
+                </ToolTip.Tip>
+            </Button>
             <Grid Grid.Column="2" VerticalAlignment="Center">
                 <TextBox Classes="search" PlaceholderText="Поиск по названию…"
                          Text="{Binding ContentNameQuery}" />
