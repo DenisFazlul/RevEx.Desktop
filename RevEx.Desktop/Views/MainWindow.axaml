@@ -30,13 +30,13 @@
 
     <Grid x:Name="WorkspaceGrid">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="264" />
+            <ColumnDefinition Width="232" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
         <Border x:Name="WorkspaceSidebar" Classes="workspace-sidebar">
-            <Grid RowDefinitions="58,Auto,12,*,Auto">
-                <Grid Margin="14,0" ColumnDefinitions="Auto,*,Auto">
+            <Grid RowDefinitions="48,Auto,8,*,Auto">
+                <Grid Margin="12,0" ColumnDefinitions="Auto,*,Auto">
                     <Border Classes="brand-mark" VerticalAlignment="Center">
                         <TextBlock Text="R" />
                     </Border>
@@ -51,12 +51,12 @@
                     </Button>
                 </Grid>
 
-                <TextBlock Grid.Row="1" Margin="16,10,16,0"
+                <TextBlock Grid.Row="1" Margin="16,4,16,0"
                            Classes="section-label" Text="ОСНОВНОЕ" />
 
                 <menuViews:MainMenuView Grid.Row="3" DataContext="{Binding MainMenu}" />
 
-                <Border Grid.Row="4" Margin="12" Classes="sidebar-footer">
+                <Border Grid.Row="4" Margin="8" Classes="sidebar-footer">
                     <Grid ColumnDefinitions="30,*,Auto">
                         <Border Width="30" Height="30" CornerRadius="9"
                                 Background="{StaticResource AccentBrush}" VerticalAlignment="Center">
@@ -75,7 +75,7 @@
             </Grid>
         </Border>
 
-        <Grid Grid.Column="1" RowDefinitions="52,*">
+        <Grid Grid.Column="1" RowDefinitions="40,*">
             <Border Classes="workspace-header">
                 <Grid Margin="10,0" ColumnDefinitions="Auto,*,Auto">
                     <Button x:Name="ShowSidebarButton" Classes="sidebar-toggle" IsVisible="False"

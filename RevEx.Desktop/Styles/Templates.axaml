@@ -6,8 +6,8 @@
             <Setter Property="Template">
                 <ControlTemplate>
                     <StackPanel Spacing="4">
-                        <TextBlock Classes="h1" Text="{TemplateBinding Header}" />
-                        <TextBlock Classes="caption" Text="{TemplateBinding Content}" />
+                        <TextBlock Classes="h1" Text="{TemplateBinding Header}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Classes="caption" Text="{TemplateBinding Content}" TextTrimming="CharacterEllipsis" />
                     </StackPanel>
                 </ControlTemplate>
             </Setter>
@@ -28,7 +28,7 @@
             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
             <Setter Property="Template">
                 <ControlTemplate>
-                    <StackPanel Spacing="7">
+                    <StackPanel Spacing="4">
                         <TextBlock Classes="label" Text="{TemplateBinding Header}" />
                         <ContentPresenter Content="{TemplateBinding Content}"
                                           HorizontalContentAlignment="Stretch" />
@@ -40,7 +40,7 @@
         <ControlTheme x:Key="InfoFieldTheme" TargetType="HeaderedContentControl">
             <Setter Property="Template">
                 <ControlTemplate>
-                    <StackPanel Spacing="6">
+                    <StackPanel Spacing="4">
                         <TextBlock Classes="label" Text="{TemplateBinding Header}" />
                         <TextBlock Text="{TemplateBinding Content}" TextWrapping="Wrap" />
                     </StackPanel>
@@ -90,7 +90,7 @@
             <Setter Property="Template">
                 <ControlTemplate>
                     <Border Classes="card details-card">
-                        <Grid RowDefinitions="Auto,18,Auto">
+                        <Grid RowDefinitions="Auto,12,Auto">
                             <Grid ColumnDefinitions="38,12,*">
                                 <Border Classes="icon-tile" Width="38" Height="38">
                                     <PathIcon Width="18" Height="18"
@@ -113,8 +113,8 @@
             <Setter Property="Template">
                 <ControlTemplate>
                     <Border Classes="card settings-card">
-                        <Grid RowDefinitions="Auto,18,Auto" ColumnDefinitions="42,14,*">
-                            <Border Classes="icon-tile" Width="42" Height="42">
+                        <Grid RowDefinitions="Auto,12,Auto" ColumnDefinitions="32,12,*">
+                            <Border Classes="icon-tile" Width="32" Height="32">
                                 <PathIcon Width="19" Height="19"
                                           Data="M6,10 C6,7.8 7.8,6 10,6 L13,6 C15.2,6 17,7.8 17,10 C17,12.2 15.2,14 13,14 L11,14 M14,10 C14,12.2 12.2,14 10,14 L7,14 C4.8,14 3,12.2 3,10 C3,7.8 4.8,6 7,6 L9,6" />
                             </Border>

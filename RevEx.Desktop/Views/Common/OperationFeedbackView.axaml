@@ -1,0 +1,13 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RevEx.Desktop.ViewModels.Common"
+             x:Class="RevEx.Desktop.Views.Common.OperationFeedbackView"
+             x:DataType="vm:AsyncViewModelBase">
+    <StackPanel Spacing="8">
+        <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsBusy}" />
+        <TextBlock Text="{Binding Message}" IsVisible="{Binding !HasError}"
+                   Classes="caption" TextWrapping="Wrap" />
+        <TextBlock Text="{Binding ErrorMessage}" IsVisible="{Binding HasError}"
+                   Classes="validation-message" TextWrapping="Wrap" />
+    </StackPanel>
+</UserControl>

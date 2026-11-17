@@ -12,7 +12,9 @@ public sealed class ApplicationShutdownService : IApplicationShutdownService
             () =>
             {
                 if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+                {
                     desktop.Shutdown();
+                }
             },
             DispatcherPriority.Background);
     }

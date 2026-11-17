@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Net;
 using System.Text;
 using System.Text.Json;
@@ -15,6 +14,7 @@ public sealed class OidcAuthenticationService : IAuthenticationService
 
     private readonly OidcClient _oidcClient;
     private readonly HttpClient _backchannelClient;
+    private readonly IAuthenticationBrowser _authenticationBrowser;
     private readonly string _clientId;
     private readonly string? _refreshTokenRevocationEndpoint;
     private readonly string _redirectUri;
@@ -30,7 +30,8 @@ public sealed class OidcAuthenticationService : IAuthenticationService
 
     public OidcAuthenticationService(
         IAppSettings settings,
-        IHttpClientFactory httpClientFactory)
+        IHttpClientFactory httpClientFactory,
+        IAuthenticationBrowser authenticationBrowser)
     {
         var authentication = settings.Authentication;
         if (!authentication.Providers.TryGetValue(authentication.Provider, out var provider))
@@ -38,6 +39,7 @@ public sealed class OidcAuthenticationService : IAuthenticationService
                 $"Authentication provider '{authentication.Provider}' is not configured.");
 
         _backchannelClient = httpClientFactory.CreateClient(nameof(OidcAuthenticationService));
+        _authenticationBrowser = authenticationBrowser;
         _clientId = provider.ClientId;
         _refreshTokenRevocationEndpoint = provider.RefreshTokenRevocationEndpoint;
         _redirectUri = authentication.RedirectUri;
@@ -160,18 +162,24 @@ public sealed class OidcAuthenticationService : IAuthenticationService
         using var listener = CreateCallbackListener();
         try
         {
-            Process.Start(new ProcessStartInfo(state.StartUrl) { UseShellExecute = true });
+            var authorizationUri = new Uri(state.StartUrl, UriKind.Absolute);
+            var expectedState = GetQueryParameter(authorizationUri.Query, "state")
+                ?? throw new InvalidOperationException("The authorization URL does not contain state.");
+            _authenticationBrowser.Open(authorizationUri);
 
-            var context = await listener.GetContextAsync().WaitAsync(cancellationToken);
+            var context = await WaitForCallbackAsync(listener, expectedState, cancellationToken);
             var result = await _oidcClient.ProcessResponseAsync(
                 context.Request.RawUrl,
                 state,
                 cancellationToken: cancellationToken);
 
             if (result.IsError || string.IsNullOrWhiteSpace(result.AccessToken))
+            {
+                await WriteBrowserErrorResponseAsync(context.Response, result.Error);
                 throw new InvalidOperationException($"OIDC authentication failed: {result.Error}");
+            }
 
-            await WriteBrowserResponseAsync(context.Response, cancellationToken);
+            await WriteBrowserResponseAsync(context.Response, CancellationToken.None);
 
             _refreshToken = result.RefreshToken;
             _accessTokenExpiration = result.AccessTokenExpiration;
@@ -183,6 +191,41 @@ public sealed class OidcAuthenticationService : IAuthenticationService
             if (listener.IsListening)
                 listener.Stop();
         }
+    }
+
+    private static async Task<HttpListenerContext> WaitForCallbackAsync(
+        HttpListener listener,
+        string expectedState,
+        CancellationToken cancellationToken)
+    {
+        while (true)
+        {
+            var context = await listener.GetContextAsync().WaitAsync(cancellationToken);
+            var receivedState = context.Request.QueryString["state"];
+            if (string.Equals(receivedState, expectedState, StringComparison.Ordinal))
+            {
+                return context;
+            }
+
+            await WriteBrowserErrorResponseAsync(
+                context.Response,
+                "Эта ссылка относится к другой или уже завершённой попытке входа.");
+        }
+    }
+
+    private static string? GetQueryParameter(string query, string name)
+    {
+        var parameters = query.TrimStart('?').Split('&', StringSplitOptions.RemoveEmptyEntries);
+        foreach (var parameter in parameters)
+        {
+            var parts = parameter.Split('=', 2);
+            if (Uri.UnescapeDataString(parts[0]).Equals(name, StringComparison.Ordinal))
+            {
+                return parts.Length == 2 ? Uri.UnescapeDataString(parts[1]) : string.Empty;
+            }
+        }
+
+        return null;
     }
 
     private HttpListener CreateCallbackListener()
@@ -218,6 +261,31 @@ public sealed class OidcAuthenticationService : IAuthenticationService
         response.ContentType = "text/html; charset=utf-8";
         response.ContentLength64 = content.Length;
         await response.OutputStream.WriteAsync(content, cancellationToken);
+        response.Close();
+    }
+
+    private static async Task WriteBrowserErrorResponseAsync(
+        HttpListenerResponse response,
+        string? error)
+    {
+        var details = WebUtility.HtmlEncode(
+            string.IsNullOrWhiteSpace(error) ? "Авторизация не завершена." : error);
+        var html = $"""
+            <!doctype html>
+            <html lang="ru">
+            <head><meta charset="utf-8"><title>Авторизация не завершена</title></head>
+            <body style="font-family: sans-serif; margin: 40px; color: #202124">
+                <h1>Авторизация не завершена</h1>
+                <p>{details}</p>
+                <p>Вернитесь в приложение RevEx и повторите вход.</p>
+            </body>
+            </html>
+            """;
+        var content = Encoding.UTF8.GetBytes(html);
+
+        response.ContentType = "text/html; charset=utf-8";
+        response.ContentLength64 = content.Length;
+        await response.OutputStream.WriteAsync(content, CancellationToken.None);
         response.Close();
     }
 

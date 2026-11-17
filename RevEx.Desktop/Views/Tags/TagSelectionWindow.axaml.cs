@@ -3,10 +3,11 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using RevEx.Domain.Contracts.Tag;
 using RevEx.Desktop.ViewModels.Tags;
+using RevEx.Desktop.Views.Common;
 
 namespace RevEx.Desktop.Views.Tags;
 
-public partial class TagSelectionWindow : Window
+public partial class TagSelectionWindow : DialogWindow
 {
     public TagSelectionWindow() : this([])
     {
@@ -18,15 +19,13 @@ public partial class TagSelectionWindow : Window
         DataContext = new TagSelectionWindowViewModel(tags);
     }
 
-    private void OnAddClick(object? sender, Avalonia.Interactivity.RoutedEventArgs eventArgs) => CloseSelectedTag();
-
-    private void OnCancelClick(object? sender, Avalonia.Interactivity.RoutedEventArgs eventArgs) => Close(null);
-
     private void OnTagDoubleTapped(object? sender, TappedEventArgs eventArgs) => CloseSelectedTag();
 
     private void CloseSelectedTag()
     {
-        if (DataContext is TagSelectionWindowViewModel { SelectedTag: { } tag })
-            Close(tag);
+        if (DataContext is TagSelectionWindowViewModel viewModel)
+        {
+            viewModel.Accept();
+        }
     }
 }

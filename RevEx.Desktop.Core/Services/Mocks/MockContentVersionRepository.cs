@@ -1,6 +1,8 @@
 using RevEx.Domain.Contracts.ContentFile;
 using RevEx.Domain.Contracts.ContentVersion;
 using RevEx.Desktop.Core.Interfaces;
+using RevEx.Domain.Entities;
+using RevEx.Domain.Identifiers;
 using static RevEx.Desktop.Core.Services.MockApiData;
 
 namespace RevEx.Desktop.Core.Services;
@@ -19,14 +21,56 @@ internal sealed class MockContentVersionRepository : IContentVersionRepository
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        var platform = request.Platform;
+        if (platform is null || !Enum.IsDefined(typeof(Platform), platform.Value)
+            || !Enum.IsDefined(typeof(PublishStatus), request.PublishStatus))
+        {
+            throw new InvalidOperationException("Укажите допустимые платформу и статус публикации версии.");
+        }
+
+        if (request.Vid.HasValue)
+        {
+            if (!request.Cid.HasValue ||
+                !Uuid7.IsValid(request.Cid.Value) ||
+                !Uuid7.IsValid(request.Vid.Value))
+            {
+                throw new InvalidOperationException("CID и VID должны быть UUID v7.");
+            }
+
+            var content = Contents.FirstOrDefault(item => item.Id == request.ContentId);
+            if (content is null || content.Cid != request.Cid.Value)
+            {
+                throw new InvalidOperationException("CID не соответствует карточке контента.");
+            }
+
+            var existing = ContentVersions.FirstOrDefault(item => item.Vid == request.Vid.Value);
+            if (existing is not null)
+            {
+                if (existing.ContentId != request.ContentId)
+                {
+                    throw new InvalidOperationException("VID уже принадлежит другой карточке контента.");
+                }
+
+                return Task.FromResult(existing);
+            }
+        }
+
         var version = new ContentVersionDto(
             ContentVersions.Count == 0 ? 1 : ContentVersions.Max(item => item.Id) + 1,
+            request.Vid,
             request.ContentId,
             [],
             request.Name ?? "Новая версия",
             request.Date ?? DateTimeOffset.UtcNow,
-            request.Status ?? "draft",
-            request.Application,
+            GetLegacyStatus(request.PublishStatus),
+            request.PublishStatus,
+            platform.Value,
+            platform.Value switch
+            {
+                Platform.Revit => "revit",
+                Platform.AutoCad => "autocad",
+                _ => request.Application
+            },
             request.ApplicationVersion,
             DateTimeOffset.UtcNow,
             DateTimeOffset.UtcNow);
@@ -34,12 +78,47 @@ internal sealed class MockContentVersionRepository : IContentVersionRepository
         return Task.FromResult(version);
     }
 
+    public Task UpdatePublishStatusAsync(
+        int versionId, PublishStatus publishStatus, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (!Enum.IsDefined(typeof(PublishStatus), publishStatus))
+        {
+            throw new InvalidOperationException("Укажите допустимый статус публикации.");
+        }
+
+        var index = ContentVersions.FindIndex(version => version.Id == versionId);
+        if (index < 0)
+        {
+            throw new HttpRequestException($"Version {versionId} was not found.");
+        }
+
+        ContentVersions[index] = ContentVersions[index] with
+        {
+            PublishStatus = publishStatus,
+            Status = GetLegacyStatus(publishStatus),
+            UpdatedAt = DateTimeOffset.UtcNow
+        };
+        return Task.CompletedTask;
+    }
+
+    private static string GetLegacyStatus(PublishStatus status)
+    {
+        return status switch
+        {
+            PublishStatus.Ready => "published",
+            PublishStatus.Withdrawn => "archived",
+            _ => "draft"
+        };
+    }
+
     public Task<ContentVersionDto> UploadFileAsync(
         int versionId,
         Stream content,
         string fileName,
         string role,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        string? metadataJson = null)
     {
         cancellationToken.ThrowIfCancellationRequested();
         var versionIndex = ContentVersions.FindIndex(item => item.Id == versionId);
@@ -56,7 +135,10 @@ internal sealed class MockContentVersionRepository : IContentVersionRepository
             content.CanSeek ? content.Length : 0,
             role,
             DateTimeOffset.UtcNow,
-            DateTimeOffset.UtcNow));
+            DateTimeOffset.UtcNow)
+        {
+            Metadata = metadataJson is null ? null : System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.JsonElement>(metadataJson)
+        });
 
         var version = ContentVersions[versionIndex];
         version = version with { FileIds = version.FileIds.Append(fileId).ToArray() };

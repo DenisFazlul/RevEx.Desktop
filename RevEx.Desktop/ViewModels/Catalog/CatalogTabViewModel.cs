@@ -16,15 +16,22 @@ using RevEx.Desktop.ViewModels.Tabs;
 
 namespace RevEx.Desktop.ViewModels.Catalog;
 
+/// <summary>Модель каталога. Загружает карточки, применяет поиск и фильтры, открывает выбранный материал.</summary>
 public partial class CatalogTabViewModel : WorkspaceTabViewModel
 {
     private readonly IRevExApiService _revExApiService;
     private readonly Action<ContentItemViewModel> _openContent;
     private CancellationTokenSource? _contentLoadCancellation;
+    private bool _disposed;
+    private bool _isApplyingFilters;
 
-    [ObservableProperty] private bool _isLoading;
-    [ObservableProperty] private bool _isContentLoading;
-    [ObservableProperty] private string _contentNameQuery = string.Empty;
+    [ObservableProperty]
+
+
+    private bool _isContentLoading;
+    [ObservableProperty]
+
+    private string _contentNameQuery = string.Empty;
 
     public ObservableCollection<CategoryItemViewModel> Categories { get; } = [];
     public ObservableCollection<TagFilterItemViewModel> Tags { get; } = [];
@@ -53,9 +60,15 @@ public partial class CatalogTabViewModel : WorkspaceTabViewModel
             await Task.WhenAll(categoriesTask, tagsTask);
             var categoryDtos = await categoriesTask;
             var tagDtos = await tagsTask;
+            if (_disposed)
+            {
+                return;
+            }
 
             foreach (var category in Categories)
+            {
                 category.PropertyChanged -= OnCategoryPropertyChanged;
+            }
 
             Categories.Clear();
             foreach (var dto in categoryDtos)
@@ -66,7 +79,9 @@ public partial class CatalogTabViewModel : WorkspaceTabViewModel
             }
 
             foreach (var tag in Tags)
+            {
                 tag.PropertyChanged -= OnTagPropertyChanged;
+            }
 
             Tags.Clear();
             foreach (var dto in tagDtos.OrderBy(item => item.Name))
@@ -86,25 +101,60 @@ public partial class CatalogTabViewModel : WorkspaceTabViewModel
 
     public void OpenContent(ContentItemViewModel content) => _openContent(content);
 
+    public void ApplyFilters(IReadOnlySet<int> categoryIds, IReadOnlySet<int> tagIds)
+    {
+        _isApplyingFilters = true;
+        try
+        {
+            foreach (var category in Categories)
+            {
+                category.IsSelected = categoryIds.Contains(category.Id);
+            }
+
+            foreach (var tag in Tags)
+            {
+                tag.IsSelected = tagIds.Contains(tag.Id);
+            }
+        }
+        finally
+        {
+            _isApplyingFilters = false;
+        }
+
+        ScheduleContentLoad();
+    }
+
     partial void OnContentNameQueryChanged(string value) => ScheduleContentLoad();
 
     private void OnCategoryPropertyChanged(object? sender, PropertyChangedEventArgs eventArgs)
     {
         if (eventArgs.PropertyName == nameof(CategoryItemViewModel.IsSelected))
+        {
             ScheduleContentLoad();
+        }
     }
 
     private void OnTagPropertyChanged(object? sender, PropertyChangedEventArgs eventArgs)
     {
         if (eventArgs.PropertyName == nameof(TagFilterItemViewModel.IsSelected))
+        {
             ScheduleContentLoad();
+        }
     }
 
     private void ScheduleContentLoad()
     {
+        if (_disposed || _isApplyingFilters)
+        {
+            return;
+        }
+
         _contentLoadCancellation?.Cancel();
         foreach (var content in Contents)
+        {
             content.Dispose();
+        }
+
         Contents.Clear();
         IsContentLoading = false;
 
@@ -133,7 +183,9 @@ public partial class CatalogTabViewModel : WorkspaceTabViewModel
             cancellation.Token.ThrowIfCancellationRequested();
 
             if (!ReferenceEquals(_contentLoadCancellation, cancellation))
+            {
                 return;
+            }
 
             var tagNames = Tags.ToDictionary(tag => tag.Id, tag => tag.Name);
             var itemTasks = ApplyQuery(contentDtos, query)
@@ -149,6 +201,13 @@ public partial class CatalogTabViewModel : WorkspaceTabViewModel
         catch (OperationCanceledException)
         {
             // Быстрое изменение фильтров отменяет уже неактуальную загрузку.
+        }
+        catch (HttpRequestException exception)
+        {
+            if (ReferenceEquals(_contentLoadCancellation, cancellation) && !_disposed)
+            {
+                SetError($"Не удалось загрузить каталог: {exception.Message}");
+            }
         }
         finally
         {
@@ -210,5 +269,32 @@ public partial class CatalogTabViewModel : WorkspaceTabViewModel
         }
 
         return result;
+    }
+
+    public override void Dispose()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _disposed = true;
+        _contentLoadCancellation?.Cancel();
+        foreach (var category in Categories)
+        {
+            category.PropertyChanged -= OnCategoryPropertyChanged;
+        }
+
+        foreach (var tag in Tags)
+        {
+            tag.PropertyChanged -= OnTagPropertyChanged;
+        }
+
+        foreach (var content in Contents)
+        {
+            content.Dispose();
+        }
+
+        base.Dispose();
     }
 }

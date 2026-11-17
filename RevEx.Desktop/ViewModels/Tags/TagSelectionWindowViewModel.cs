@@ -2,17 +2,17 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using RevEx.Domain.Contracts.Tag;
+using RevEx.Desktop.ViewModels.Common;
 
 namespace RevEx.Desktop.ViewModels.Tags;
 
-public partial class TagSelectionWindowViewModel : ViewModelBase
+/// <summary>Модель выбора тега для карточки. Возвращает выбранный тег без изменения каталога.</summary>
+public class TagSelectionWindowViewModel : SelectionDialogViewModel<TagDto>
 {
-    [ObservableProperty]
-    private TagDto? _selectedTag;
+    public IReadOnlyList<TagDto> Tags => Items;
+    public bool HasTags => HasItems;
 
-    public ObservableCollection<TagDto> Tags { get; }
-    public bool HasTags => Tags.Count > 0;
-
-    public TagSelectionWindowViewModel(IEnumerable<TagDto> tags) =>
-        Tags = new ObservableCollection<TagDto>(tags);
+    public TagSelectionWindowViewModel(IEnumerable<TagDto> tags) : base(tags)
+    {
+    }
 }

@@ -10,6 +10,7 @@ using CommunityToolkit.Mvvm.Input;
 using RevEx.Domain.Contracts.Category;
 using RevEx.Domain.Contracts.Content;
 using RevEx.Domain.Contracts.ContentVersion;
+using RevEx.Domain.Identifiers;
 using RevEx.Domain.Contracts.Tag;
 using RevEx.Desktop.Core.Interfaces;
 using RevEx.Desktop.Configuration;
@@ -17,6 +18,7 @@ using RevEx.Desktop.ViewModels.Tabs;
 
 namespace RevEx.Desktop.ViewModels.Contents;
 
+/// <summary>Модель ручного редактора. Проверяет карточку, выбранные файлы и сохраняет контент или новую версию.</summary>
 public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
 {
     private const string NoFamilyFileSelected = "Файл не выбран";
@@ -55,17 +57,9 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
     [ObservableProperty]
     private string _selectedPreviewName = NoPreviewSelected;
 
-    [ObservableProperty]
-    private bool _isLoading;
 
-    [ObservableProperty]
-    private bool _isSaving;
 
-    [ObservableProperty]
-    private string? _message;
 
-    [ObservableProperty]
-    private bool _hasError;
 
     public ObservableCollection<CategoryDto> Categories { get; } = [];
     public ObservableCollection<ContentTagItemViewModel> SelectedTags { get; } = [];
@@ -97,12 +91,14 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
     public override async Task ActivateAsync()
     {
         if (_isLoaded)
+        {
             return;
+        }
 
         try
         {
             IsLoading = true;
-            HasError = false;
+            ErrorMessage = null;
             Message = null;
 
             if (IsCreatingContent)
@@ -114,7 +110,9 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
                 var categories = await categoriesTask;
                 Categories.Clear();
                 foreach (var category in categories.OrderBy(item => item.Name))
+                {
                     Categories.Add(category);
+                }
 
                 SelectedCategory ??= Categories.FirstOrDefault();
                 _availableTags = await tagsTask;
@@ -156,7 +154,9 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
     public void AddTag(TagDto tag)
     {
         if (SelectedTags.Any(item => item.Id == tag.Id))
+        {
             return;
+        }
 
         SelectedTags.Add(new ContentTagItemViewModel(tag, RemoveTagAsync));
         NotifySelectedTagsChanged();
@@ -174,10 +174,17 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
         try
         {
             IsSaving = true;
-            HasError = false;
-            Message = "Сохраняем контент и загружаем Revit-семейство…";
+            ErrorMessage = null;
+            Message = "Сохраняем данные…";
 
             var createdContent = IsCreatingContent ? await CreateContentWithPreviewAsync() : null;
+            if (createdContent is not null && string.IsNullOrWhiteSpace(SelectedFamilyFilePath))
+            {
+                ResetForm(true);
+                Message = "Карточка контента успешно создана.";
+                return;
+            }
+
             var contentId = createdContent?.Id ?? _existingContent!.Id;
             var version = await CreateVersionWithFamilyFileAsync(contentId);
 
@@ -218,17 +225,24 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
         }
 
 
-        if (IsCreatingContent &&
-            (string.IsNullOrWhiteSpace(SelectedPreviewPath) || !File.Exists(SelectedPreviewPath)))
+        if (IsCreatingContent && !string.IsNullOrWhiteSpace(SelectedPreviewPath) &&
+            !File.Exists(SelectedPreviewPath))
         {
             message = "Выберите изображение контента.";
             return false;
         }
 
-        if (IsCreatingContent && !ContentImageUploadConfiguration.IsSupported(SelectedPreviewPath!))
+        if (IsCreatingContent && !string.IsNullOrWhiteSpace(SelectedPreviewPath) &&
+            !ContentImageUploadConfiguration.IsSupported(SelectedPreviewPath))
         {
             message = "Изображение должно быть в формате JPEG, PNG, WebP или GIF.";
             return false;
+        }
+
+        if (IsCreatingContent && string.IsNullOrWhiteSpace(SelectedFamilyFilePath))
+        {
+            message = string.Empty;
+            return true;
         }
 
         if (string.IsNullOrWhiteSpace(VersionName))
@@ -261,18 +275,6 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
         return true;
     }
 
-    private void SetError(string message)
-    {
-        HasError = true;
-        Message = message;
-    }
-
-    private void ClearMessage()
-    {
-        Message = null;
-        HasError = false;
-    }
-
     private async Task<ContentDto> CreateContentWithPreviewAsync()
     {
         var content = await _apiService.Contents.CreateAsync(new CreateContentDto
@@ -283,7 +285,12 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
             TagIds = SelectedTags.Select(tag => tag.Id).ToArray()
         });
 
-        await using var previewStream = File.OpenRead(SelectedPreviewPath!);
+        if (string.IsNullOrWhiteSpace(SelectedPreviewPath))
+        {
+            return content;
+        }
+
+        await using var previewStream = File.OpenRead(SelectedPreviewPath);
         return await _apiService.Contents.UploadPreviewAsync(
             content.Id,
             previewStream,
@@ -298,6 +305,8 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
             Name = VersionName.Trim(),
             Date = DateTimeOffset.UtcNow,
             Status = "draft",
+            PublishStatus = RevEx.Domain.Entities.PublishStatus.Draft,
+            Platform = RevEx.Domain.Entities.Platform.Revit,
             Application = "revit",
             ApplicationVersion = RevitVersion.Trim()
         });

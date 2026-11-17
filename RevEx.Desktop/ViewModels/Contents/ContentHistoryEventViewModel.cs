@@ -2,6 +2,7 @@ using RevEx.Domain.Contracts.ContentHistory;
 
 namespace RevEx.Desktop.ViewModels.Contents;
 
+/// <summary>Модель записи истории. Подготавливает описание, автора и местное время события.</summary>
 public sealed class ContentHistoryEventViewModel(ContentHistoryEventDto value)
 {
     public ContentHistoryEventDto Value { get; } = value;

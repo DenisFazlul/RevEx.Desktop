@@ -1,10 +1,11 @@
 <UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:common="using:RevEx.Desktop.Views.Common"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:RevEx.Desktop.ViewModels.Tags"
              x:Class="RevEx.Desktop.Views.Tags.TagAdminTabView"
              x:DataType="vm:TagAdminTabViewModel"
              HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
-    <Grid Margin="32,30" RowDefinitions="Auto,22,*,Auto">
+    <Grid Margin="12" RowDefinitions="Auto,12,*,Auto">
         <Grid ColumnDefinitions="*,Auto,10,Auto">
             <HeaderedContentControl Theme="{StaticResource PageHeaderTheme}"
                                     Header="Группы тегов"
@@ -15,8 +16,8 @@
                     Click="OnCreateGroupClick" VerticalAlignment="Center" />
         </Grid>
 
-        <Border Grid.Row="2" Classes="card section-card">
-            <Grid RowDefinitions="Auto,14,*">
+        <Border Grid.Row="2" Classes="card section-card" VerticalAlignment="Top">
+            <Grid RowDefinitions="Auto,8,*">
                 <Grid ColumnDefinitions="*,Auto">
                     <TextBlock Classes="h2" Text="Группы и теги" />
                     <TextBlock Grid.Column="1" Classes="caption"
@@ -24,8 +25,7 @@
                 </Grid>
 
                 <Grid Grid.Row="2">
-                    <ProgressBar IsVisible="{Binding IsLoading}" IsIndeterminate="True"
-                                 VerticalAlignment="Top" />
+
                     <TextBlock IsVisible="{Binding HasNoGroups}"
                                Text="Групп пока нет. Создайте первую группу."
                                HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -37,7 +37,7 @@
                                     <Border Margin="0,0,0,12" BorderBrush="{StaticResource BorderBrush}"
                                             BorderThickness="1" CornerRadius="10">
                                         <Grid RowDefinitions="Auto,Auto">
-                                            <Border Padding="14,10" Background="{StaticResource SurfaceMutedBrush}"
+                                            <Border Padding="12,4" Background="{StaticResource SurfaceMutedBrush}"
                                                     CornerRadius="9,9,0,0">
                                                 <Grid ColumnDefinitions="*,Auto,12,Auto,6,Auto">
                                                     <TextBlock Text="{Binding Name}" FontWeight="SemiBold"
@@ -54,15 +54,15 @@
                                                 </Grid>
                                             </Border>
 
-                                            <Grid Grid.Row="1" MinHeight="48">
+                                            <Grid Grid.Row="1" MinHeight="32">
                                                 <TextBlock IsVisible="{Binding HasNoTags}"
                                                            Text="В группе пока нет тегов"
-                                                           Classes="caption" Margin="16,14" />
+                                                           Classes="caption" Margin="12,8" />
                                                 <ItemsControl ItemsSource="{Binding Tags}"
                                                               IsVisible="{Binding HasTags}">
                                                     <ItemsControl.ItemTemplate>
                                                         <DataTemplate x:DataType="vm:TagItemViewModel">
-                                                            <Border Padding="16,8" BorderBrush="{StaticResource BorderBrush}"
+                                                            <Border Padding="12,4" BorderBrush="{StaticResource BorderBrush}"
                                                                     BorderThickness="0,1,0,0">
                                                                 <Grid ColumnDefinitions="*,Auto,6,Auto">
                                                                     <TextBlock Text="{Binding Name, StringFormat='#{0}'}"
@@ -89,7 +89,6 @@
                 </Grid>
             </Grid>
         </Border>
-        <TextBlock Grid.Row="3" Margin="2,12,0,0" Text="{Binding ErrorMessage}"
-                   TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" />
+        <common:OperationFeedbackView Grid.Row="3" Margin="2,12,0,0" />
     </Grid>
 </UserControl>

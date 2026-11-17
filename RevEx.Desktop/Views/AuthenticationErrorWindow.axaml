@@ -6,9 +6,9 @@
         Height="240"
         CanResize="False"
         WindowStartupLocation="CenterScreen">
-    <Grid Margin="24">
+    <Grid Margin="16">
         <Border Classes="card section-card">
-            <Grid RowDefinitions="Auto,16,*,20,Auto" ColumnDefinitions="38,12,*">
+            <Grid RowDefinitions="Auto,12,*,12,Auto" ColumnDefinitions="38,12,*">
                 <Border Classes="icon-tile" Width="38" Height="38" Background="{StaticResource DangerSoftBrush}">
                     <PathIcon Width="18" Height="18" Foreground="{StaticResource DangerBrush}"
                               Data="M10,2 L18,17 L2,17 Z M10,7 L10,11 M10,14 L10,14.2" />

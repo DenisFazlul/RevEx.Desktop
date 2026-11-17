@@ -3,88 +3,69 @@
              xmlns:vm="using:RevEx.Desktop.ViewModels.Catalog"
              xmlns:contentVm="using:RevEx.Desktop.ViewModels.Contents"
              x:Class="RevEx.Desktop.Views.Catalog.CatalogTabView" x:DataType="vm:CatalogTabViewModel">
-    <Grid Margin="28" RowDefinitions="Auto,22,*">
-        <Grid ColumnDefinitions="*,Auto,12,304">
-            <HeaderedContentControl Theme="{StaticResource PageHeaderTheme}" Header="Каталог"
-                                    Content="Материалы, инструкции и документы команды" />
-            <Button Grid.Column="1" Classes="secondary" VerticalAlignment="Center"
-                    Content="⚙  Категории и теги" Click="OnOpenCatalogSettingsClick" />
-            <Grid Grid.Column="3" VerticalAlignment="Center">
+    <Grid Margin="12" RowDefinitions="Auto,12,*">
+        <Grid ColumnDefinitions="Auto,8,240">
+            <Button Classes="secondary" VerticalAlignment="Center"
+                    Content="Фильтры" Click="OnOpenCatalogSettingsClick" />
+            <Grid Grid.Column="2" VerticalAlignment="Center">
                 <TextBox Classes="search" Watermark="Поиск по названию…"
                          Text="{Binding ContentNameQuery}" />
-                <PathIcon Width="16" Height="16" Margin="14,0,0,0" HorizontalAlignment="Left"
+                <PathIcon Width="16" Height="16" Margin="8,0,0,0" HorizontalAlignment="Left"
                           Foreground="{StaticResource TextSecondaryBrush}" IsHitTestVisible="False"
                           Data="M8,2 A6,6 0 1 0 8,14 A6,6 0 1 0 8,2 M12.5,12.5 L17,17" />
             </Grid>
         </Grid>
 
         <Grid Grid.Row="2">
-            <Border Classes="content-pane">
-                <Grid RowDefinitions="Auto,14,*">
-                    <Grid ColumnDefinitions="*,Auto">
-                        <StackPanel Spacing="3">
-                            <TextBlock Classes="h2" Text="Материалы" />
-                            <TextBlock Classes="caption" Text="Дважды нажмите, чтобы открыть" />
-                        </StackPanel>
-                        <Border Grid.Column="1" Padding="9,4" CornerRadius="8" Background="{StaticResource SurfaceMutedBrush}">
-                            <TextBlock Text="БИБЛИОТЕКА" Foreground="{StaticResource TextSecondaryBrush}"
-                                       FontSize="10" FontWeight="SemiBold" />
-                        </Border>
-                    </Grid>
-                    <Grid Grid.Row="2">
-                        <StackPanel IsVisible="{Binding IsContentLoading}" HorizontalAlignment="Center"
-                                    VerticalAlignment="Center" Spacing="12">
-                            <ProgressBar Width="120" IsIndeterminate="True" />
-                            <TextBlock Classes="caption" Text="Загружаем материалы…" />
-                        </StackPanel>
-                        <ListBox Classes="clean-list content-list" ItemsSource="{Binding Contents}"
-                                 IsVisible="{Binding !IsContentLoading}">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate x:DataType="contentVm:ContentItemViewModel">
-                                    <Border Classes="content-row" Margin="0,0,0,8"
-                                            DoubleTapped="OnContentDoubleTapped">
-                                        <Grid ColumnDefinitions="84,14,*">
-                                            <Border Width="84" Height="72" CornerRadius="8" ClipToBounds="True"
-                                                    Background="{StaticResource SurfaceMutedBrush}">
-                                                <Grid>
-                                                    <TextBlock Text="Нет фото" Classes="caption"
-                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                               IsVisible="{Binding !HasPreview}" />
-                                                    <Image Source="{Binding PreviewImage}" Stretch="UniformToFill"
-                                                           IsVisible="{Binding HasPreview}" />
-                                                </Grid>
-                                            </Border>
-                                            <StackPanel Grid.Column="2" Spacing="7" VerticalAlignment="Center">
-                                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="15" />
-                                                <WrapPanel Orientation="Horizontal">
-                                                    <ItemsControl ItemsSource="{Binding VisibleTags}">
-                                                        <ItemsControl.ItemsPanel>
-                                                            <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
-                                                        </ItemsControl.ItemsPanel>
-                                                        <ItemsControl.ItemTemplate>
-                                                            <DataTemplate>
-                                                                <Border Classes="value-box" Padding="8,3" Margin="0,0,6,0">
-                                                                    <TextBlock Text="{Binding StringFormat='#{0}'}" Classes="caption"
-                                                                               Foreground="{StaticResource AccentBrush}" />
-                                                                </Border>
-                                                            </DataTemplate>
-                                                        </ItemsControl.ItemTemplate>
-                                                    </ItemsControl>
-                                                    <Border Classes="value-box" Padding="8,3"
-                                                            IsVisible="{Binding HasAdditionalTags}">
-                                                        <TextBlock Text="{Binding AdditionalTagsText}" Classes="caption"
+            <StackPanel IsVisible="{Binding IsContentLoading}" HorizontalAlignment="Center"
+                        VerticalAlignment="Center" Spacing="12">
+                <ProgressBar Width="120" IsIndeterminate="True" />
+                <TextBlock Classes="caption" Text="Загружаем материалы…" />
+            </StackPanel>
+            <ListBox Classes="clean-list content-list" ItemsSource="{Binding Contents}"
+                     IsVisible="{Binding !IsContentLoading}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="contentVm:ContentItemViewModel">
+                        <Border Classes="content-row" DoubleTapped="OnContentDoubleTapped">
+                            <Grid ColumnDefinitions="64,12,*">
+                                <Border Width="64" Height="56" CornerRadius="8" ClipToBounds="True"
+                                        Background="{StaticResource SurfaceMutedBrush}">
+                                    <Grid>
+                                        <TextBlock Text="Нет фото" Classes="caption"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                   IsVisible="{Binding !HasPreview}" />
+                                        <Image Source="{Binding PreviewImage}" Stretch="UniformToFill"
+                                               IsVisible="{Binding HasPreview}" />
+                                    </Grid>
+                                </Border>
+                                <StackPanel Grid.Column="2" Spacing="4" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="15" />
+                                    <WrapPanel Orientation="Horizontal">
+                                        <ItemsControl ItemsSource="{Binding VisibleTags}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Classes="value-box" Padding="8,0" Margin="0,0,6,0">
+                                                        <TextBlock Text="{Binding StringFormat='#{0}'}" Classes="caption"
                                                                    Foreground="{StaticResource AccentBrush}" />
                                                     </Border>
-                                                </WrapPanel>
-                                            </StackPanel>
-                                        </Grid>
-                                    </Border>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-                    </Grid>
-                </Grid>
-            </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                        <Border Classes="value-box" Padding="8,0"
+                                                IsVisible="{Binding HasAdditionalTags}">
+                                            <TextBlock Text="{Binding AdditionalTagsText}" Classes="caption"
+                                                       Foreground="{StaticResource AccentBrush}" />
+                                        </Border>
+                                    </WrapPanel>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
         </Grid>
     </Grid>
 </UserControl>

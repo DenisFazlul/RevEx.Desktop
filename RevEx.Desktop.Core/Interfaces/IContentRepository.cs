@@ -10,6 +10,10 @@ public interface IContentRepository
 
     Task<ContentDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
 
+    Task<ContentDto?> GetByCidAsync(Guid cid, CancellationToken cancellationToken = default);
+
+    Task<Guid> GenerateUuid7Async(CancellationToken cancellationToken = default);
+
     Task<ContentDto> CreateAsync(
         CreateContentDto request,
         CancellationToken cancellationToken = default);

@@ -63,7 +63,7 @@
 `FormFieldTheme` сам создаёт подпись и правильный отступ до контрола:
 
 ```xml
-<StackPanel Spacing="14">
+<StackPanel Spacing="8">
     <HeaderedContentControl Theme="{StaticResource FormFieldTheme}" Header="Название">
         <TextBox Text="{Binding Name}" />
     </HeaderedContentControl>
@@ -89,7 +89,7 @@
 
 ```xml
 <Border Classes="card section-card">
-    <StackPanel Spacing="14">
+    <StackPanel Spacing="8">
         <TextBlock Classes="h2" Text="Параметры" />
         <HeaderedContentControl Theme="{StaticResource InfoFieldTheme}"
                                 Header="Версия" Content="{Binding Version}" />
@@ -114,13 +114,13 @@
 ```xml
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <Grid Margin="32,30" RowDefinitions="Auto,22,*" MaxWidth="880">
+    <Grid Margin="12" RowDefinitions="Auto,12,*" MaxWidth="880">
         <HeaderedContentControl Theme="{StaticResource PageHeaderTheme}"
                                 Header="Новый раздел"
                                 Content="Краткое описание раздела" />
 
         <Border Grid.Row="2" Classes="card section-card">
-            <StackPanel Spacing="14">
+            <StackPanel Spacing="8">
                 <HeaderedContentControl Theme="{StaticResource FormFieldTheme}" Header="Название">
                     <TextBox Text="{Binding Name}" />
                 </HeaderedContentControl>
@@ -167,6 +167,23 @@
 
 Навигационные классы предназначены для оболочки приложения и обычно не нужны в
 обычных экранах.
+
+
+## Компактность
+
+Интерфейс рассчитан на мышь и клавиатуру. Сохраняйте основной текст 14 DIP;
+плотность регулируйте полями и промежутками, а не уменьшением текста.
+
+- Поля рабочих страниц — 12 DIP, диалогов — 16 DIP.
+- Между секциями — 12 DIP, между связанными элементами — 8 DIP,
+  от подписи до поля — 4 DIP.
+- Кнопки, однострочные поля, вкладки и заголовки раскрывающихся групп — от 32 DIP.
+- Внутренние поля секций — 12 DIP, компактных карточек — 8 DIP,
+  строк значений — 8 DIP по горизонтали и 4 DIP по вертикали.
+- Формы начинаются у левого края рабочей области; MaxWidth ограничивает длину полей.
+- Пустые status-message и validation-message скрываются стилем и не занимают строку.
+- Строки каталога разделяет ListBoxItem.Margin; не добавляйте второй отступ
+  к вложенному content-row.
 
 ## Где менять систему
 

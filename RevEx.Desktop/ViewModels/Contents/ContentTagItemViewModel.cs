@@ -6,14 +6,24 @@ using RevEx.Domain.Contracts.Tag;
 
 namespace RevEx.Desktop.ViewModels.Contents;
 
+/// <summary>Модель тега на карточке. Показывает название и предоставляет команду снятия тега.</summary>
 public partial class ContentTagItemViewModel : ViewModelBase
 {
     private readonly Func<ContentTagItemViewModel, Task> _remove;
 
-    public int Id { get; }
+    public int Id
+    {
+        get;
+    }
 
-    public string Name { get; }
-    public bool CanEdit { get; }
+    public string Name
+    {
+        get;
+    }
+    public bool CanEdit
+    {
+        get;
+    }
 
     public ContentTagItemViewModel(
         TagDto dto,

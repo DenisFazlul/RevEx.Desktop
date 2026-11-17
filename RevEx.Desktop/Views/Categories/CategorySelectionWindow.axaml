@@ -1,19 +1,22 @@
-<Window xmlns="https://github.com/avaloniaui"
+<common:DialogWindow xmlns="https://github.com/avaloniaui"
+        xmlns:common="using:RevEx.Desktop.Views.Common"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:domain="using:RevEx.Domain.Contracts.Category"
+        xmlns:vm="using:RevEx.Desktop.ViewModels.Categories"
+        x:DataType="vm:CategorySelectionViewModel"
         x:Class="RevEx.Desktop.Views.Categories.CategorySelectionWindow"
-        Title="Изменение категории" Width="500" Height="300"
-        MinWidth="440" MinHeight="280" WindowStartupLocation="CenterOwner"
+        Title="Изменение категории" Width="500" Height="224"
+        MinWidth="440" MinHeight="224" WindowStartupLocation="CenterOwner"
         CanResize="False">
-    <Grid Margin="24" RowDefinitions="Auto,18,*,Auto">
+    <Grid Margin="12" RowDefinitions="Auto,8,Auto,12,Auto">
         <HeaderedContentControl Theme="{StaticResource DialogHeaderTheme}"
                                 Header="Категория контента"
                                 Content="Выберите новую категорию карточки" />
 
         <HeaderedContentControl Grid.Row="2" Theme="{StaticResource FormFieldTheme}"
                                 Header="Категория">
-            <ComboBox x:Name="CategoryBox" ItemsSource="{Binding Categories}"
-                      SelectedItem="{Binding SelectedCategory}">
+            <ComboBox x:Name="CategoryBox" ItemsSource="{Binding Items}"
+                      SelectedItem="{Binding SelectedItem}">
                 <ComboBox.ItemTemplate>
                     <DataTemplate x:DataType="domain:CategoryDto">
                         <TextBlock Text="{Binding Name}" />
@@ -22,9 +25,9 @@
             </ComboBox>
         </HeaderedContentControl>
 
-        <Grid Grid.Row="3" ColumnDefinitions="*,Auto,10,Auto">
-            <Button Grid.Column="1" Classes="secondary" Content="Отмена" Click="OnCancelClick" />
-            <Button Grid.Column="3" Classes="primary" Content="Сохранить" Click="OnSaveClick" />
+        <Grid Grid.Row="4" ColumnDefinitions="*,Auto,8,Auto">
+            <Button Grid.Column="1" Classes="secondary" Content="Отмена" Command="{Binding CancelCommand}" />
+            <Button Grid.Column="3" Classes="primary" Content="Сохранить" Command="{Binding AcceptCommand}" />
         </Grid>
     </Grid>
-</Window>
+</common:DialogWindow>

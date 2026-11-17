@@ -10,6 +10,8 @@ public static class AuthenticationServiceExtensions
         this IHttpClientBuilder builder,
         AuthenticationSettings settings)
     {
+        builder.Services.AddSingleton<IAuthenticationBrowser, SystemAuthenticationBrowser>();
+
         if (settings.Provider.Equals(
                 AuthenticationProviderNames.ActiveDirectory,
                 StringComparison.OrdinalIgnoreCase))

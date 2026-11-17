@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using System.Threading;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -14,7 +15,7 @@ using RevEx.Desktop.Services;
 using RevEx.Desktop.ViewModels;
 using RevEx.Desktop.Views;
 using RevEx.Desktop.Views.MainMenu;
-using RevEx.Desktop.Connectors;
+using RevEx.Connector.Client;
 using RevEx.Configuration;
 using RevEx.Desktop.Updates.Services;
 
@@ -35,7 +36,7 @@ public partial class App : Application
     {
         var configuration = CreateConfig();
         var services = new ServiceCollection();
-        
+
         services.AddServices(configuration);
 
         Services = services.BuildServiceProvider();
@@ -43,6 +44,50 @@ public partial class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+            var shutdownCompleted = false;
+            var shutdownStarted = false;
+            desktop.ShutdownRequested += async (_, e) =>
+            {
+                if (shutdownCompleted)
+                {
+                    return;
+                }
+
+                e.Cancel = true;
+                if (shutdownStarted)
+                {
+                    return;
+                }
+
+                shutdownStarted = true;
+                try
+                {
+                    using var timeout = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(10));
+                    await Services.GetRequiredService<DesktopControlBridge>().StopAsync(timeout.Token)
+                        .WaitAsync(timeout.Token);
+                }
+                catch (Exception error)
+                {
+                    Console.Error.WriteLine($"Ошибка остановки Desktop control bridge: {error}");
+                }
+
+                try
+                {
+                    using var timeout = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(10));
+                    await Services.GetRequiredService<IConnectorRuntime>().StopAsync(timeout.Token)
+                        .WaitAsync(timeout.Token);
+                }
+                catch (Exception error)
+                {
+                    Console.Error.WriteLine($"Ошибка остановки коннекторов: {error}");
+                }
+                finally
+                {
+                    (Services.GetRequiredService<RevEx.Connector.Contracts.IConnectorClient>() as IDisposable)?.Dispose();
+                    shutdownCompleted = true;
+                    desktop.Shutdown();
+                }
+            };
             desktop.Startup += async (_, _) => await StartDesktopAsync(desktop);
         }
 
@@ -51,6 +96,7 @@ public partial class App : Application
 
     private static async Task StartDesktopAsync(IClassicDesktopStyleApplicationLifetime desktop)
     {
+        AuthenticationProgressWindow? authenticationWindow = null;
         try
         {
             if (!await Services.GetRequiredService<StartupUpdateCoordinator>().RunAsync())
@@ -58,9 +104,23 @@ public partial class App : Application
                 desktop.Shutdown();
                 return;
             }
-            await Services.GetRequiredService<DesktopConnectorServer>().StartAsync();
+            authenticationWindow = new AuthenticationProgressWindow(
+                Services.GetRequiredService<IAuthenticationBrowser>());
+            desktop.MainWindow = authenticationWindow;
+            authenticationWindow.Show();
+
+            using var authenticationTimeout = new CancellationTokenSource(TimeSpan.FromMinutes(3));
+            using var authenticationCancellation = CancellationTokenSource.CreateLinkedTokenSource(
+                authenticationTimeout.Token,
+                authenticationWindow.CancellationToken);
             var authenticationService = Services.GetRequiredService<IAuthenticationService>();
-            var accessToken = await authenticationService.GetAccessTokenAsync();
+            var accessToken = await authenticationService.GetAccessTokenAsync(
+                authenticationCancellation.Token);
+            authenticationWindow.Complete();
+            authenticationWindow = null;
+
+            await Services.GetRequiredService<IConnectorRuntime>().StartAsync();
+            await Services.GetRequiredService<DesktopControlBridge>().StartAsync();
             try
             {
                 using var timeout = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(10));
@@ -78,15 +138,34 @@ public partial class App : Application
             desktop.ShutdownMode = ShutdownMode.OnLastWindowClose;
             mainWindow.Show();
         }
+        catch (OperationCanceledException) when (
+            authenticationWindow?.CancellationToken.IsCancellationRequested == true)
+        {
+            desktop.Shutdown();
+        }
+        catch (OperationCanceledException)
+        {
+            authenticationWindow?.Complete();
+            ShowAuthenticationError(
+                desktop,
+                "Время ожидания входа истекло. Запустите RevEx и попробуйте снова.");
+        }
         catch (Exception exception)
         {
             Console.Error.WriteLine($"OIDC startup authentication failed: {exception}");
-
-            var errorWindow = new AuthenticationErrorWindow(exception.Message);
-            desktop.MainWindow = errorWindow;
-            errorWindow.Closed += (_, _) => desktop.Shutdown(1);
-            errorWindow.Show();
+            authenticationWindow?.Complete();
+            ShowAuthenticationError(desktop, exception.Message);
         }
+    }
+
+    private static void ShowAuthenticationError(
+        IClassicDesktopStyleApplicationLifetime desktop,
+        string message)
+    {
+        var errorWindow = new AuthenticationErrorWindow(message);
+        desktop.MainWindow = errorWindow;
+        errorWindow.Closed += (_, _) => desktop.Shutdown(1);
+        errorWindow.Show();
     }
 
     private IConfigurationRoot CreateConfig()
@@ -99,3 +178,4 @@ public partial class App : Application
         return configuration;
     }
 }
+
