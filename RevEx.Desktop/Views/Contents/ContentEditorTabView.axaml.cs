@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using RevEx.Desktop.Configuration;
@@ -13,6 +14,21 @@ public partial class ContentEditorTabView : UserControl
     public ContentEditorTabView()
     {
         InitializeComponent();
+    }
+
+    private async void OnSaveClick(object? sender, RoutedEventArgs eventArgs)
+    {
+        if (!this.TryGetContext<ContentEditorTabViewModel>(out var owner, out var viewModel) ||
+            !viewModel.SaveCommand.CanExecute(null))
+        {
+            return;
+        }
+
+        await viewModel.SaveCommand.ExecuteAsync(null);
+        if (viewModel.SaveFailure is { } error)
+        {
+            await new OperationErrorWindow("Не удалось сохранить данные", error).ShowDialog(owner);
+        }
     }
 
     private async void OnChooseFileClick(object? sender, RoutedEventArgs eventArgs)
@@ -50,8 +66,14 @@ public partial class ContentEditorTabView : UserControl
             return;
         }
 
-        var tag = await new TagSelectionWindow(viewModel.GetAvailableTags()).ShowDialog<TagDto?>(owner);
-        if (tag is not null)
+        var tags = await new TagSelectionWindow(viewModel.GetAvailableTags())
+            .ShowDialog<IReadOnlyList<TagDto>?>(owner);
+        if (tags is null)
+        {
+            return;
+        }
+
+        foreach (var tag in tags)
         {
             viewModel.AddTag(tag);
         }

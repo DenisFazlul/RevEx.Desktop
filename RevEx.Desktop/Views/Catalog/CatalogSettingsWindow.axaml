@@ -12,57 +12,101 @@
         MinWidth="560" MinHeight="340"
         WindowStartupLocation="CenterOwner">
     <Window.Styles>
-        <Style Selector="ListBox.filter-options ListBoxItem">
-            <Setter Property="Padding" Value="4,0" />
-            <Setter Property="Margin" Value="0" />
-            <Setter Property="MinHeight" Value="32" />
-            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Style Selector="Expander.selected-tag-group">
+            <Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+        <Style Selector="TextBlock.selected-tag-group-name">
+            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="FontWeight" Value="SemiBold" />
         </Style>
     </Window.Styles>
-    <Grid RowDefinitions="Auto,*,Auto">
-        <StackPanel Margin="12,12,12,8" Spacing="4">
-            <TextBlock Classes="h2" Text="Фильтр каталога" />
-            <TextBlock Classes="caption"
-                       Text="Выберите категории и теги материалов, которые нужно показать" />
-        </StackPanel>
-
-        <Grid Grid.Row="1" Margin="12,0" ColumnDefinitions="*,12,*">
+    <Window.Resources>
+        <DataTemplate x:Key="FilterItem" x:DataType="models:FilterItemViewModel">
+            <CheckBox MinHeight="32" Padding="4,0" IsChecked="{Binding IsSelected}">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <Ellipse Width="10" Height="10" Fill="{Binding ColorBrush}"
+                             IsVisible="{Binding ColorBrush, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                    <TextBlock Text="{Binding Name}" />
+                </StackPanel>
+            </CheckBox>
+        </DataTemplate>
+        <DataTemplate x:Key="FilterGroup" x:DataType="vm:CatalogFilterGroupViewModel">
+            <StackPanel Spacing="4">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button Classes="secondary" MinHeight="32" Padding="8,4" FontSize="12"
+                            Content="Выбрать все" Command="{Binding SelectAllCommand}" />
+                    <Button Classes="secondary" MinHeight="32" Padding="8,4" FontSize="12"
+                            Content="Снять все" Command="{Binding ClearCommand}" />
+                </StackPanel>
+                <ItemsControl ItemsSource="{Binding VisibleItems}" ItemTemplate="{StaticResource FilterItem}" />
+            </StackPanel>
+        </DataTemplate>
+    </Window.Resources>
+    <Grid RowDefinitions="*,Auto">
+        <Grid Margin="12,12,12,0" ColumnDefinitions="*,12,2*">
             <Border Classes="content-pane">
                 <Grid RowDefinitions="Auto,8,*">
                     <StackPanel Spacing="4">
-                        <TextBlock FontSize="15" FontWeight="SemiBold" Text="Категории" />
-                        <TextBlock Classes="caption" Text="Можно выбрать несколько" />
+                        <TextBlock FontWeight="SemiBold" Text="Категории" />
+                        <TextBox PlaceholderText="Поиск по категориям"
+                                 AutomationProperties.Name="Поиск по категориям"
+                                 Text="{Binding CategorySearchText, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
-                    <ListBox Grid.Row="2" Classes="clean-list filter-options" ItemsSource="{Binding Categories}">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate x:DataType="models:FilterItemViewModel">
-                                <CheckBox Margin="0" MinHeight="28" Padding="4,0" Content="{Binding Name}"
-                                          IsChecked="{Binding IsSelected}" />
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
+                    <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Disabled">
+                        <ContentControl Content="{Binding Categories}" ContentTemplate="{StaticResource FilterGroup}" />
+                    </ScrollViewer>
                 </Grid>
             </Border>
 
             <Border Grid.Column="2" Classes="content-pane">
                 <Grid RowDefinitions="Auto,8,*">
                     <StackPanel Spacing="4">
-                        <TextBlock FontSize="15" FontWeight="SemiBold" Text="Теги" />
+                        <TextBlock FontWeight="SemiBold" Text="Теги" />
                         <TextBlock Classes="caption" Text="Материал должен содержать все выбранные теги" TextWrapping="Wrap" />
+                        <TextBox PlaceholderText="Поиск по тегам"
+                                 AutomationProperties.Name="Поиск по тегам"
+                                 Text="{Binding TagSearchText, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
-                    <ListBox Grid.Row="2" Classes="clean-list filter-options" ItemsSource="{Binding Tags}">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate x:DataType="models:FilterItemViewModel">
-                                <CheckBox Margin="0" MinHeight="28" Padding="4,0" Content="{Binding Name}"
-                                          IsChecked="{Binding IsSelected}" />
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
+                    <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Disabled">
+                        <ItemsControl ItemsSource="{Binding VisibleTagGroups}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:CatalogFilterGroupViewModel">
+                                    <Expander Padding="8,4" Margin="0,0,0,4"
+                                              Classes.selected-tag-group="{Binding HasSelection}"
+                                              IsExpanded="{Binding IsSearchActive, Mode=OneWay}"
+                                              HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                                        <Expander.Header>
+                                            <DockPanel LastChildFill="True">
+                                                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="4">
+                                                <Button Classes="secondary" MinHeight="32" Padding="8,4" FontSize="12"
+                                                        Content="Выбрать все" Command="{Binding SelectAllCommand}" />
+                                                <Button Classes="secondary" MinHeight="32" Padding="8,4" FontSize="12"
+                                                        Content="Снять все" Command="{Binding ClearCommand}" />
+                                                </StackPanel>
+                                                <TextBlock Margin="0,0,4,0" VerticalAlignment="Center"
+                                                           Classes.selected-tag-group-name="{Binding HasSelection}"
+                                                           TextWrapping="Wrap" Text="{Binding DisplayName}" />
+                                            </DockPanel>
+                                        </Expander.Header>
+                                        <ItemsControl ItemsSource="{Binding VisibleItems}" ItemTemplate="{StaticResource FilterItem}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <WrapPanel Orientation="Horizontal" />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                        </ItemsControl>
+                                    </Expander>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
                 </Grid>
             </Border>
         </Grid>
 
-        <Border Grid.Row="2" Margin="0,8,0,0" BorderBrush="{StaticResource BorderBrush}"
+        <Border Grid.Row="1" Margin="0,8,0,0" BorderBrush="{DynamicResource BorderBrush}"
                 BorderThickness="0,1,0,0" Padding="12,8">
             <Grid ColumnDefinitions="Auto,*,Auto,8,Auto">
                 <Button Classes="secondary" Content="Сбросить" Command="{Binding ResetCommand}" />

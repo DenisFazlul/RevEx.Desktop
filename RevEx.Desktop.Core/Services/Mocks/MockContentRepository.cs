@@ -8,6 +8,51 @@ namespace RevEx.Desktop.Core.Services;
 
 internal sealed class MockContentRepository : IContentRepository
 {
+    private readonly Dictionary<int, List<ContentParameterDto>> _parameters = [];
+    private int _nextParameterId;
+
+    public Task<IReadOnlyCollection<ContentParameterDto>> GetParametersAsync(int contentId, CancellationToken token = default)
+    {
+        token.ThrowIfCancellationRequested();
+        IReadOnlyCollection<ContentParameterDto> result = GetParameters(contentId).ToArray();
+        return Task.FromResult(result);
+    }
+
+    public Task<ContentParameterDto> CreateParameterAsync(int contentId, ContentParameterInput input, CancellationToken token = default)
+    {
+        token.ThrowIfCancellationRequested();
+        var parameter = new ContentParameterDto(++_nextParameterId, input.Name, input.Kind, input.Value, input.Help);
+        GetParameters(contentId).Add(parameter);
+        return Task.FromResult(parameter);
+    }
+
+    public Task UpdateParameterAsync(int contentId, int id, ContentParameterInput input, CancellationToken token = default)
+    {
+        token.ThrowIfCancellationRequested();
+        var parameters = GetParameters(contentId);
+        var index = parameters.FindIndex(parameter => parameter.Id == id);
+        parameters[index] = new ContentParameterDto(id, input.Name, input.Kind, input.Value, input.Help);
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteParameterAsync(int contentId, int id, CancellationToken token = default)
+    {
+        token.ThrowIfCancellationRequested();
+        GetParameters(contentId).RemoveAll(parameter => parameter.Id == id);
+        return Task.CompletedTask;
+    }
+
+    private List<ContentParameterDto> GetParameters(int contentId)
+    {
+        if (!_parameters.TryGetValue(contentId, out var parameters))
+        {
+            parameters = [];
+            _parameters.Add(contentId, parameters);
+        }
+
+        return parameters;
+    }
+
     public Task<Guid> GenerateUuid7Async(CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -47,6 +92,18 @@ internal sealed class MockContentRepository : IContentRepository
         }
 
         return Task.FromResult<IReadOnlyCollection<ContentDto>>(result.ToArray());
+    }
+
+    public Task SetFrozenAsync(int id, bool isFrozen, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var index = Contents.FindIndex(item => item.Id == id);
+        if (index >= 0)
+        {
+            Contents[index] = Contents[index] with { IsFrozen = isFrozen };
+        }
+
+        return Task.CompletedTask;
     }
 
     public Task<ContentDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default) =>

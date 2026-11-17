@@ -12,10 +12,10 @@ public sealed class MockRevExApiService : IRevExApiService
     public IContentVersionRepository ContentVersions { get; } = new MockContentVersionRepository();
     public IContentFileRepository ContentFiles { get; } = new MockContentFileRepository();
     public IContentHistoryRepository ContentHistory { get; } = new MockContentHistoryRepository();
-    public IRfaImportRepository RfaImports { get; }
+    public IVersionImportRepository VersionImports { get; }
 
     public MockRevExApiService()
     {
-        RfaImports = new CompositeRfaImportRepository(Contents, ContentVersions, ContentFiles);
+        VersionImports = new CompositeVersionImportRepository(Contents, ContentVersions, ContentFiles);
     }
 }

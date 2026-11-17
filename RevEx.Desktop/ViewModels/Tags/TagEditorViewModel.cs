@@ -10,10 +10,23 @@ namespace RevEx.Desktop.ViewModels.Tags;
 public partial class TagEditorViewModel : TextEditorViewModel<TagEditorResult>
 {
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ColorPreview), nameof(PickerColor))]
+    private string _color;
+
+    public Avalonia.Media.IBrush? ColorPreview => TagColorBrush.FromHex(Color);
+
+    public Avalonia.Media.Color PickerColor
+    {
+        get => (ColorPreview as Avalonia.Media.ISolidColorBrush)?.Color ?? Avalonia.Media.Colors.Transparent;
+        set => Color = $"#{value.R:X2}{value.G:X2}{value.B:X2}";
+    }
+
+    [ObservableProperty]
     private TagGroupItemViewModel? _selectedGroup;
 
-    public TagEditorViewModel(IEnumerable<TagGroupItemViewModel> groups, string? name, TagGroupItemViewModel? selectedGroup)
+    public TagEditorViewModel(IEnumerable<TagGroupItemViewModel> groups, string? name, TagGroupItemViewModel? selectedGroup, string color = "#75451D")
     {
+        _color = color;
         Groups = groups.ToArray();
         Text = name ?? string.Empty;
         IsEditing = name is not null;
@@ -44,7 +57,14 @@ public partial class TagEditorViewModel : TextEditorViewModel<TagEditorResult>
             return;
         }
 
-        Complete(new TagEditorResult(EditorAction.Save, name, SelectedGroup));
+        if (ColorPreview is null)
+        {
+            ValidationMessage = "Введите цвет в формате #RRGGBB.";
+            return;
+        }
+
+        var result = new TagEditorResult(EditorAction.Save, name, SelectedGroup, Color.ToUpperInvariant());
+        Complete(result);
     }
 
     [RelayCommand]

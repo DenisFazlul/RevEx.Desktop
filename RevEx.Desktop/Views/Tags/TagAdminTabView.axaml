@@ -29,15 +29,15 @@
                     <TextBlock IsVisible="{Binding HasNoGroups}"
                                Text="Групп пока нет. Создайте первую группу."
                                HorizontalAlignment="Center" VerticalAlignment="Center"
-                               Foreground="{StaticResource TextSecondaryBrush}" />
+                               Foreground="{DynamicResource TextSecondaryBrush}" />
                     <ScrollViewer IsVisible="{Binding HasGroups}" VerticalScrollBarVisibility="Auto">
                         <ItemsControl ItemsSource="{Binding Groups}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="vm:TagGroupItemViewModel">
-                                    <Border Margin="0,0,0,12" BorderBrush="{StaticResource BorderBrush}"
+                                    <Border Margin="0,0,0,12" BorderBrush="{DynamicResource BorderBrush}"
                                             BorderThickness="1" CornerRadius="10">
                                         <Grid RowDefinitions="Auto,Auto">
-                                            <Border Padding="12,4" Background="{StaticResource SurfaceMutedBrush}"
+                                            <Border Padding="12,4" Background="{DynamicResource SurfaceMutedBrush}"
                                                     CornerRadius="9,9,0,0">
                                                 <Grid ColumnDefinitions="*,Auto,12,Auto,6,Auto">
                                                     <TextBlock Text="{Binding Name}" FontWeight="SemiBold"
@@ -62,12 +62,13 @@
                                                               IsVisible="{Binding HasTags}">
                                                     <ItemsControl.ItemTemplate>
                                                         <DataTemplate x:DataType="vm:TagItemViewModel">
-                                                            <Border Padding="12,4" BorderBrush="{StaticResource BorderBrush}"
+                                                            <Border Padding="12,4" BorderBrush="{DynamicResource BorderBrush}"
                                                                     BorderThickness="0,1,0,0">
                                                                 <Grid ColumnDefinitions="*,Auto,6,Auto">
-                                                                    <TextBlock Text="{Binding Name, StringFormat='#{0}'}"
-                                                                               FontWeight="Medium"
-                                                                               VerticalAlignment="Center" />
+                                                                    <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                                                    <Ellipse Width="10" Height="10" Fill="{Binding ColorBrush}" />
+                                                                    <TextBlock Text="{Binding Name, StringFormat='#{0}'}" FontWeight="Medium" />
+                                                                </StackPanel>
                                                                     <Button Grid.Column="1" Classes="icon" Content="✎"
                                                                             Click="OnEditTagClick"
                                                                             ToolTip.Tip="Редактировать тег" />

@@ -8,9 +8,16 @@ public interface IContentRepository
         ContentQueryDto query,
         CancellationToken cancellationToken = default);
 
+    Task SetFrozenAsync(int id, bool isFrozen, CancellationToken cancellationToken = default);
+
     Task<ContentDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
 
     Task<ContentDto?> GetByCidAsync(Guid cid, CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyCollection<ContentParameterDto>> GetParametersAsync(int contentId, CancellationToken token = default);
+    Task<ContentParameterDto> CreateParameterAsync(int contentId, ContentParameterInput input, CancellationToken token = default);
+    Task UpdateParameterAsync(int contentId, int id, ContentParameterInput input, CancellationToken token = default);
+    Task DeleteParameterAsync(int contentId, int id, CancellationToken token = default);
 
     Task<Guid> GenerateUuid7Async(CancellationToken cancellationToken = default);
 

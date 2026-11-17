@@ -16,11 +16,17 @@ using RevEx.Domain.Contracts.ContentHistory;
 using RevEx.Domain.Contracts.Tag;
 
 AppBuilder.Configure<App>().UseHeadless(new AvaloniaHeadlessPlatformOptions()).SetupWithoutStarting();
+if (args.Contains("--unified-only", StringComparer.Ordinal))
+{
+    UnifiedVersionImportChecks.Run();
+    return;
+}
+
 ConnectorChecks.Run();
 DesktopControlChecks.Run();
+UnifiedVersionImportChecks.Run();
 RfaImportChecks.Run();
 VersionPublicationChecks.Run();
-FileVersionImportChecks.Run();
 OtherFileMetadataChecks.Run();
 DialogChecks.Run();
 RevitFamilyMetadataChecks.Run();
@@ -34,8 +40,7 @@ Window[] windows = [new MainWindow(),
     new ConnectorSelectionWindow([new ConnectorDescriptor(Guid.NewGuid(),"Test",ConnectorProduct.Mock,"1",new Uri("http://127.0.0.1:1"),1,null)]),
     new ContentHistoryDetailsWindow(history),
     new RfaFamilyImportWindow(),
-    new RfaVersionImportWindow(),
-    new FileVersionImportWindow(),
+    new VersionImportWindow(),
     new Window { Content = new OtherFileMetadataView() },
     new TagEditorWindow(),
     new TagGroupEditorWindow(),

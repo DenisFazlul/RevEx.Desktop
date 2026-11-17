@@ -13,7 +13,7 @@
                         <Button Classes="sidebar-menu-button" Command="{Binding OpenCommand}">
                             <Grid ColumnDefinitions="28,*">
                                 <Border Width="28" Height="28" CornerRadius="8"
-                                        Background="{StaticResource SurfaceBrush}">
+                                        Background="{DynamicResource SurfaceBrush}">
                                     <TextBlock Text="{Binding Symbol}" FontSize="16" FontWeight="Normal"
                                                HorizontalAlignment="Center" VerticalAlignment="Center" />
                                 </Border>
@@ -29,7 +29,7 @@
         <Button Grid.Row="1" Margin="8,8,8,0" Classes="sidebar-menu-button danger-menu"
                 Command="{Binding LogoutCommand}">
             <Grid ColumnDefinitions="28,*">
-                <PathIcon Width="17" Height="17" Foreground="{StaticResource DangerBrush}"
+                <PathIcon Width="17" Height="17" Foreground="{DynamicResource DangerBrush}"
                           Data="M3,2 L11,2 L11,4 L5,4 L5,16 L11,16 L11,18 L3,18 Z M10,9 L17,9 L14,6 L15,5 L20,10 L15,15 L14,14 L17,11 L10,11 Z" />
                 <TextBlock Grid.Column="1" Margin="9,0,0,0" VerticalAlignment="Center"
                            Text="Выйти из профиля" />

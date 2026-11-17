@@ -50,7 +50,7 @@ public partial class ContentDetailsViewModel
         .ToArray();
 
     public bool HasNoPlatformVersions => !IsLoading && FilteredVersions.Count == 0;
-    public bool CanAddVersion => SelectedVersionPlatform?.Value is Platform.Revit or Platform.Other;
+    public bool CanAddVersion => SelectedVersionPlatform is not null;
 
     private void SynchronizeVersionPlatform(ContentVersionDto? version)
     {

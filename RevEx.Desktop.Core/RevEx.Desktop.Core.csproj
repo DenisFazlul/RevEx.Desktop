@@ -13,6 +13,7 @@
 
     <ItemGroup>
         <EmbeddedResource Include="Authentication\Assets\AuthorizationCompleted.html" />
+        <EmbeddedResource Include="Authentication\Assets\Tyubik.png" />
     </ItemGroup>
 
   <ItemGroup>

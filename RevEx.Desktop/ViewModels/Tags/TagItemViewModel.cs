@@ -18,10 +18,17 @@ public partial class TagItemViewModel : ViewModelBase
     [ObservableProperty]
     private string _name;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ColorBrush))]
+    private string _color;
+
+    public Avalonia.Media.IBrush? ColorBrush => TagColorBrush.FromHex(Color);
+
     public TagItemViewModel(TagDto dto)
     {
         Id = dto.Id;
         TagGroupId = dto.TagGroupId;
         _name = dto.Name;
+        _color = dto.Color;
     }
 }

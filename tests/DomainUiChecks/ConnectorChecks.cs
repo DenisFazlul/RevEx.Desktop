@@ -47,7 +47,7 @@ internal static class ConnectorChecks
             await runtime.StartAsync();
             Require(registry.GetAll().Count == 0, "Isolated registry is not empty.");
 
-            await using var connector = new ConnectorHost(new ConnectorHostOptions(
+            using var connector = new ConnectorHost(new ConnectorHostOptions(
                 "Desktop integration connector", ConnectorProduct.Mock, "1", DiscoveryDirectory: directory));
             connector.RegisterExecutor(new LoadExecutor());
             await connector.StartAsync();

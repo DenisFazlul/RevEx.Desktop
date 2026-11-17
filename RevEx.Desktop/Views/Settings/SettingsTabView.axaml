@@ -1,5 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:common="using:RevEx.Desktop.Views.Common"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:RevEx.Desktop.ViewModels.Settings"
@@ -7,11 +8,23 @@
              mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="650"
              x:DataType="vm:SettingsTabViewModel" x:Class="RevEx.Desktop.Views.Settings.SettingsTabView">
     <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-        <Grid Margin="12" RowDefinitions="Auto,12,Auto,12,Auto" MaxWidth="880"
+        <Grid Margin="12" RowDefinitions="Auto,12,Auto,12,Auto,12,Auto" MaxWidth="880"
               HorizontalAlignment="Left">
             <HeaderedContentControl Theme="{StaticResource PageHeaderTheme}" Header="Настройки"
                                     Content="Подключение и параметры рабочего пространства" />
             <Border Grid.Row="2" Classes="card settings-card">
+                <StackPanel Spacing="8">
+                    <TextBlock Classes="h2" Text="Оформление" />
+                    <HeaderedContentControl Theme="{StaticResource FormFieldTheme}" Header="Тема">
+                        <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding ThemeOptions}"
+                                  SelectedItem="{Binding SelectedTheme, Mode=TwoWay}" />
+                    </HeaderedContentControl>
+                    <TextBlock Classes="validation-message" Text="{Binding ThemeErrorMessage}"
+                               TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Row="4" Classes="card settings-card">
                 <Grid RowDefinitions="Auto,12,Auto,8,Auto,12,Auto,Auto">
                     <StackPanel Spacing="4">
                         <TextBlock Classes="h2" Text="Подключения" />
@@ -39,7 +52,7 @@
                 </Grid>
             </Border>
 
-            <Border Grid.Row="4" Classes="card settings-card">
+            <Border Grid.Row="6" Classes="card settings-card">
                 <Grid RowDefinitions="Auto,12,Auto">
                     <Grid ColumnDefinitions="*,Auto">
                         <StackPanel Spacing="4">
@@ -53,7 +66,7 @@
                     </Grid>
 
                     <Grid Grid.Row="2" MinHeight="48">
-                        <ProgressBar IsVisible="{Binding IsLoadingConnectors}" IsIndeterminate="True"
+                        <common:LoadingIndicator IsVisible="{Binding IsLoadingConnectors}"
                                      VerticalAlignment="Top" />
                         <TextBlock IsVisible="{Binding HasNoConnectors}" Classes="caption"
                                    Text="Подключённых Connector пока нет."

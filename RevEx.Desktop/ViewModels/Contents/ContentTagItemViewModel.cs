@@ -20,6 +20,8 @@ public partial class ContentTagItemViewModel : ViewModelBase
     {
         get;
     }
+    public Avalonia.Media.IBrush? ColorBrush { get; }
+
     public bool CanEdit
     {
         get;
@@ -32,6 +34,7 @@ public partial class ContentTagItemViewModel : ViewModelBase
     {
         Id = dto.Id;
         Name = dto.Name;
+        ColorBrush = Tags.TagColorBrush.FromHex(dto.Color);
         CanEdit = canEdit;
         _remove = remove;
     }

@@ -6,13 +6,13 @@ using RevEx.Domain.Entities;
 
 namespace RevEx.Desktop.Core.Services;
 
-public sealed class CompositeRfaImportRepository(
+public sealed class CompositeVersionImportRepository(
     IContentRepository contents,
     IContentVersionRepository versions,
-    IContentFileRepository files) : IRfaImportRepository
+    IContentFileRepository files) : IVersionImportRepository
 {
     public async Task<ContentVersionDto> ImportAsync(
-        RfaImportRequest request,
+        VersionImportRequest request,
         CancellationToken cancellationToken = default)
     {
         var content = await contents.GetByCidAsync(request.Cid, cancellationToken);
@@ -44,8 +44,8 @@ public sealed class CompositeRfaImportRepository(
                 Date = request.Date,
                 Status = "draft",
                 PublishStatus = PublishStatus.Draft,
-                Application = "revit",
-                Platform = Platform.Revit,
+                Application = request.Application,
+                Platform = request.Platform,
                 ApplicationVersion = request.ApplicationVersion
             },
             cancellationToken);
@@ -92,7 +92,8 @@ public sealed class CompositeRfaImportRepository(
                 stream,
                 auxiliaryFile.Name,
                 role,
-                cancellationToken);
+                cancellationToken,
+                auxiliaryFile.MetadataJson);
         }
 
         return version;

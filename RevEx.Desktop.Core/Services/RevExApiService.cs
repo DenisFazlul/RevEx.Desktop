@@ -11,7 +11,7 @@ public sealed class RevExApiService(
     IContentVersionRepository contentVersions,
     IContentFileRepository contentFiles,
     IContentHistoryRepository contentHistory,
-    IRfaImportRepository rfaImports) : IRevExApiService
+    IVersionImportRepository rfaImports) : IRevExApiService
 {
     public IContentRepository Contents { get; } = contents;
     public ICategoryRepository Categories { get; } = categories;
@@ -21,5 +21,5 @@ public sealed class RevExApiService(
     public IContentVersionRepository ContentVersions { get; } = contentVersions;
     public IContentFileRepository ContentFiles { get; } = contentFiles;
     public IContentHistoryRepository ContentHistory { get; } = contentHistory;
-    public IRfaImportRepository RfaImports { get; } = rfaImports;
+    public IVersionImportRepository VersionImports { get; } = rfaImports;
 }

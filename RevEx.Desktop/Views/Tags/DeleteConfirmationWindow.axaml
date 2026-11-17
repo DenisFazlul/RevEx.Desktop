@@ -10,7 +10,7 @@
     <Grid Margin="16" RowDefinitions="Auto,8,*,Auto">
         <TextBlock Classes="h2" Text="Удалить?" />
         <TextBlock Grid.Row="2" Text="{Binding Description}" TextWrapping="Wrap"
-                   Foreground="{StaticResource TextSecondaryBrush}" />
+                   Foreground="{DynamicResource TextSecondaryBrush}" />
         <Grid Grid.Row="3" ColumnDefinitions="*,12,*">
             <Button Content="{Binding CancelButtonText}" Command="{Binding CancelCommand}" />
             <Button Grid.Column="2" Classes="danger" Content="Удалить"

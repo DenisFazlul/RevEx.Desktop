@@ -7,7 +7,7 @@
         x:DataType="vm:RfaFamilyImportViewModel"
         Title="Добавить семейство RFA" Width="860" Height="780"
         MinWidth="640" MinHeight="540" WindowStartupLocation="CenterOwner"
-        Background="{StaticResource CanvasBrush}">
+        Background="{DynamicResource CanvasBrush}">
     <Grid Margin="16" RowDefinitions="Auto,12,*,12,Auto">
         <StackPanel Spacing="4">
             <TextBlock Classes="h2" Text="Добавить семейство RFA" />

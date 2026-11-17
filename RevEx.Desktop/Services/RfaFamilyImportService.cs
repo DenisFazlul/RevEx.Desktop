@@ -185,7 +185,7 @@ public sealed class RfaFamilyImportService
         try
         {
             await WriteIdentifiersAsync(session);
-            var request = new RfaImportRequest(
+            var request = new VersionImportRequest(
                 session.Cid,
                 session.Vid!.Value,
                 session.ContentName,
@@ -198,9 +198,11 @@ public sealed class RfaFamilyImportService
                 session.FileName,
                 session.Metadata.ToString(Formatting.None),
                 session.AuxiliaryFiles
-                    .Select(file => new RfaImportAuxiliaryFile(file.Path, file.Name))
-                    .ToArray());
-            session.SavedVersion = await _api.RfaImports.ImportAsync(request);
+                    .Select(file => new VersionImportAuxiliaryFile(file.Path, file.Name))
+                    .ToArray(),
+                Platform.Revit,
+                "revit");
+            session.SavedVersion = await _api.VersionImports.ImportAsync(request);
             return session.SavedVersion;
         }
         finally
@@ -221,9 +223,9 @@ public sealed class RfaFamilyImportService
             throw new InvalidOperationException($"Коннектор «{connector.Name}» не поддерживает чтение RFA. Выберите другой коннектор.");
         }
 
-        if (!connector.Commands.Any(command => command.Name == ConnectorCommand.WriteRfaIdentifiers))
+        if (!connector.Commands.Any(command => command.Name == ConnectorCommand.PrepareContentVersion))
         {
-            throw new InvalidOperationException($"Коннектор «{connector.Name}» не поддерживает запись CID и VID. Выберите другой коннектор.");
+            throw new InvalidOperationException($"Коннектор «{connector.Name}» не поддерживает подготовку файла версии. Выберите другой коннектор.");
         }
     }
 
@@ -237,21 +239,28 @@ public sealed class RfaFamilyImportService
         ValidateReader(session.Connector);
         session.Vid ??= await _api.Contents.GenerateUuid7Async();
         var file = new ContentVersionExecuteDto(Guid.NewGuid(), session.FileName, session.SourceFilePath);
-        var request = new WriteRfaIdentifiersRequest(file, session.Cid, session.Vid.Value);
+        var request = new PrepareContentVersionRequest(
+            session.Cid,
+            session.Vid.Value,
+            Platform.Revit,
+            [file]);
         var task = new ConnectorTask(
             Guid.NewGuid(),
-            $"Запись CID и VID в {session.FileName}",
-            ConnectorCommand.WriteRfaIdentifiers);
-        var response = await _client.ExecuteAsync<WriteRfaIdentifiersRequest, WriteRfaIdentifiersResponse>(
+            $"Подготовка {session.FileName}",
+            ConnectorCommand.PrepareContentVersion);
+        var response = await _client.ExecuteAsync<PrepareContentVersionRequest, PrepareContentVersionResponse>(
             session.Connector,
             task,
             request);
-        if (response.Cid != session.Cid || response.Vid != session.Vid.Value)
+        var writtenCid = response.Cid;
+        var writtenVid = response.Vid;
+
+        if (writtenCid != session.Cid || writtenVid != session.Vid.Value)
         {
             throw new InvalidOperationException("Коннектор вернул CID или VID, отличающийся от записанного значения.");
         }
 
-        UpdateIdentifierMetadata(session, response.Cid, response.Vid);
+        UpdateIdentifierMetadata(session, writtenCid, writtenVid);
         session.AreIdentifiersWritten = true;
     }
 

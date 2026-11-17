@@ -29,7 +29,7 @@ internal static class VersionPublicationChecks
         var repository = new StatusRepository(mock.ContentVersions);
         var api = new RevExApiService(mock.Contents, mock.Categories, mock.Tags, mock.TagGroups,
             mock.ContentStatuses, repository, mock.ContentFiles, mock.ContentHistory,
-            new CompositeRfaImportRepository(mock.Contents, repository, mock.ContentFiles));
+            new CompositeVersionImportRepository(mock.Contents, repository, mock.ContentFiles));
         var category = (await api.Categories.GetAllAsync()).First();
         var content = await api.Contents.CreateAsync(new CreateContentDto
         {
@@ -69,7 +69,7 @@ internal static class VersionPublicationChecks
         var otherPlatformVersion = version with { Id = -100, Platform = Platform.AutoCad, Name = "AutoCAD check" };
         model.Versions.Add(otherPlatformVersion);
         model.SelectedVersionPlatform = model.VersionPlatforms.Single(option => option.Value == Platform.AutoCad);
-        Require(!model.CanAddVersion, "AutoCAD exposed a version form that is not implemented.");
+        Require(model.CanAddVersion, "The unified version form is unavailable for AutoCAD.");
         while (model.IsLoadingVersion)
         {
             await Task.Delay(1);
@@ -119,6 +119,42 @@ internal static class VersionPublicationChecks
         Require(model.SelectedVersion?.PublishStatus == PublishStatus.Ready && model.VersionErrorMessage is null,
             "Retry did not save the selected status.");
         window.Close();
+
+        using var administrator = new ContentDetailsViewModel(item, api, client, registry, import, true,
+            () => { }, (_, _, _) => { }, canChangeFreeze: true);
+        await administrator.ActivateAsync();
+        await administrator.ToggleFreezeCommand.ExecuteAsync(null);
+        Require(administrator.IsFrozen && !administrator.CanEdit && !administrator.CanChangePublishStatus,
+            "Freezing did not disable edits for the administrator.");
+        await model.ActivateAsync();
+        Require(!model.IsFrozen && model.CanEdit, "Freezing changed an already open card.");
+
+        using var reopened = new ContentDetailsViewModel(item, api, client, registry, import, true,
+            () => { }, (_, _, _) => { });
+        await reopened.ActivateAsync();
+        Require(reopened.IsFrozen && !reopened.CanEdit && !reopened.CanLoadVersionIntoProject
+            && !reopened.ToggleFreezeCommand.CanExecute(null), "A newly opened frozen card is not read-only.");
+
+        var frozenView = new ContentDetailsView { DataContext = reopened };
+        var frozenWindow = new Window { Content = frozenView, Width = 1200, Height = 900 };
+        frozenWindow.Show();
+        frozenView.GetVisualDescendants().OfType<TabControl>().Single().SelectedIndex = 1;
+        Dispatcher.UIThread.RunJobs();
+        var frozenButtons = frozenView.GetVisualDescendants().OfType<Button>().ToArray();
+        foreach (var label in new[] { "Добавить", "Сохранить статус", "Загрузить в проект" })
+        {
+            Require(!frozenButtons.Single(button => button.Content as string == label).IsEffectivelyEnabled,
+                $"The frozen card enabled the {label} action.");
+        }
+
+        frozenWindow.Close();
+
+        await administrator.ToggleFreezeCommand.ExecuteAsync(null);
+        Require(!administrator.IsFrozen && administrator.CanEdit, "Thawing did not restore editing.");
+        using var reopenedAfterThaw = new ContentDetailsViewModel(item, api, client, registry, import, true,
+            () => { }, (_, _, _) => { });
+        await reopenedAfterThaw.ActivateAsync();
+        Require(!reopenedAfterThaw.IsFrozen && reopenedAfterThaw.CanEdit, "Thawing did not persist.");
 
         using var readOnly = new ContentDetailsViewModel(item, api, client, registry, import, false,
             () => { }, (_, _, _) => { });

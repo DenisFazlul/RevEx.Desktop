@@ -3,12 +3,12 @@ using RevEx.Domain.Contracts.ContentVersion;
 
 namespace RevEx.Desktop.Core.Services;
 
-public sealed class RfaImportRepository(RevExApiTransport transport) : IRfaImportRepository
+public sealed class VersionImportRepository(RevExApiTransport transport) : IVersionImportRepository
 {
     public Task<ContentVersionDto> ImportAsync(
-        RfaImportRequest request,
+        VersionImportRequest request,
         CancellationToken cancellationToken = default)
     {
-        return transport.ImportRfaAsync(request, cancellationToken);
+        return transport.ImportVersionAsync(request, cancellationToken);
     }
 }

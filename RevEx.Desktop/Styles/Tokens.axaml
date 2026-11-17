@@ -1,23 +1,95 @@
 <Styles xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <!-- Neutral, content-first palette inspired by modern conversational desktop apps. -->
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:services="using:RevEx.Desktop.Services">
+    <!-- Neutral palettes and Tube palettes. See the workspace AGENTS.md for Tube colors. -->
     <Styles.Resources>
-        <SolidColorBrush x:Key="CanvasBrush" Color="#FFFFFF" />
-        <SolidColorBrush x:Key="SurfaceBrush" Color="#FFFFFF" />
-        <SolidColorBrush x:Key="SurfaceMutedBrush" Color="#F7F7F8" />
-        <SolidColorBrush x:Key="SurfaceHoverBrush" Color="#F1F1F1" />
-        <SolidColorBrush x:Key="SurfaceSelectedBrush" Color="#E9E9E9" />
-        <SolidColorBrush x:Key="SidebarBrush" Color="#F7F7F8" />
-        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#2D2D2D" />
-        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#6B6B6B" />
-        <SolidColorBrush x:Key="TextTertiaryBrush" Color="#8F8F8F" />
-        <SolidColorBrush x:Key="BorderBrush" Color="#E5E5E5" />
-        <SolidColorBrush x:Key="BorderStrongBrush" Color="#D4D4D4" />
-        <SolidColorBrush x:Key="AccentBrush" Color="#111111" />
-        <SolidColorBrush x:Key="AccentHoverBrush" Color="#2F2F2F" />
-        <SolidColorBrush x:Key="AccentSoftBrush" Color="#ECECEC" />
-        <SolidColorBrush x:Key="DangerBrush" Color="#C13D3D" />
-        <SolidColorBrush x:Key="DangerSoftBrush" Color="#FFF1F1" />
-        <SolidColorBrush x:Key="SuccessBrush" Color="#1F8A5B" />
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Light">
+                    <Color x:Key="SystemAccentColor">#171717</Color>
+                    <SolidColorBrush x:Key="CanvasBrush" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="SurfaceBrush" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="SurfaceMutedBrush" Color="#F7F7F8" />
+                    <SolidColorBrush x:Key="SurfaceHoverBrush" Color="#F2F2F2" />
+                    <SolidColorBrush x:Key="SurfaceSelectedBrush" Color="#E8E8E8" />
+                    <SolidColorBrush x:Key="SidebarBrush" Color="#F9F9F9" />
+                    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#171717" />
+                    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#5D5D5D" />
+                    <SolidColorBrush x:Key="TextTertiaryBrush" Color="#666666" />
+                    <SolidColorBrush x:Key="BorderBrush" Color="#E5E5E5" />
+                    <SolidColorBrush x:Key="BorderStrongBrush" Color="#AAAAAA" />
+                    <SolidColorBrush x:Key="AccentBrush" Color="#171717" />
+                    <SolidColorBrush x:Key="AccentHoverBrush" Color="#303030" />
+                    <SolidColorBrush x:Key="AccentSoftBrush" Color="#F1F1F1" />
+                    <SolidColorBrush x:Key="DangerBrush" Color="#B42318" />
+                    <SolidColorBrush x:Key="DangerSoftBrush" Color="#FFF0EF" />
+                    <SolidColorBrush x:Key="SuccessBrush" Color="#147647" />
+                    <SolidColorBrush x:Key="AccentForegroundBrush" Color="#FFFFFF" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="{x:Static services:DesktopThemePreference.LightTubeVariant}">
+                    <Color x:Key="SystemAccentColor">#75451D</Color>
+                    <SolidColorBrush x:Key="CanvasBrush" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="SurfaceBrush" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="SurfaceMutedBrush" Color="#FAF8F4" />
+                    <SolidColorBrush x:Key="SurfaceHoverBrush" Color="#F0EBE4" />
+                    <SolidColorBrush x:Key="SurfaceSelectedBrush" Color="#E9E2D8" />
+                    <SolidColorBrush x:Key="SidebarBrush" Color="#FAF8F4" />
+                    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#242321" />
+                    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#625D57" />
+                    <SolidColorBrush x:Key="TextTertiaryBrush" Color="#6C655E" />
+                    <SolidColorBrush x:Key="BorderBrush" Color="#DDD6CD" />
+                    <SolidColorBrush x:Key="BorderStrongBrush" Color="#B9AFA3" />
+                    <SolidColorBrush x:Key="AccentBrush" Color="#75451D" />
+                    <SolidColorBrush x:Key="AccentHoverBrush" Color="#573215" />
+                    <SolidColorBrush x:Key="AccentSoftBrush" Color="#FFF0D9" />
+                    <SolidColorBrush x:Key="DangerBrush" Color="#C13D3D" />
+                    <SolidColorBrush x:Key="DangerSoftBrush" Color="#FFF1F1" />
+                    <SolidColorBrush x:Key="SuccessBrush" Color="#1F8A5B" />
+                    <SolidColorBrush x:Key="AccentForegroundBrush" Color="#FFFFFF" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Dark">
+                    <Color x:Key="SystemAccentColor">#ECECEC</Color>
+                    <SolidColorBrush x:Key="CanvasBrush" Color="#212121" />
+                    <SolidColorBrush x:Key="SurfaceBrush" Color="#262626" />
+                    <SolidColorBrush x:Key="SurfaceMutedBrush" Color="#2F2F2F" />
+                    <SolidColorBrush x:Key="SurfaceHoverBrush" Color="#383838" />
+                    <SolidColorBrush x:Key="SurfaceSelectedBrush" Color="#424242" />
+                    <SolidColorBrush x:Key="SidebarBrush" Color="#171717" />
+                    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#ECECEC" />
+                    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#B4B4B4" />
+                    <SolidColorBrush x:Key="TextTertiaryBrush" Color="#A5A5A5" />
+                    <SolidColorBrush x:Key="BorderBrush" Color="#404040" />
+                    <SolidColorBrush x:Key="BorderStrongBrush" Color="#686868" />
+                    <SolidColorBrush x:Key="AccentBrush" Color="#ECECEC" />
+                    <SolidColorBrush x:Key="AccentHoverBrush" Color="#D8D8D8" />
+                    <SolidColorBrush x:Key="AccentSoftBrush" Color="#383838" />
+                    <SolidColorBrush x:Key="DangerBrush" Color="#FF9898" />
+                    <SolidColorBrush x:Key="DangerSoftBrush" Color="#46292B" />
+                    <SolidColorBrush x:Key="SuccessBrush" Color="#79D4A1" />
+                    <SolidColorBrush x:Key="AccentForegroundBrush" Color="#171717" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="{x:Static services:DesktopThemePreference.DarkTubeVariant}">
+                    <Color x:Key="SystemAccentColor">#FFAB35</Color>
+                    <SolidColorBrush x:Key="CanvasBrush" Color="#1A1918" />
+                    <SolidColorBrush x:Key="SurfaceBrush" Color="#242321" />
+                    <SolidColorBrush x:Key="SurfaceMutedBrush" Color="#2B2825" />
+                    <SolidColorBrush x:Key="SurfaceHoverBrush" Color="#35302B" />
+                    <SolidColorBrush x:Key="SurfaceSelectedBrush" Color="#40362D" />
+                    <SolidColorBrush x:Key="SidebarBrush" Color="#201F1D" />
+                    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#FAF6EF" />
+                    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#B9B2A9" />
+                    <SolidColorBrush x:Key="TextTertiaryBrush" Color="#ADA398" />
+                    <SolidColorBrush x:Key="BorderBrush" Color="#514A42" />
+                    <SolidColorBrush x:Key="BorderStrongBrush" Color="#786B5D" />
+                    <SolidColorBrush x:Key="AccentBrush" Color="#FFAB35" />
+                    <SolidColorBrush x:Key="AccentHoverBrush" Color="#FFC169" />
+                    <SolidColorBrush x:Key="AccentSoftBrush" Color="#403124" />
+                    <SolidColorBrush x:Key="DangerBrush" Color="#FF9890" />
+                    <SolidColorBrush x:Key="DangerSoftBrush" Color="#472B28" />
+                    <SolidColorBrush x:Key="SuccessBrush" Color="#7AD4A1" />
+                    <SolidColorBrush x:Key="AccentForegroundBrush" Color="#242321" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
     </Styles.Resources>
 </Styles>

@@ -16,7 +16,7 @@
             <TextBlock Classes="label" Text="Название группы" />
             <TextBox x:Name="NameBox" Text="{Binding Text}" MaxLength="100"
                      PlaceholderText="Например, Платформа" />
-            <TextBlock Text="{Binding ValidationMessage}" Foreground="{StaticResource TextSecondaryBrush}" />
+            <TextBlock Text="{Binding ValidationMessage}" Foreground="{DynamicResource TextSecondaryBrush}" />
         </StackPanel>
         <Grid Grid.Row="4" ColumnDefinitions="Auto,*,Auto,10,Auto">
             <Button Classes="danger" Content="Удалить" IsVisible="{Binding IsEditing}"

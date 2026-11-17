@@ -49,6 +49,7 @@
                                     <DataTemplate x:DataType="vm:ContentTagItemViewModel">
                                         <Border Classes="tag">
                                             <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <Ellipse Width="10" Height="10" Fill="{Binding ColorBrush}" />
                                                 <TextBlock Text="{Binding Name, StringFormat='#{0}'}"
                                                            VerticalAlignment="Center" />
                                                 <Button Classes="icon-sm" Command="{Binding RemoveCommand}"
@@ -108,7 +109,7 @@
 
                     <Button Classes="primary" HorizontalAlignment="Left"
                             Content="Сохранить"
-                            Command="{Binding SaveCommand}"
+                            Click="OnSaveClick"
                             IsEnabled="{Binding !IsSaving}" />
                 </StackPanel>
             </Border>

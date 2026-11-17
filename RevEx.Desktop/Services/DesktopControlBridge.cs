@@ -89,8 +89,14 @@ public sealed class DesktopControlBridge : IAsyncDisposable
         {
             if (application is not null)
             {
-                await application.StopAsync(cancellationToken);
-                await application.DisposeAsync();
+                try
+                {
+                    await application.StopAsync(cancellationToken);
+                }
+                finally
+                {
+                    await application.DisposeAsync();
+                }
             }
         }
         finally

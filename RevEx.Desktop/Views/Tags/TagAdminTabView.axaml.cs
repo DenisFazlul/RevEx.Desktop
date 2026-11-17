@@ -80,7 +80,7 @@ public partial class TagAdminTabView : UserControl
             .ShowDialog<TagEditorResult?>(owner);
         if (result is { Action: EditorAction.Save })
         {
-            await viewModel.AddTagFromDialogAsync(result.Name, result.Group);
+            await viewModel.AddTagFromDialogAsync(result.Name, result.Group, result.Color);
         }
     }
 
@@ -93,7 +93,7 @@ public partial class TagAdminTabView : UserControl
         }
 
         var group = viewModel.Groups.First(item => item.Id == tag.TagGroupId);
-        var result = await new TagEditorWindow(viewModel.Groups, tag.Name, group)
+        var result = await new TagEditorWindow(viewModel.Groups, tag.Name, group, tag.Color)
             .ShowDialog<TagEditorResult?>(owner);
         if (result is null)
         {
@@ -106,7 +106,7 @@ public partial class TagAdminTabView : UserControl
         }
         else
         {
-            await viewModel.EditTagFromDialogAsync(tag, result.Name, result.Group);
+            await viewModel.EditTagFromDialogAsync(tag, result.Name, result.Group, result.Color);
         }
     }
 

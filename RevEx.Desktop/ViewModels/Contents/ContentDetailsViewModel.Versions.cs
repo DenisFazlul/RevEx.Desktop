@@ -81,7 +81,7 @@ public partial class ContentDetailsViewModel
 
     public async Task AddVersionFileAsync(string path, string fileName)
     {
-        if (SelectedVersion is null)
+        if (!CanEdit || SelectedVersion is null)
         {
             return;
         }
@@ -111,7 +111,7 @@ public partial class ContentDetailsViewModel
 
     public async Task DeleteVersionFileAsync(ContentVersionFileItemViewModel file)
     {
-        if (SelectedVersion is null)
+        if (!CanEdit || SelectedVersion is null)
         {
             return;
         }

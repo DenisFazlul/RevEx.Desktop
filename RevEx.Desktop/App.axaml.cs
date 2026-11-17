@@ -5,6 +5,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Threading;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RevEx.Desktop.Core.Interfaces;
@@ -23,10 +24,16 @@ namespace RevEx.Desktop;
 
 public partial class App : Application
 {
+    private readonly CancellationTokenSource _startupCancellation = new();
+    private Task? _shutdownTask;
+    private Task? _startupTask;
+    private bool _connectorServicesStarted;
+
     public static IServiceProvider Services { get; private set; } = null!;
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
+        DesktopThemePreference.Apply(this, DesktopThemePreference.Load());
 #if DEBUG
         this.AttachDeveloperTools();
 #endif
@@ -39,71 +46,97 @@ public partial class App : Application
 
         services.AddServices(configuration);
 
+        services.AddSingleton<IApplicationShutdownService>(
+            new ApplicationShutdownService(() => RequestShutdownAsync(signOut: true)));
         Services = services.BuildServiceProvider();
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
-            var shutdownCompleted = false;
-            var shutdownStarted = false;
-            desktop.ShutdownRequested += async (_, e) =>
+            desktop.ShutdownRequested += (_, e) =>
             {
-                if (shutdownCompleted)
-                {
-                    return;
-                }
-
                 e.Cancel = true;
-                if (shutdownStarted)
-                {
-                    return;
-                }
-
-                shutdownStarted = true;
-                try
-                {
-                    using var timeout = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(10));
-                    await Services.GetRequiredService<DesktopControlBridge>().StopAsync(timeout.Token)
-                        .WaitAsync(timeout.Token);
-                }
-                catch (Exception error)
-                {
-                    Console.Error.WriteLine($"Ошибка остановки Desktop control bridge: {error}");
-                }
-
-                try
-                {
-                    using var timeout = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(10));
-                    await Services.GetRequiredService<IConnectorRuntime>().StopAsync(timeout.Token)
-                        .WaitAsync(timeout.Token);
-                }
-                catch (Exception error)
-                {
-                    Console.Error.WriteLine($"Ошибка остановки коннекторов: {error}");
-                }
-                finally
-                {
-                    (Services.GetRequiredService<RevEx.Connector.Contracts.IConnectorClient>() as IDisposable)?.Dispose();
-                    shutdownCompleted = true;
-                    desktop.Shutdown();
-                }
+                _ = RequestShutdownAsync();
             };
-            desktop.Startup += async (_, _) => await StartDesktopAsync(desktop);
+            desktop.Startup += (_, _) => _startupTask = StartDesktopAsync(desktop);
         }
 
         base.OnFrameworkInitializationCompleted();
     }
 
-    private static async Task StartDesktopAsync(IClassicDesktopStyleApplicationLifetime desktop)
+    private Task RequestShutdownAsync(bool signOut = false, int exitCode = 0)
+    {
+        return _shutdownTask ??= ShutdownAsync(signOut, exitCode);
+    }
+
+    private async Task ShutdownAsync(bool signOut, int exitCode)
+    {
+        // Let Avalonia finish delivering the event and publish the shared shutdown task.
+        await Dispatcher.Yield(DispatcherPriority.Background);
+
+        var desktop = (IClassicDesktopStyleApplicationLifetime)ApplicationLifetime!;
+        try
+        {
+            if (desktop.MainWindow is { } window)
+            {
+                window.IsEnabled = false;
+            }
+
+            _startupCancellation.Cancel();
+            if (_startupTask is { } startup)
+            {
+                await RunShutdownStepAsync("завершение запуска", token => startup.WaitAsync(token));
+            }
+
+            if (signOut)
+            {
+                await RunShutdownStepAsync("выход из учётной записи",
+                    token => Services.GetRequiredService<IAuthenticationService>().LogoutAsync(token));
+            }
+
+            if (_connectorServicesStarted)
+            {
+                await RunShutdownStepAsync("остановка Desktop Control Bridge",
+                    token => Services.GetRequiredService<DesktopControlBridge>().StopAsync(token));
+                await RunShutdownStepAsync("остановка коннекторов",
+                    token => Services.GetRequiredService<IConnectorRuntime>().StopAsync(token));
+                await RunShutdownStepAsync("освобождение клиента коннектора", _ =>
+                {
+                    (Services.GetRequiredService<RevEx.Connector.Contracts.IConnectorClient>() as IDisposable)?.Dispose();
+                    return Task.CompletedTask;
+                });
+            }
+        }
+        finally
+        {
+            desktop.Shutdown(exitCode);
+        }
+    }
+
+    private static async Task RunShutdownStepAsync(string operation, Func<CancellationToken, Task> action)
+    {
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        try
+        {
+            await action(timeout.Token).WaitAsync(timeout.Token);
+        }
+        catch (Exception error)
+        {
+            Console.Error.WriteLine($"Ошибка при завершении Desktop ({operation}): {error}");
+        }
+    }
+
+    private async Task StartDesktopAsync(IClassicDesktopStyleApplicationLifetime desktop)
     {
         AuthenticationProgressWindow? authenticationWindow = null;
         try
         {
             if (!await Services.GetRequiredService<StartupUpdateCoordinator>().RunAsync())
             {
-                desktop.Shutdown();
+                _ = RequestShutdownAsync();
                 return;
             }
+            _startupCancellation.Token.ThrowIfCancellationRequested();
             authenticationWindow = new AuthenticationProgressWindow(
                 Services.GetRequiredService<IAuthenticationBrowser>());
             desktop.MainWindow = authenticationWindow;
@@ -112,18 +145,22 @@ public partial class App : Application
             using var authenticationTimeout = new CancellationTokenSource(TimeSpan.FromMinutes(3));
             using var authenticationCancellation = CancellationTokenSource.CreateLinkedTokenSource(
                 authenticationTimeout.Token,
-                authenticationWindow.CancellationToken);
+                authenticationWindow.CancellationToken, _startupCancellation.Token);
             var authenticationService = Services.GetRequiredService<IAuthenticationService>();
             var accessToken = await authenticationService.GetAccessTokenAsync(
                 authenticationCancellation.Token);
             authenticationWindow.Complete();
             authenticationWindow = null;
 
-            await Services.GetRequiredService<IConnectorRuntime>().StartAsync();
-            await Services.GetRequiredService<DesktopControlBridge>().StartAsync();
+            _startupCancellation.Token.ThrowIfCancellationRequested();
+            _connectorServicesStarted = true;
+            await Services.GetRequiredService<IConnectorRuntime>().StartAsync(_startupCancellation.Token);
+            _startupCancellation.Token.ThrowIfCancellationRequested();
+            await Services.GetRequiredService<DesktopControlBridge>().StartAsync(_startupCancellation.Token);
             try
             {
-                using var timeout = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(10));
+                using var timeout = CancellationTokenSource.CreateLinkedTokenSource(_startupCancellation.Token);
+                timeout.CancelAfter(TimeSpan.FromSeconds(10));
                 await Services.GetRequiredService<DesktopUpdateService>().ReportAuthenticatedAsync(
                     Services.GetRequiredService<IAppSettings>().ApiPath, accessToken, timeout.Token);
             }
@@ -133,15 +170,21 @@ public partial class App : Application
                 Console.Error.WriteLine($"Не удалось подтвердить версию десктопа: {trackingError.Message}");
             }
 
+            _startupCancellation.Token.ThrowIfCancellationRequested();
             var mainWindow = Services.GetRequiredService<MainWindow>();
             desktop.MainWindow = mainWindow;
-            desktop.ShutdownMode = ShutdownMode.OnLastWindowClose;
+            mainWindow.Closing += (_, e) =>
+            {
+                e.Cancel = true;
+                _ = RequestShutdownAsync();
+            };
             mainWindow.Show();
         }
         catch (OperationCanceledException) when (
+            _startupCancellation.IsCancellationRequested ||
             authenticationWindow?.CancellationToken.IsCancellationRequested == true)
         {
-            desktop.Shutdown();
+            _ = RequestShutdownAsync();
         }
         catch (OperationCanceledException)
         {
@@ -158,13 +201,13 @@ public partial class App : Application
         }
     }
 
-    private static void ShowAuthenticationError(
+    private void ShowAuthenticationError(
         IClassicDesktopStyleApplicationLifetime desktop,
         string message)
     {
         var errorWindow = new AuthenticationErrorWindow(message);
         desktop.MainWindow = errorWindow;
-        errorWindow.Closed += (_, _) => desktop.Shutdown(1);
+        errorWindow.Closed += (_, _) => _ = RequestShutdownAsync(exitCode: 1);
         errorWindow.Show();
     }
 

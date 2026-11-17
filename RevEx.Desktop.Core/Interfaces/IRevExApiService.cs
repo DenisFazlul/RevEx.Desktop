@@ -10,5 +10,5 @@ public interface IRevExApiService
     IContentVersionRepository ContentVersions { get; }
     IContentFileRepository ContentFiles { get; }
     IContentHistoryRepository ContentHistory { get; }
-    IRfaImportRepository RfaImports { get; }
+    IVersionImportRepository VersionImports { get; }
 }

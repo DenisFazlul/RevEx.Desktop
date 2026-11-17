@@ -2,7 +2,6 @@ using RevEx.Domain.Security;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using RevEx.Desktop.Core.Interfaces;
 using RevEx.Desktop.Services;
 using RevEx.Desktop.ViewModels.Catalog;
@@ -53,26 +52,11 @@ public sealed class MainMenuProvider : IMainMenuProvider
             new WorkspaceTabRequest(item.TabType),
             openTab));
 
-        return new MainMenuViewModel(links, LogoutAsync);
+        return new MainMenuViewModel(links, _applicationShutdownService.SignOutAsync);
     }
 
     private bool CanEditContent() =>
         _authenticationService.IsInRole(RevExRoles.Moderator) ||
         _authenticationService.IsInRole(RevExRoles.Administrator);
 
-    private async Task LogoutAsync()
-    {
-        try
-        {
-            await _authenticationService.LogoutAsync();
-        }
-        catch (Exception exception)
-        {
-            Console.Error.WriteLine($"Не удалось отозвать OIDC-сессию при выходе: {exception}");
-        }
-        finally
-        {
-            _applicationShutdownService.Shutdown();
-        }
-    }
 }

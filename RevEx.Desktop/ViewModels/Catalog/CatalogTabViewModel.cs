@@ -187,9 +187,9 @@ public partial class CatalogTabViewModel : WorkspaceTabViewModel
                 return;
             }
 
-            var tagNames = Tags.ToDictionary(tag => tag.Id, tag => tag.Name);
+            var catalogTags = Tags.ToDictionary(tag => tag.Id);
             var itemTasks = ApplyQuery(contentDtos, query)
-                .Select(dto => CreateContentItemAsync(dto, tagNames, cancellation.Token));
+                .Select(dto => CreateContentItemAsync(dto, catalogTags, cancellation.Token));
             var items = await Task.WhenAll(itemTasks);
 
             foreach (var item in items)
@@ -223,7 +223,7 @@ public partial class CatalogTabViewModel : WorkspaceTabViewModel
 
     private async Task<ContentItemViewModel> CreateContentItemAsync(
         ContentDto content,
-        IReadOnlyDictionary<int, string> tagNames,
+        IReadOnlyDictionary<int, TagFilterItemViewModel> catalogTags,
         CancellationToken cancellationToken)
     {
         byte[]? previewBytes = null;
@@ -239,7 +239,7 @@ public partial class CatalogTabViewModel : WorkspaceTabViewModel
             }
         }
 
-        return new ContentItemViewModel(content, tagNames, previewBytes);
+        return new ContentItemViewModel(content, catalogTags, previewBytes);
     }
 
     private static IEnumerable<ContentDto> ApplyQuery(

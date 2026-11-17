@@ -70,23 +70,24 @@ public class TagAdminTabViewModel(IRevExApiService apiService)
         });
     }
 
-    public Task<bool> AddTagFromDialogAsync(string name, TagGroupItemViewModel group)
+    public Task<bool> AddTagFromDialogAsync(string name, TagGroupItemViewModel group, string color = "#75451D")
     {
         return SaveChangesAsync(async () =>
         {
-            var created = await apiService.Tags.CreateAsync(new CreateTagDto { Name = name.Trim(), TagGroupId = group.Id });
+            var created = await apiService.Tags.CreateAsync(new CreateTagDto { Name = name.Trim(), TagGroupId = group.Id, Color = color });
             group.Tags.Add(new TagItemViewModel(created));
             Message = "Тег создан.";
         });
     }
 
-    public Task<bool> EditTagFromDialogAsync(TagItemViewModel tag, string name, TagGroupItemViewModel targetGroup)
+    public Task<bool> EditTagFromDialogAsync(TagItemViewModel tag, string name, TagGroupItemViewModel targetGroup, string? color = null)
     {
         return SaveChangesAsync(async () =>
         {
             var oldGroup = Groups.First(group => group.Id == tag.TagGroupId);
-            await apiService.Tags.UpdateAsync(tag.Id, new UpdateTagDto { Name = name.Trim(), TagGroupId = targetGroup.Id });
+            await apiService.Tags.UpdateAsync(tag.Id, new UpdateTagDto { Name = name.Trim(), TagGroupId = targetGroup.Id, Color = color });
             tag.Name = name.Trim();
+            tag.Color = color ?? tag.Color;
             if (oldGroup.Id != targetGroup.Id)
             {
                 oldGroup.Tags.Remove(tag);

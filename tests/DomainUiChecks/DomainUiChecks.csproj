@@ -7,5 +7,5 @@
   <ProjectReference Include="../../../RevEx.Domain/src/RevEx.Contracts/RevEx.Contracts.csproj" Condition="'$(UseRevExDomainPackage)' != 'true'" />
   <PackageReference Include="RevEx.Contracts" Version="2.2.0" Condition="'$(UseRevExDomainPackage)' == 'true'" />
 </ItemGroup>
-<ItemGroup><ProjectReference Include="../../../RevEx.Connecter/RevEx.Connector.Host/RevEx.Connector.Host.csproj" /></ItemGroup>
+<ItemGroup><ProjectReference Include="../../../RevEx.Connecter/RevEx.Connector/RevEx.Connector.csproj" /></ItemGroup>
 </Project>

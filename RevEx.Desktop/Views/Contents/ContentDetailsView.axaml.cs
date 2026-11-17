@@ -33,10 +33,10 @@ public partial class ContentDetailsView : UserControl
 
         var availableTags = await viewModel.GetAvailableTagsAsync();
         var window = new TagSelectionWindow(availableTags);
-        var tag = await window.ShowDialog<TagDto?>(owner);
-        if (tag is not null)
+        var tags = await window.ShowDialog<IReadOnlyList<TagDto>?>(owner);
+        if (tags is not null)
         {
-            await viewModel.AssignTagAsync(tag);
+            await viewModel.AssignTagsAsync(tags);
         }
     }
 
@@ -133,21 +133,8 @@ public partial class ContentDetailsView : UserControl
             return;
         }
 
-        ContentVersionDto? version;
-        if (viewModel.SelectedVersionPlatform?.Value == Platform.Revit)
-        {
-            var window = new RfaVersionImportWindow(viewModel.CreateRfaVersionImport());
-            version = await window.ShowDialog<ContentVersionDto?>(owner);
-        }
-        else if (viewModel.SelectedVersionPlatform?.Value == Platform.Other)
-        {
-            var window = new FileVersionImportWindow(viewModel.CreateFileVersionImport());
-            version = await window.ShowDialog<ContentVersionDto?>(owner);
-        }
-        else
-        {
-            return;
-        }
+        var window = new VersionImportWindow(viewModel.CreateVersionImport());
+        var version = await window.ShowDialog<ContentVersionDto?>(owner);
 
         if (version is not null)
         {

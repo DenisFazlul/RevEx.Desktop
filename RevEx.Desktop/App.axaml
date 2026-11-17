@@ -11,7 +11,13 @@
         <local:ViewLocator />
     </Application.DataTemplates>
     <Application.Styles>
-        <FluentTheme />
+        <FluentTheme>
+            <FluentTheme.Palettes>
+                <ColorPaletteResources x:Key="Light" Accent="#171717" />
+                <ColorPaletteResources x:Key="Dark" Accent="#ECECEC" />
+            </FluentTheme.Palettes>
+        </FluentTheme>
+        <StyleInclude Source="avares://Avalonia.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
         <StyleInclude Source="/Styles/RevExStyles.axaml" />
     </Application.Styles>
 </Application>

@@ -1,32 +1,42 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:common="using:RevEx.Desktop.Views.Common"
              xmlns:domain="using:RevEx.Domain.Contracts.ContentVersion"
         xmlns:history="using:RevEx.Desktop.ViewModels.Contents"
              xmlns:revitViews="using:RevEx.Desktop.Views.Revit"
              xmlns:contentViews="using:RevEx.Desktop.Views.Contents"
+             xmlns:parameter="using:RevEx.Domain.Contracts.Content"
              xmlns:vm="using:RevEx.Desktop.ViewModels.Contents"
              x:Class="RevEx.Desktop.Views.Contents.ContentDetailsView"
              x:DataType="vm:ContentDetailsViewModel">
-    <Grid Margin="12" HorizontalAlignment="Stretch">
-        <TabControl>
+    <Grid Margin="12" HorizontalAlignment="Stretch" RowDefinitions="Auto,*">
+        <TextBlock Margin="0,0,0,8" Text="Контент заморожен. Доступен только просмотр."
+                   IsVisible="{Binding IsFrozen}" TextWrapping="Wrap" />
+        <TabControl Grid.Row="1">
             <TabItem Header="Основное">
                 <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-                    <Grid Margin="0,16,0,0" ColumnDefinitions="2*,12,3*">
+                    <Grid Margin="0,16,0,0" ColumnDefinitions="2*,12,3*" RowDefinitions="Auto,Auto">
                         <Border Classes="card section-card" VerticalAlignment="Top">
                             <StackPanel Spacing="8">
                                 <Grid ColumnDefinitions="*,Auto">
                                     <TextBlock Classes="h2" Text="Изображение" />
                                     <Button Grid.Column="1" Classes="icon" Click="OnUpdatePreviewClick"
-                                            IsVisible="{Binding CanEdit}"
-                                            IsEnabled="{Binding !IsUpdatingPreview}" ToolTip.Tip="Обновить изображение">
+                                            IsVisible="{Binding HasEditPermission}"
+                                             ToolTip.Tip="Обновить изображение">
+                                        <Button.IsEnabled>
+                                            <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                                <Binding Path="CanEdit" />
+                                                <Binding Path="!IsUpdatingPreview" />
+                                            </MultiBinding>
+                                        </Button.IsEnabled>
                                         <PathIcon Data="M13,5 L13,1 L11.5,2.5 A6,6 0 1 0 13.5,9 M13,1 L9,1" />
                                     </Button>
                                 </Grid>
-                                <ProgressBar IsVisible="{Binding IsUpdatingPreview}" IsIndeterminate="True" />
+                                <common:LoadingIndicator IsVisible="{Binding IsUpdatingPreview}" />
                                 <Border Classes="image-frame" MinHeight="200">
                                     <Grid>
                                         <TextBlock IsVisible="{Binding HasNoPreview}" Text="Изображение пока не загружено."
-                                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}"
                                                    HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         <Image Source="{Binding PreviewImage}" Stretch="Uniform"
                                                IsVisible="{Binding HasPreview}" MaxHeight="256" />
@@ -39,14 +49,7 @@
                         <StackPanel Grid.Column="2" Spacing="12">
                             <Border Classes="card section-card">
                                 <StackPanel Spacing="8">
-                                    <Grid ColumnDefinitions="*,Auto">
-                                        <TextBlock Classes="h2" Text="Основная информация" />
-                                        <Button Grid.Column="1" Classes="icon danger" Click="OnDeleteContentClick"
-                                                IsVisible="{Binding CanEdit}"
-                                                IsEnabled="{Binding !IsDeleting}" ToolTip.Tip="Удалить контент">
-                                            <PathIcon Data="M3,4 L13,4 M5,4 L5,14 L11,14 L11,4 M6,2 L10,2 L11,4 L5,4 Z M7,7 L7,12 M9,7 L9,12" />
-                                        </Button>
-                                    </Grid>
+                                    <TextBlock Classes="h2" Text="Основная информация" />
                                     <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto,Auto">
                                         <Grid.Styles>
                                             <Style Selector="TextBlock">
@@ -55,31 +58,49 @@
                                                 <Setter Property="TextWrapping" Value="Wrap" />
                                             </Style>
                                         </Grid.Styles>
-                                        <Border Grid.Row="0" Grid.ColumnSpan="3" Background="{StaticResource SurfaceMutedBrush}" />
-                                        <Border Grid.Row="2" Grid.ColumnSpan="3" Background="{StaticResource SurfaceMutedBrush}" />
+                                        <Border Grid.Row="0" Grid.ColumnSpan="3" Background="{DynamicResource SurfaceMutedBrush}" />
+                                        <Border Grid.Row="2" Grid.ColumnSpan="3" Background="{DynamicResource SurfaceMutedBrush}" />
                                         <TextBlock Grid.Row="0" Classes="caption" Text="Название" />
                                         <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Name}" />
                                         <Button Grid.Row="0" Grid.Column="2" Classes="icon" Click="OnEditNameClick"
-                                                IsVisible="{Binding CanEdit}"
-                                                IsEnabled="{Binding !IsSavingContent}" ToolTip.Tip="Изменить название">
+                                                IsVisible="{Binding HasEditPermission}"
+                                                 ToolTip.Tip="Изменить название">
+                                            <Button.IsEnabled>
+                                                <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                                    <Binding Path="CanEdit" />
+                                                    <Binding Path="!IsSavingContent" />
+                                                </MultiBinding>
+                                            </Button.IsEnabled>
                                             <PathIcon Data="M3,11 L3,14 L6,14 L14,6 L11,3 Z M10,4 L13,7 M3,14 L7,13" />
                                         </Button>
                                         <TextBlock Grid.Row="1" Classes="caption" Text="Описание" />
                                         <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Description}" />
                                         <Button Grid.Row="1" Grid.Column="2" Classes="icon" Click="OnEditDescriptionClick"
-                                                IsVisible="{Binding CanEdit}"
-                                                IsEnabled="{Binding !IsSavingContent}" ToolTip.Tip="Изменить описание">
+                                                IsVisible="{Binding HasEditPermission}"
+                                                 ToolTip.Tip="Изменить описание">
+                                            <Button.IsEnabled>
+                                                <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                                    <Binding Path="CanEdit" />
+                                                    <Binding Path="!IsSavingContent" />
+                                                </MultiBinding>
+                                            </Button.IsEnabled>
                                             <PathIcon Data="M3,11 L3,14 L6,14 L14,6 L11,3 Z M10,4 L13,7 M3,14 L7,13" />
                                         </Button>
                                         <TextBlock Grid.Row="2" Classes="caption" Text="Категория" />
                                         <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding CategoryName}" />
                                         <Button Grid.Row="2" Grid.Column="2" Classes="icon" Click="OnEditCategoryClick"
-                                                IsVisible="{Binding CanEdit}"
-                                                IsEnabled="{Binding !IsSavingContent}" ToolTip.Tip="Изменить категорию">
+                                                IsVisible="{Binding HasEditPermission}"
+                                                 ToolTip.Tip="Изменить категорию">
+                                            <Button.IsEnabled>
+                                                <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                                    <Binding Path="CanEdit" />
+                                                    <Binding Path="!IsSavingContent" />
+                                                </MultiBinding>
+                                            </Button.IsEnabled>
                                             <PathIcon Data="M3,11 L3,14 L6,14 L14,6 L11,3 Z M10,4 L13,7 M3,14 L7,13" />
                                         </Button>
                                     </Grid>
-                                    <ProgressBar IsVisible="{Binding IsSavingContent}" IsIndeterminate="True" />
+                                    <common:LoadingIndicator IsVisible="{Binding IsSavingContent}" />
                                     <TextBlock Text="{Binding ContentMessage}" Classes="status-message" />
                                 </StackPanel>
                             </Border>
@@ -89,12 +110,19 @@
                                     <Grid ColumnDefinitions="*,Auto">
                                         <TextBlock Classes="h2" Text="Теги" />
                                         <Button Grid.Column="1" Classes="primary" Content="Добавить тег"
-                                                IsVisible="{Binding CanEdit}"
-                                                Click="OnAddTagClick" IsEnabled="{Binding !IsSavingTags}" />
+                                                IsVisible="{Binding HasEditPermission}"
+                                                Click="OnAddTagClick">
+                                            <Button.IsEnabled>
+                                                <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                                    <Binding Path="CanEdit" />
+                                                    <Binding Path="!IsSavingTags" />
+                                                </MultiBinding>
+                                            </Button.IsEnabled>
+                                        </Button>
                                     </Grid>
-                                    <ProgressBar IsVisible="{Binding IsSavingTags}" IsIndeterminate="True" />
+                                    <common:LoadingIndicator IsVisible="{Binding IsSavingTags}" />
                                     <TextBlock IsVisible="{Binding HasNoTags}" Text="У контента пока нет тегов."
-                                               Foreground="{StaticResource TextSecondaryBrush}" />
+                                               Foreground="{DynamicResource TextSecondaryBrush}" />
                                     <ItemsControl ItemsSource="{Binding Tags}" IsVisible="{Binding HasTags}">
                                         <ItemsControl.ItemsPanel>
                                             <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
@@ -103,9 +131,10 @@
                                             <DataTemplate x:DataType="vm:ContentTagItemViewModel">
                                                 <Border Classes="tag">
                                                     <StackPanel Orientation="Horizontal" Spacing="8">
+                                                        <Ellipse Width="10" Height="10" Fill="{Binding ColorBrush}" />
                                                         <TextBlock Text="{Binding Name, StringFormat='#{0}'}" VerticalAlignment="Center" />
                                                         <Button Classes="icon-sm" Command="{Binding RemoveCommand}"
-                                                                IsVisible="{Binding CanEdit}" ToolTip.Tip="Удалить тег">
+                                                                IsEnabled="{Binding $parent[UserControl].((vm:ContentDetailsViewModel)DataContext).CanEdit}" IsVisible="{Binding $parent[UserControl].((vm:ContentDetailsViewModel)DataContext).HasEditPermission}" ToolTip.Tip="Удалить тег">
                                                             <PathIcon Data="M2,3 L3,2 L10,9 L9,10 Z M9,2 L10,3 L3,10 L2,9 Z" />
                                                         </Button>
                                                     </StackPanel>
@@ -127,8 +156,81 @@
                                 </StackPanel>
                             </Border>
                             <TextBlock Text="{Binding ErrorMessage}" TextWrapping="Wrap"
-                                       Foreground="{StaticResource TextSecondaryBrush}" />
+                                       Foreground="{DynamicResource TextSecondaryBrush}" />
                         </StackPanel>
+                        <Border Grid.Row="1" Grid.ColumnSpan="3" Margin="0,12,0,0" Classes="card section-card">
+                            <StackPanel Spacing="8">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Classes="h2" Text="Параметры" />
+                                    <Button Grid.Column="1" Content="Добавить параметр" Command="{Binding AddParameterCommand}"
+                                            IsVisible="{Binding HasEditPermission}">
+                                        <Button.IsEnabled>
+                                            <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                                <Binding Path="CanEdit" />
+                                                <Binding Path="!IsLoading" />
+                                            </MultiBinding>
+                                        </Button.IsEnabled>
+                                    </Button>
+                                </Grid>
+                                <Grid ColumnDefinitions="2*,*,2*,2*,112" ColumnSpacing="8">
+                                    <TextBlock Classes="caption" Text="Название" />
+                                    <TextBlock Grid.Column="1" Classes="caption" Text="Тип" />
+                                    <TextBlock Grid.Column="2" Classes="caption" Text="Значение" />
+                                    <TextBlock Grid.Column="3" Classes="caption" Text="Подсказка" />
+                                </Grid>
+                                <ItemsControl ItemsSource="{Binding Parameters}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="parameter:ContentParameterDto">
+                                            <Grid ColumnDefinitions="2*,*,2*,2*,112" ColumnSpacing="8" Margin="0,4">
+                                                <TextBlock Text="{Binding Name}" TextWrapping="Wrap" />
+                                                <TextBlock Grid.Column="1" Text="{Binding Kind, Converter={x:Static vm:ContentParameterRowViewModel.KindLabelConverter}}" />
+                                                <TextBlock Grid.Column="2" Text="{Binding Value}" TextWrapping="Wrap"
+                                                           ToolTip.Tip="{Binding Help}" />
+                                                <TextBlock Grid.Column="3" Text="{Binding Help}" TextWrapping="Wrap" />
+                                                <Button Grid.Column="4" Content="Изменить"
+                                                        IsEnabled="{Binding $parent[UserControl].((vm:ContentDetailsViewModel)DataContext).CanEdit}" IsVisible="{Binding $parent[UserControl].((vm:ContentDetailsViewModel)DataContext).HasEditPermission}"
+                                                        Command="{Binding $parent[UserControl].((vm:ContentDetailsViewModel)DataContext).EditParameterCommand}"
+                                                        CommandParameter="{Binding}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <ContentControl Content="{Binding ParameterEditor}" IsVisible="{Binding !!ParameterEditor}" IsEnabled="{Binding CanEdit}">
+                                    <ContentControl.ContentTemplate>
+                                        <DataTemplate x:DataType="vm:ContentParameterRowViewModel">
+                                            <StackPanel Spacing="8" Margin="0,12,0,0" IsEnabled="{Binding IsIdle}">
+                                                <TextBlock Classes="h2" Text="Параметр" />
+                                                <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto"
+                                                      ColumnSpacing="12" RowSpacing="8">
+                                                    <TextBlock Text="Название" VerticalAlignment="Center" />
+                                                    <TextBox Grid.Column="1" Text="{Binding Name}" MaxLength="200"
+                                                             AutomationProperties.Name="Название" />
+                                                    <TextBlock Grid.Row="1" Text="Тип" VerticalAlignment="Center" />
+                                                    <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Types}"
+                                                              SelectedIndex="{Binding TypeIndex, Mode=TwoWay}"
+                                                              HorizontalAlignment="Stretch" AutomationProperties.Name="Тип" />
+                                                    <TextBlock Grid.Row="2" Text="Значение" VerticalAlignment="Center" />
+                                                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Value}" MaxLength="4000"
+                                                             ToolTip.Tip="{Binding ValueHint}" AutomationProperties.Name="Значение" />
+                                                    <TextBlock Grid.Row="3" Text="Подсказка" VerticalAlignment="Center" />
+                                                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Help}" MaxLength="1000"
+                                                             AutomationProperties.Name="Подсказка" />
+                                                </Grid>
+                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                    <Button Content="Сохранить" Command="{Binding SaveCommand}" />
+                                                    <Button Content="Отмена"
+                                                            Command="{Binding $parent[UserControl].((vm:ContentDetailsViewModel)DataContext).CancelParameterCommand}" />
+                                                    <Button Content="Удалить" Classes="danger" IsVisible="{Binding IsExisting}"
+                                                            Command="{Binding DeleteCommand}" />
+                                                </StackPanel>
+                                                <TextBlock Text="{Binding Message}" TextWrapping="Wrap" Classes="status-message" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ContentControl.ContentTemplate>
+                                </ContentControl>
+                                <TextBlock Text="{Binding ParameterMessage}" TextWrapping="Wrap" Classes="status-message" />
+                            </StackPanel>
+                        </Border>
                     </Grid>
                 </ScrollViewer>
             </TabItem>
@@ -151,7 +253,7 @@
                                 <Setter Property="CornerRadius" Value="6" />
                             </Style>
                             <Style Selector="ListBoxItem:selected">
-                                <Setter Property="Background" Value="{StaticResource SurfaceSelectedBrush}" />
+                                <Setter Property="Background" Value="{DynamicResource SurfaceSelectedBrush}" />
                             </Style>
                         </ListBox.Styles>
                         <ListBox.ItemTemplate>
@@ -177,8 +279,15 @@
                             </ComboBox.ItemTemplate>
                         </ComboBox>
                         <Button Grid.Column="4" Classes="primary compact" Content="Добавить"
-                                IsVisible="{Binding CanEdit}" IsEnabled="{Binding CanAddVersion}"
-                                Click="OnAddVersionClick" />
+                                IsVisible="{Binding HasEditPermission}"
+                                Click="OnAddVersionClick">
+                            <Button.IsEnabled>
+                                <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                    <Binding Path="CanEdit" />
+                                    <Binding Path="CanAddVersion" />
+                                </MultiBinding>
+                            </Button.IsEnabled>
+                        </Button>
                     </Grid>
                     <TextBlock Grid.Row="4" IsVisible="{Binding HasNoPlatformVersions}"
                                Classes="caption" Text="Для выбранной платформы пока нет версий." />
@@ -195,9 +304,9 @@
                                                 <Setter Property="TextWrapping" Value="Wrap" />
                                             </Style>
                                         </Grid.Styles>
-                                        <Border Grid.ColumnSpan="2" Background="{StaticResource SurfaceMutedBrush}" />
-                                        <Border Grid.Row="2" Grid.ColumnSpan="2" Background="{StaticResource SurfaceMutedBrush}" />
-                                        <Border Grid.Row="4" Grid.ColumnSpan="2" Background="{StaticResource SurfaceMutedBrush}" />
+                                        <Border Grid.ColumnSpan="2" Background="{DynamicResource SurfaceMutedBrush}" />
+                                        <Border Grid.Row="2" Grid.ColumnSpan="2" Background="{DynamicResource SurfaceMutedBrush}" />
+                                        <Border Grid.Row="4" Grid.ColumnSpan="2" Background="{DynamicResource SurfaceMutedBrush}" />
                                         <TextBlock Classes="caption" Text="Версия приложения" />
                                         <TextBlock Grid.Column="1" Text="{Binding SelectedVersion.ApplicationVersion}" />
                                         <TextBlock Grid.Row="1" Classes="caption" Text="Платформа" />
@@ -217,7 +326,7 @@
                                                       DisplayMemberBinding="{Binding Name}"
                                                       IsEnabled="{Binding CanChangePublishStatus}" />
                                             <Button Grid.Column="2" Content="Сохранить статус"
-                                                    IsVisible="{Binding CanEdit}"
+                                                    IsEnabled="{Binding CanEdit}" IsVisible="{Binding HasEditPermission}"
                                                     Command="{Binding SavePublishStatusCommand}" />
                                         </Grid>
                                     </Grid>
@@ -232,7 +341,7 @@
                                                 Click="OnLoadVersionIntoProjectClick"
                                                 IsEnabled="{Binding CanLoadVersionIntoProject}" />
                                     </Grid>
-                                    <ProgressBar IsVisible="{Binding IsVersionBusy}" IsIndeterminate="True" />
+                                    <common:LoadingIndicator IsVisible="{Binding IsVersionBusy}" />
                                     <TextBlock IsVisible="{Binding HasNoVersionFiles}" Classes="caption"
                                                Text="У версии нет прикреплённых файлов." />
                                     <TextBlock Classes="validation-message" Text="{Binding VersionErrorMessage}" TextWrapping="Wrap" />
@@ -252,7 +361,7 @@
                                                                 IsVisible="{Binding IsIfc}"
                                                                 Click="OnPreviewIfcFileClick" />
                                                         <Button Grid.Column="9" Classes="compact danger" Content="Удалить"
-                                                                IsVisible="{Binding CanEdit}"
+                                                                IsEnabled="{Binding $parent[UserControl].((vm:ContentDetailsViewModel)DataContext).CanEdit}" IsVisible="{Binding $parent[UserControl].((vm:ContentDetailsViewModel)DataContext).HasEditPermission}"
                                                                 Click="OnDeleteVersionFileClick" />
                                                     </Grid>
                                                 </Border>
@@ -288,7 +397,7 @@
                         <TextBlock Classes="h2" Text="История изменений контента и версий" />
                         <TextBlock Grid.Row="2" IsVisible="{Binding HasNoHistory}"
                                    Text="История изменений пока пуста."
-                                   Foreground="{StaticResource TextSecondaryBrush}" />
+                                   Foreground="{DynamicResource TextSecondaryBrush}" />
                         <Grid Grid.Row="2" IsVisible="{Binding HasHistory}" RowDefinitions="Auto,*">
                             <Border Classes="value-box" Padding="8,4">
                                 <Grid ColumnDefinitions="180,*,180,150">
@@ -322,6 +431,30 @@
                         </Grid>
                     </Grid>
                 </Border>
+            </TabItem>
+            <TabItem Header="Настройки">
+                <TabItem.IsVisible>
+                    <MultiBinding Converter="{x:Static BoolConverters.Or}">
+                        <Binding Path="HasEditPermission" />
+                        <Binding Path="CanChangeFreeze" />
+                    </MultiBinding>
+                </TabItem.IsVisible>
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Margin="0,12,0,0" Spacing="12">
+                        <Button Content="{Binding FreezeActionText}" IsVisible="{Binding CanChangeFreeze}"
+                                Command="{Binding ToggleFreezeCommand}" MinHeight="32" />
+                        <Expander IsVisible="{Binding HasEditPermission}" IsExpanded="False"
+                                  BorderBrush="{DynamicResource DangerBrush}" BorderThickness="1">
+                            <Expander.Header>
+                                <TextBlock Text="Красная зона" Foreground="{DynamicResource DangerBrush}" FontWeight="SemiBold" />
+                            </Expander.Header>
+                            <StackPanel IsEnabled="{Binding CanEdit}">
+                                <Button Classes="danger" Content="Удалить семейство" Click="OnDeleteContentClick"
+                                        IsEnabled="{Binding !IsDeleting}" MinHeight="32" />
+                            </StackPanel>
+                        </Expander>
+                    </StackPanel>
+                </ScrollViewer>
             </TabItem>
         </TabControl>
     </Grid>

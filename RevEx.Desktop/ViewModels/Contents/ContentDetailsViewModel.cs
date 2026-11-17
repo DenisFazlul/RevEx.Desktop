@@ -14,12 +14,14 @@ using RevEx.Domain.Contracts.ContentFile;
 using RevEx.Domain.Contracts.ContentHistory;
 using RevEx.Domain.Contracts.ContentVersion;
 using RevEx.Domain.Contracts.Tag;
+using RevEx.Domain.Entities;
 using RevEx.Desktop.Core.Interfaces;
 using RevEx.Connector.Contracts;
 using RevEx.Domain.Contracts.Connectors;
 using RevEx.Configuration;
 using RevEx.Connector.Client;
 using RevEx.Desktop.Services;
+using RevEx.Desktop.Services.VersionImport;
 
 namespace RevEx.Desktop.ViewModels.Contents;
 
@@ -32,6 +34,8 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
     private readonly IConnectorClient _connectorClient;
     private readonly IConnectorRegistry _connectorRegistry;
     private readonly RfaFamilyImportService _rfaImportService;
+    private readonly VersionFileConnectorCatalog _versionConnectorCatalog;
+    private readonly VersionImportService _versionImportService;
     private ContentDto? _content;
     private IReadOnlyCollection<TagDto> _allTags = [];
     private IReadOnlyCollection<CategoryDto> _categories = [];
@@ -112,9 +116,43 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
     {
         get;
     }
-    public bool CanEdit
+    public bool HasEditPermission { get; }
+    public bool CanChangeFreeze { get; }
+    public bool CanEdit => HasEditPermission && _content is not null && !IsFrozen;
+    private bool? _isFrozen;
+
+    public bool IsFrozen => _isFrozen == true;
+    public string FreezeActionText => IsFrozen ? "Разморозить" : "Заморозить";
+
+    [RelayCommand(CanExecute = nameof(CanToggleFreeze))]
+    private async Task ToggleFreezeAsync()
     {
-        get;
+        if (!CanToggleFreeze())
+        {
+            return;
+        }
+
+        var isFrozen = !IsFrozen;
+        try
+        {
+            await _apiService.Contents.SetFrozenAsync(Id, isFrozen);
+            ApplyFreezeState(isFrozen);
+        }
+        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
+        {
+            ErrorMessage = $"Не удалось изменить статус заморозки: {exception.Message}";
+        }
+    }
+
+    private bool CanToggleFreeze() => CanChangeFreeze && _content is not null && !IsLoading;
+
+    private void ApplyFreezeState(bool isFrozen)
+    {
+        _isFrozen = isFrozen;
+        OnPropertyChanged(nameof(IsFrozen));
+        OnPropertyChanged(nameof(CanEdit));
+        OnPropertyChanged(nameof(FreezeActionText));
+        NotifyVersionStateChanged();
     }
     public ObservableCollection<ContentVersionDto> Versions { get; } = [];
     public ObservableCollection<ContentHistoryEventViewModel> History { get; } = [];
@@ -140,7 +178,7 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
     public bool HasVersionFiles => VersionFiles.Count > 0;
     public bool HasNoVersionFiles => HasSelectedVersion && !HasVersionFiles && !IsLoadingVersion;
     public bool IsVersionBusy => IsLoadingVersion || IsSavingVersionFile || IsSavingPublishStatus;
-    public bool CanLoadVersionIntoProject => HasVersionFiles && !IsVersionBusy;
+    public bool CanLoadVersionIntoProject => !IsFrozen && HasVersionFiles && !IsVersionBusy && !IsLoading;
     public string SelectedVersionDateText => SelectedVersion?.Date.ToLocalTime().ToString("dd.MM.yyyy HH:mm") ?? string.Empty;
     public string SelectedVersionCreatedAtText => SelectedVersion?.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm") ?? string.Empty;
     public string SelectedVersionUpdatedAtText => SelectedVersion?.UpdatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm") ?? string.Empty;
@@ -157,7 +195,10 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         RfaFamilyImportService rfaImportService,
         bool canEdit,
         Action close,
-        Action<string, string, int> contentUpdated)
+        Action<string, string, int> contentUpdated,
+        VersionFileConnectorCatalog? versionConnectorCatalog = null,
+        VersionImportService? versionImportService = null,
+        bool canChangeFreeze = false)
         : base(
             content.Name,
             true,
@@ -167,7 +208,12 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         _connectorClient = connectorClient;
         _connectorRegistry = connectorRegistry;
         _rfaImportService = rfaImportService;
-        CanEdit = canEdit;
+        _versionConnectorCatalog = versionConnectorCatalog
+            ?? new VersionFileConnectorCatalog(connectorRegistry, connectorClient, new DesktopFileConnector());
+        _versionImportService = versionImportService
+            ?? new VersionImportService(apiService, rfaImportService);
+        HasEditPermission = canEdit;
+        CanChangeFreeze = canChangeFreeze;
         _close = close;
         _contentUpdated = contentUpdated;
         Id = content.Id;
@@ -183,6 +229,8 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         try
         {
             IsLoading = true;
+            NotifyVersionStateChanged();
+            ToggleFreezeCommand.NotifyCanExecuteChanged();
             ErrorMessage = null;
             TagMessage = null;
             var contentTask = _apiService.Contents.GetByIdAsync(Id);
@@ -196,6 +244,7 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
                 ?? throw new HttpRequestException($"Контент {Id} не найден.");
             ApplyContent(content, await versionsTask, await tagsTask, await categoriesTask);
             ReplaceHistory(await historyTask);
+            await LoadParametersAsync();
             await LoadPreviewAsync(content.PreviewFileId);
             await SelectInitialVersionAsync();
             try
@@ -216,25 +265,22 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         finally
         {
             IsLoading = false;
+            NotifyVersionStateChanged();
+            ToggleFreezeCommand.NotifyCanExecuteChanged();
             NotifyCollectionStateChanged();
         }
     }
 
-    public RfaFamilyImportViewModel CreateRfaVersionImport()
+    public VersionImportViewModel CreateVersionImport()
     {
         var content = _content
             ?? throw new InvalidOperationException("Данные карточки ещё не загружены.");
-        return new RfaFamilyImportViewModel(_apiService, _rfaImportService, content);
-    }
-
-    public FileVersionImportViewModel CreateFileVersionImport()
-    {
-        if (_content is null)
-        {
-            throw new InvalidOperationException("Данные карточки ещё не загружены.");
-        }
-
-        return new FileVersionImportViewModel(_apiService, _content.Id);
+        var platform = SelectedVersionPlatform?.Value ?? Platform.Other;
+        return new VersionImportViewModel(
+            content,
+            platform,
+            _versionConnectorCatalog,
+            _versionImportService);
     }
 
     private async Task RefreshHistoryAsync()
@@ -306,6 +352,11 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         IReadOnlyCollection<CategoryDto> categories)
     {
         _content = content;
+        if (_isFrozen is null)
+        {
+            ApplyFreezeState(content.IsFrozen);
+        }
+
         _allTags = tags;
         _categories = categories;
         Name = content.Name;
@@ -375,7 +426,7 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         VersionFiles.Clear();
         foreach (var file in versionFiles.OrderBy(item => item.Role).ThenBy(item => item.OriginalFileName))
         {
-            VersionFiles.Add(new ContentVersionFileItemViewModel(file, CanEdit));
+            VersionFiles.Add(new ContentVersionFileItemViewModel(file, HasEditPermission));
         }
     }
 
@@ -386,7 +437,7 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
                      .Where(item => assignedTagIds.Contains(item.Id))
                      .OrderBy(item => item.Name))
         {
-            Tags.Add(new ContentTagItemViewModel(tag, RemoveTagAsync, CanEdit));
+            Tags.Add(new ContentTagItemViewModel(tag, RemoveTagAsync, HasEditPermission));
         }
     }
 

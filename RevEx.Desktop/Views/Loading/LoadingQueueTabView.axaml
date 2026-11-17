@@ -14,7 +14,7 @@
                 <StackPanel Spacing="8">
                     <TextBlock IsVisible="{Binding HasNoItems}"
                                Text="Очередь загрузки пока пуста."
-                               Foreground="{StaticResource TextSecondaryBrush}" />
+                               Foreground="{DynamicResource TextSecondaryBrush}" />
                     <ItemsControl ItemsSource="{Binding Items}" IsVisible="{Binding HasItems}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="vm:LoadingQueueItemViewModel">

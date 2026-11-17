@@ -30,7 +30,7 @@ public partial class ContentDetailsViewModel
 
     public void QueueVersionForLoading(ConnectorDescriptor connector)
     {
-        if (SelectedVersion is null || VersionFiles.Count == 0)
+        if (!CanLoadVersionIntoProject || SelectedVersion is null)
         {
             return;
         }

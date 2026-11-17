@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using RevEx.Connector.Contracts;
@@ -37,6 +38,14 @@ public partial class SettingsTabViewModel : WorkspaceTabViewModel
     [ObservableProperty]
     private bool _isLoadingConnectors;
 
+    [ObservableProperty]
+    private string? _selectedTheme;
+
+    [ObservableProperty]
+    private string? _themeErrorMessage;
+
+    public string[] ThemeOptions { get; } = [DesktopThemePreference.Light, DesktopThemePreference.Dark, DesktopThemePreference.LightTube, DesktopThemePreference.DarkTube];
+
     public ObservableCollection<ConnectorItemViewModel> Connectors { get; } = [];
     public bool HasConnectors => Connectors.Count > 0;
     public bool HasNoConnectors => !HasConnectors && !IsLoadingConnectors;
@@ -55,6 +64,26 @@ public partial class SettingsTabViewModel : WorkspaceTabViewModel
         _connectorClient = connectorClient;
         _userSettingsStore = userSettingsStore;
         _apiServerAddress = settings.ApiPath;
+        _selectedTheme = DesktopThemePreference.GetName(Application.Current?.RequestedThemeVariant);
+    }
+
+    partial void OnSelectedThemeChanged(string? value)
+    {
+        if (value is null || Application.Current is not { } application)
+        {
+            return;
+        }
+
+        DesktopThemePreference.Apply(application, value);
+        ThemeErrorMessage = null;
+        try
+        {
+            DesktopThemePreference.Save(value);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            ThemeErrorMessage = $"Не удалось сохранить тему: {exception.Message}";
+        }
     }
 
     [RelayCommand]

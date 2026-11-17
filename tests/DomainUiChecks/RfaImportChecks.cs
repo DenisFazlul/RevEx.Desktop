@@ -85,7 +85,7 @@ internal static class RfaImportChecks
             var versions = new RetryVersionRepository(mock.ContentVersions);
             var api = new RevExApiService(mock.Contents, mock.Categories, mock.Tags, mock.TagGroups,
                 mock.ContentStatuses, versions, mock.ContentFiles, mock.ContentHistory,
-                new CompositeRfaImportRepository(mock.Contents, versions, mock.ContentFiles));
+                new CompositeVersionImportRepository(mock.Contents, versions, mock.ContentFiles));
             var registry = new ConnectorRegistry();
             using var transport = new TcpConnectorTransport();
             using var client = new TcpConnectorClient(transport, new ConnectorTaskQueue());
@@ -110,13 +110,13 @@ internal static class RfaImportChecks
                     "Missing connector must block opening and reading.");
             }
 
-            await using var unsupported = new ConnectorHost(new ConnectorHostOptions(
+            using var unsupported = new ConnectorHost(new ConnectorHostOptions(
                 "Revit without reader", ConnectorProduct.Revit, "2027", DiscoveryDirectory: directory));
             await unsupported.StartAsync();
             var unsupportedDescriptor = (await discovery.FindAsync(default)).Single(
                 connector => connector.InstanceId == unsupported.InstanceId);
             registry.Register(unsupportedDescriptor);
-            await using var reader = new ConnectorHost(new ConnectorHostOptions(
+            using var reader = new ConnectorHost(new ConnectorHostOptions(
                 "RFA mock reader", ConnectorProduct.Mock, "2026", DiscoveryDirectory: directory));
             var readerExecutor = new ReadExecutor();
             var writerExecutor = new WriteExecutor();
@@ -332,12 +332,12 @@ internal static class RfaImportChecks
     }
 
     private sealed class WriteExecutor
-        : ConnectorCommandExecutor<WriteRfaIdentifiersRequest, WriteRfaIdentifiersResponse>
+        : ConnectorCommandExecutor<PrepareContentVersionRequest, PrepareContentVersionResponse>
     {
         public WriteExecutor()
             : base(
-                ConnectorCommand.WriteRfaIdentifiers,
-                "Writes CID and VID to a mock family.")
+                ConnectorCommand.PrepareContentVersion,
+                "Prepares a mock family for publication.")
         {
         }
 
@@ -345,8 +345,8 @@ internal static class RfaImportChecks
         public Guid? LastCid { get; private set; }
         public Guid? LastVid { get; private set; }
 
-        protected override Task<WriteRfaIdentifiersResponse> ExecuteAsync(
-            WriteRfaIdentifiersRequest request,
+        protected override Task<PrepareContentVersionResponse> ExecuteAsync(
+            PrepareContentVersionRequest request,
             IConnectorCommandContext context,
             CancellationToken token)
         {
@@ -355,10 +355,12 @@ internal static class RfaImportChecks
             WriteCount++;
             LastCid = request.Cid;
             LastVid = request.Vid;
+            var file = request.Files.Single();
             File.AppendAllText(
-                request.File.Path,
+                file.Path,
                 $"{Environment.NewLine}RevEx_CID={request.Cid:D}{Environment.NewLine}RevEx_VID={request.Vid:D}");
-            return Task.FromResult(new WriteRfaIdentifiersResponse(request.Cid, request.Vid));
+            var response = new PrepareContentVersionResponse(request.Cid, request.Vid, request.Files);
+            return Task.FromResult(response);
         }
     }
 

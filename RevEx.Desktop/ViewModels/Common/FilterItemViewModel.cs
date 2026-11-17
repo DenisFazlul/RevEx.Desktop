@@ -11,12 +11,15 @@ public partial class FilterItemViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isSelected;
 
-    public FilterItemViewModel(int id, string name, bool isSelected = false)
+    public FilterItemViewModel(int id, string name, bool isSelected = false, Avalonia.Media.IBrush? colorBrush = null)
     {
         Id = id;
+        ColorBrush = colorBrush;
         _name = name;
         _isSelected = isSelected;
     }
+
+    public Avalonia.Media.IBrush? ColorBrush { get; }
 
     public int Id
     {

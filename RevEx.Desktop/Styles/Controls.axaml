@@ -6,15 +6,15 @@
         <Setter Property="MinHeight" Value="32" />
         <Setter Property="Padding" Value="12,4" />
         <Setter Property="CornerRadius" Value="6" />
-        <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
         <Setter Property="FontWeight" Value="Normal" />
     </Style>
     <Style Selector="Button:pointerover">
-        <Setter Property="Background" Value="{StaticResource SurfaceHoverBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource BorderStrongBrush}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderStrongBrush}" />
     </Style>
     <Style Selector="Button:disabled">
         <Setter Property="Opacity" Value="0.45" />
@@ -24,44 +24,44 @@
         <Setter Property="MinHeight" Value="32" />
         <Setter Property="Padding" Value="12,4" />
         <Setter Property="CornerRadius" Value="6" />
-        <Setter Property="Background" Value="{StaticResource AccentBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
-        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AccentForegroundBrush}" />
         <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
     <Style Selector="Button.primary:pointerover">
-        <Setter Property="Background" Value="{StaticResource AccentHoverBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource AccentHoverBrush}" />
+        <Setter Property="Background" Value="{DynamicResource AccentHoverBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentHoverBrush}" />
     </Style>
 
     <Style Selector="Button.secondary">
-        <Setter Property="Background" Value="{StaticResource SurfaceMutedBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceMutedBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
     </Style>
     <Style Selector="Button.secondary:pointerover">
-        <Setter Property="Background" Value="{StaticResource SurfaceHoverBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource BorderStrongBrush}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderStrongBrush}" />
     </Style>
 
     <Style Selector="Button.ghost">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="CornerRadius" Value="8" />
-        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
     </Style>
     <Style Selector="Button.ghost:pointerover">
-        <Setter Property="Background" Value="{StaticResource SurfaceMutedBrush}" />
-        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceMutedBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
     </Style>
 
     <Style Selector="Button.danger">
         <Setter Property="Background" Value="Transparent" />
-        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
-        <Setter Property="Foreground" Value="{StaticResource DangerBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource DangerBrush}" />
     </Style>
     <Style Selector="Button.danger:pointerover">
-        <Setter Property="Background" Value="{StaticResource DangerSoftBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource DangerBrush}" />
+        <Setter Property="Background" Value="{DynamicResource DangerSoftBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource DangerBrush}" />
     </Style>
 
     <!-- Button modifiers. Combine with a semantic variant: "icon ghost" or "icon danger". -->
@@ -74,19 +74,19 @@
         <Setter Property="CornerRadius" Value="6" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
     </Style>
     <Style Selector="Button.icon:pointerover">
-        <Setter Property="Background" Value="{StaticResource SurfaceMutedBrush}" />
-        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceMutedBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
     </Style>
     <Style Selector="Button.icon.danger">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Foreground" Value="{StaticResource DangerBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource DangerBrush}" />
     </Style>
     <Style Selector="Button.icon.danger:pointerover">
-        <Setter Property="Background" Value="{StaticResource DangerSoftBrush}" />
+        <Setter Property="Background" Value="{DynamicResource DangerSoftBrush}" />
     </Style>
     <Style Selector="Button.icon PathIcon">
         <Setter Property="Width" Value="16" />
@@ -101,11 +101,11 @@
         <Setter Property="CornerRadius" Value="6" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
     </Style>
     <Style Selector="Button.icon-sm:pointerover">
-        <Setter Property="Background" Value="{StaticResource SurfaceMutedBrush}" />
-        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceMutedBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
     </Style>
     <Style Selector="Button.icon-sm PathIcon">
         <Setter Property="Width" Value="12" />
@@ -124,19 +124,19 @@
         <Setter Property="MinHeight" Value="32" />
         <Setter Property="Padding" Value="8,4" />
         <Setter Property="CornerRadius" Value="6" />
-        <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource BorderStrongBrush}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderStrongBrush}" />
         <Setter Property="BorderThickness" Value="1" />
     </Style>
     <Style Selector="TextBox:focus, ComboBox:focus">
-        <Setter Property="BorderBrush" Value="{StaticResource TextPrimaryBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource TextPrimaryBrush}" />
     </Style>
 
     <Style Selector="TextBox.search">
         <Setter Property="MinHeight" Value="32" />
         <Setter Property="Padding" Value="32,4,8,4" />
         <Setter Property="CornerRadius" Value="6" />
-        <Setter Property="Background" Value="{StaticResource SurfaceMutedBrush}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceMutedBrush}" />
         <Setter Property="BorderBrush" Value="Transparent" />
     </Style>
     <Style Selector="TextBox.multiline">
@@ -156,11 +156,11 @@
         <Setter Property="CornerRadius" Value="8" />
     </Style>
     <Style Selector="ListBox.category-list ListBoxItem:pointerover">
-        <Setter Property="Background" Value="{StaticResource SurfaceHoverBrush}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
     </Style>
     <Style Selector="ListBox.category-list ListBoxItem:selected">
-        <Setter Property="Background" Value="{StaticResource SurfaceSelectedBrush}" />
-        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceSelectedBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
     </Style>
     <Style Selector="ListBox.content-list ListBoxItem">
         <Setter Property="Padding" Value="0" />
@@ -172,14 +172,14 @@
     <Style Selector="Ellipse.status-dot">
         <Setter Property="Width" Value="8" />
         <Setter Property="Height" Value="8" />
-        <Setter Property="Fill" Value="{StaticResource SuccessBrush}" />
+        <Setter Property="Fill" Value="{DynamicResource SuccessBrush}" />
         <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
     <Style Selector="ProgressBar">
-        <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
     </Style>
     <Style Selector="CheckBox:checked">
-        <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
     </Style>
 
     <Style Selector="TabItem">
@@ -200,12 +200,12 @@
     </Style>
 
     <Style Selector="TextBlock.validation-message">
-        <Setter Property="Foreground" Value="{StaticResource DangerBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource DangerBrush}" />
         <Setter Property="FontSize" Value="13" />
         <Setter Property="TextWrapping" Value="Wrap" />
     </Style>
     <Style Selector="TextBlock.status-message">
-        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
         <Setter Property="FontSize" Value="13" />
         <Setter Property="TextWrapping" Value="Wrap" />
     </Style>

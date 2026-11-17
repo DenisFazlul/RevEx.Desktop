@@ -27,7 +27,7 @@ public partial class ContentDetailsViewModel
 {
     public async Task UpdatePreviewAsync(string path, string fileName)
     {
-        if (_content is null)
+        if (!CanEdit || _content is null)
         {
             return;
         }
@@ -56,7 +56,7 @@ public partial class ContentDetailsViewModel
 
     public async Task UpdateContentInformationAsync(string name, string description)
     {
-        if (_content is null)
+        if (!CanEdit || _content is null)
         {
             return;
         }
@@ -109,7 +109,7 @@ public partial class ContentDetailsViewModel
 
     public async Task UpdateContentCategoryAsync(CategoryDto category)
     {
-        if (_content is null || _content.CategoryId == category.Id)
+        if (!CanEdit || _content is null || _content.CategoryId == category.Id)
         {
             return;
         }
@@ -144,6 +144,11 @@ public partial class ContentDetailsViewModel
 
     public async Task DeleteContentAsync()
     {
+        if (!CanEdit)
+        {
+            return;
+        }
+
         try
         {
             IsDeleting = true;

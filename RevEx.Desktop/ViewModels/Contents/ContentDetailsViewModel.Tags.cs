@@ -25,19 +25,31 @@ namespace RevEx.Desktop.ViewModels.Contents;
 /// <summary>Назначение и снятие тегов карточки, обновление связанной истории.</summary>
 public partial class ContentDetailsViewModel
 {
-    public async Task AssignTagAsync(TagDto tag)
+    public async Task AssignTagsAsync(IReadOnlyList<TagDto> tags)
     {
-        if (_content is null || Tags.Any(item => item.Id == tag.Id))
+        if (!CanEdit || _content is null || IsSavingTags)
+        {
+            return;
+        }
+
+        var tagIds = Tags.Select(item => item.Id).ToHashSet();
+        var newTags = tags.Where(tag => tagIds.Add(tag.Id)).ToArray();
+        if (newTags.Length == 0)
         {
             return;
         }
 
         await RunTagActionAsync(async () =>
         {
-            var tagIds = Tags.Select(item => item.Id).Append(tag.Id).ToArray();
-            await UpdateTagAssignmentsAsync(tagIds);
-            Tags.Add(new ContentTagItemViewModel(tag, RemoveTagAsync));
-            TagMessage = $"Тег «{tag.Name}» добавлен.";
+            await UpdateTagAssignmentsAsync(tagIds.ToArray());
+            foreach (var tag in newTags)
+            {
+                Tags.Add(new ContentTagItemViewModel(tag, RemoveTagAsync));
+            }
+
+            TagMessage = newTags.Length == 1
+                ? $"Тег «{newTags[0].Name}» добавлен."
+                : $"Добавлено тегов: {newTags.Length}.";
             NotifyCollectionStateChanged();
         });
     }
@@ -60,7 +72,7 @@ public partial class ContentDetailsViewModel
 
     private async Task RemoveTagAsync(ContentTagItemViewModel tag)
     {
-        if (_content is null)
+        if (!CanEdit || _content is null)
         {
             return;
         }
@@ -77,7 +89,7 @@ public partial class ContentDetailsViewModel
 
     private async Task UpdateTagAssignmentsAsync(IReadOnlyCollection<int> tagIds)
     {
-        if (_content is null)
+        if (!CanEdit || _content is null)
         {
             return;
         }

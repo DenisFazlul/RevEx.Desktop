@@ -138,7 +138,8 @@ public sealed class WorkspaceTabFactory : IWorkspaceTabFactory
                 content.Name = name;
                 content.Description = description;
                 content.CategoryId = categoryId;
-            });
+            },
+            canChangeFreeze: _authenticationService.IsInRole(RevExRoles.Administrator));
         return details;
     }
 

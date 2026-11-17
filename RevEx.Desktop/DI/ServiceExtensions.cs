@@ -20,6 +20,7 @@ using RevEx.Connector.Client.Implementations.LocalDirectory;
 using RevEx.Configuration;
 using RevEx.LoadingQueue;
 using RevEx.Desktop.Updates;
+using RevEx.Desktop.Services.VersionImport;
 
 namespace RevEx.Desktop.DI;
 
@@ -44,7 +45,7 @@ public static class ServiceExtensions
         services.AddTransient<IContentVersionRepository, ContentVersionRepository>();
         services.AddTransient<IContentFileRepository, ContentFileRepository>();
         services.AddTransient<IContentHistoryRepository, ContentHistoryRepository>();
-        services.AddTransient<IRfaImportRepository, RfaImportRepository>();
+        services.AddTransient<IVersionImportRepository, VersionImportRepository>();
         services.AddSingleton<IConnectorRegistry, ConnectorRegistry>();
         services.AddSingleton<IConnectorTaskQueue, ConnectorTaskQueue>();
         services.AddSingleton<IConnectorDiscovery, FileConnectorDiscovery>();
@@ -54,6 +55,9 @@ public static class ServiceExtensions
         services.AddSingleton(new DesktopControlOptions());
         services.AddSingleton<DesktopControlBridge>();
         services.AddSingleton<RfaFamilyImportService>();
+        services.AddSingleton<DesktopFileConnector>();
+        services.AddSingleton<VersionFileConnectorCatalog>();
+        services.AddSingleton<VersionImportService>();
 
         services.AddUIServices();
         return services;
@@ -148,7 +152,6 @@ public static class ServiceExtensions
 
     private static IServiceCollection AddUIServices(this IServiceCollection services)
     {
-        services.AddSingleton<IApplicationShutdownService, ApplicationShutdownService>();
         services.AddSingleton<IRevExUserSettingsStore, RevExUserSettingsStore>();
         services.AddSingleton<IMainMenuProvider, MainMenuProvider>();
         services.AddTransient<IWorkspaceTabFactory, WorkspaceTabFactory>();

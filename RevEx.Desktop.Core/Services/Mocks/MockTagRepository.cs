@@ -21,7 +21,7 @@ internal sealed class MockTagRepository : ITagRepository
         var group = TagGroups.FirstOrDefault(item => item.Id == request.TagGroupId)
             ?? throw new HttpRequestException($"Tag group {request.TagGroupId} was not found.");
         var tag = new TagDto(Tags.Count == 0 ? 1 : Tags.Max(item => item.Id) + 1,
-            request.Name, group.Id, group.Name, now, now);
+            request.Name, group.Id, group.Name, now, now, request.Color?.ToUpperInvariant() ?? "#75451D");
         Tags.Add(tag);
         return Task.FromResult(tag);
     }
@@ -41,6 +41,7 @@ internal sealed class MockTagRepository : ITagRepository
         Tags[index] = Tags[index] with
         {
             Name = request.Name,
+            Color = request.Color?.ToUpperInvariant() ?? Tags[index].Color,
             TagGroupId = group.Id,
             TagGroupName = group.Name,
             UpdatedAt = DateTimeOffset.UtcNow

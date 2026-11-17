@@ -10,10 +10,10 @@ public partial class TagEditorWindow : DialogWindow
     {
     }
 
-    public TagEditorWindow(IEnumerable<TagGroupItemViewModel> groups, string? name, TagGroupItemViewModel? selectedGroup)
+    public TagEditorWindow(IEnumerable<TagGroupItemViewModel> groups, string? name, TagGroupItemViewModel? selectedGroup, string color = "#75451D")
     {
         InitializeComponent();
-        DataContext = new TagEditorViewModel(groups, name, selectedGroup);
+        DataContext = new TagEditorViewModel(groups, name, selectedGroup, color);
         Opened += (_, _) => NameBox.Focus();
     }
 }

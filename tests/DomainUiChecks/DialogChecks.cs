@@ -85,16 +85,20 @@ internal static class DialogChecks
         var now = DateTimeOffset.UtcNow;
         catalog.Categories.Add(new CategoryItemViewModel(new CategoryDto(1, "Category", now, now)));
         catalog.Tags.Add(new TagFilterItemViewModel(new TagDto(1, "Tag", 1, "Group", now, now)));
+        catalog.Tags.Add(new TagFilterItemViewModel(new TagDto(2, "Other tag", 2, "Other group", now, now)));
         var cancelled = new CatalogSettingsViewModel(catalog);
-        cancelled.Categories[0].IsSelected = true;
-        cancelled.Tags[0].IsSelected = true;
+        cancelled.Categories.SelectAllCommand.Execute(null);
+        cancelled.TagGroups[0].SelectAllCommand.Execute(null);
         cancelled.CancelCommand.Execute(null);
         Require(!catalog.Categories[0].IsSelected && !catalog.Tags[0].IsSelected, "Cancelled filter edits changed the catalog.");
         var accepted = new CatalogSettingsViewModel(catalog);
-        accepted.Categories[0].IsSelected = true;
-        accepted.Tags[0].IsSelected = true;
+        accepted.Categories.SelectAllCommand.Execute(null);
+        accepted.TagGroups[0].SelectAllCommand.Execute(null);
+        accepted.TagGroups[1].SelectAllCommand.Execute(null);
+        accepted.TagGroups[1].ClearCommand.Execute(null);
         accepted.ApplyCommand.Execute(null);
-        Require(catalog.Categories[0].IsSelected && catalog.Tags[0].IsSelected, "Confirmed filters were not applied.");
+        Require(catalog.Categories[0].IsSelected && catalog.Tags[0].IsSelected && !catalog.Tags[1].IsSelected,
+            "Bulk filter commands did not preserve independent group selections.");
     }
 
     private static async Task CheckOperationsAsync()

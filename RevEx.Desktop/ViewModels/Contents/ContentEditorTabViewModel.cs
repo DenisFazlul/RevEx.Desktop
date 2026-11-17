@@ -165,6 +165,7 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
     [RelayCommand]
     private async Task SaveAsync()
     {
+        SaveFailure = null;
         if (!TryValidate(out var validationMessage))
         {
             SetError(validationMessage);
@@ -194,15 +195,18 @@ public partial class ContentEditorTabViewModel : WorkspaceTabViewModel
                 ? "Новая версия успешно добавлена."
                 : "Контент и первая версия успешно добавлены.";
         }
-        catch (Exception exception) when (exception is HttpRequestException or IOException or UnauthorizedAccessException)
+        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException or IOException or UnauthorizedAccessException)
         {
-            SetError($"Не удалось сохранить данные: {exception.Message}");
+            SaveFailure = exception;
+            SetError("Не удалось сохранить данные.");
         }
         finally
         {
             IsSaving = false;
         }
     }
+
+    public Exception? SaveFailure { get; private set; }
 
     private bool TryValidate(out string message)
     {

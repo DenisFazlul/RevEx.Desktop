@@ -11,6 +11,8 @@ public sealed class OidcAuthenticationService : IAuthenticationService
 {
     private const string AuthorizationPageResource =
         "RevEx.Desktop.Core.Authentication.Assets.AuthorizationCompleted.html";
+    private const string AuthorizationMascotResource =
+        "RevEx.Desktop.Core.Authentication.Assets.Tyubik.png";
 
     private readonly OidcClient _oidcClient;
     private readonly HttpClient _backchannelClient;
@@ -297,7 +299,14 @@ public sealed class OidcAuthenticationService : IAuthenticationService
                 $"Embedded resource '{AuthorizationPageResource}' was not found.");
         using var reader = new StreamReader(stream, Encoding.UTF8);
 
-        return reader.ReadToEnd();
+        using var mascot = typeof(OidcAuthenticationService).Assembly
+            .GetManifestResourceStream(AuthorizationMascotResource)
+            ?? throw new InvalidOperationException(
+                $"Embedded resource '{AuthorizationMascotResource}' was not found.");
+        using var image = new MemoryStream();
+        mascot.CopyTo(image);
+        var base64Image = Convert.ToBase64String(image.ToArray());
+        return reader.ReadToEnd().Replace("{{TYUBIK_PNG}}", base64Image, StringComparison.Ordinal);
     }
 
     private static IReadOnlySet<string> ReadRoles(string accessToken)

@@ -5,6 +5,8 @@ using System.Linq;
 using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using RevEx.Desktop.Configuration;
+using RevEx.Desktop.ViewModels.Common;
+using RevEx.Desktop.ViewModels.Tags;
 using RevEx.Domain.Contracts.Content;
 
 namespace RevEx.Desktop.ViewModels.Contents;
@@ -30,7 +32,7 @@ public partial class ContentItemViewModel : ViewModelBase, IDisposable
     {
         get;
     }
-    public IReadOnlyCollection<string> VisibleTags
+    public IReadOnlyCollection<FilterItemViewModel> VisibleTags
     {
         get;
     }
@@ -54,7 +56,7 @@ public partial class ContentItemViewModel : ViewModelBase, IDisposable
 
     public ContentItemViewModel(
         ContentDto dto,
-        IReadOnlyDictionary<int, string>? tagNames = null,
+        IReadOnlyDictionary<int, TagFilterItemViewModel>? catalogTags = null,
         byte[]? previewBytes = null)
     {
         Id = dto.Id;
@@ -65,7 +67,7 @@ public partial class ContentItemViewModel : ViewModelBase, IDisposable
         _name = dto.Name;
         _description = dto.Description;
         var tags = dto.TagIds
-            .Select(id => tagNames is not null && tagNames.TryGetValue(id, out var name) ? name : id.ToString())
+            .Select(id => catalogTags is not null && catalogTags.TryGetValue(id, out var tag) ? tag : new FilterItemViewModel(id, id.ToString()))
             .ToArray();
         var visibleTagCount = CatalogDisplayConfiguration.GetMaximumVisibleTags();
         VisibleTags = tags.Take(visibleTagCount).ToArray();

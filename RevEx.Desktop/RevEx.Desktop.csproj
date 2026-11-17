@@ -4,6 +4,7 @@
         <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ApplicationManifest>app.manifest</ApplicationManifest>
+        <ApplicationIcon>Assets/revex-logo.ico</ApplicationIcon>
     </PropertyGroup>
 
     <ItemGroup>
@@ -14,6 +15,7 @@
     <ItemGroup>
         <FrameworkReference Include="Microsoft.AspNetCore.App" />
         <PackageReference Include="Avalonia" Version="12.1.2"/>
+        <PackageReference Include="Avalonia.Controls.ColorPicker" Version="12.1.2"/>
         <PackageReference Include="Avalonia.Desktop" Version="12.1.2"/>
         <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.2"/>
         <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.2"/>

@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using Avalonia.Controls;
-using Avalonia.Input;
 using RevEx.Domain.Contracts.Tag;
 using RevEx.Desktop.ViewModels.Tags;
 using RevEx.Desktop.Views.Common;
@@ -17,15 +15,5 @@ public partial class TagSelectionWindow : DialogWindow
     {
         InitializeComponent();
         DataContext = new TagSelectionWindowViewModel(tags);
-    }
-
-    private void OnTagDoubleTapped(object? sender, TappedEventArgs eventArgs) => CloseSelectedTag();
-
-    private void CloseSelectedTag()
-    {
-        if (DataContext is TagSelectionWindowViewModel viewModel)
-        {
-            viewModel.Accept();
-        }
     }
 }
