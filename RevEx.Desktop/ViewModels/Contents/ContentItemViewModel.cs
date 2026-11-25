@@ -36,6 +36,8 @@ public partial class ContentItemViewModel : ViewModelBase, IDisposable
     {
         get;
     }
+    public IReadOnlyCollection<FilterItemViewModel> AllTags { get; }
+
     public string? AdditionalTagsText
     {
         get;
@@ -69,6 +71,7 @@ public partial class ContentItemViewModel : ViewModelBase, IDisposable
         var tags = dto.TagIds
             .Select(id => catalogTags is not null && catalogTags.TryGetValue(id, out var tag) ? tag : new FilterItemViewModel(id, id.ToString()))
             .ToArray();
+        AllTags = tags;
         var visibleTagCount = CatalogDisplayConfiguration.GetMaximumVisibleTags();
         VisibleTags = tags.Take(visibleTagCount).ToArray();
         var additionalTagCount = tags.Length - VisibleTags.Count;

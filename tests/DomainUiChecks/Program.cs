@@ -16,6 +16,13 @@ using RevEx.Domain.Contracts.ContentHistory;
 using RevEx.Domain.Contracts.Tag;
 
 AppBuilder.Configure<App>().UseHeadless(new AvaloniaHeadlessPlatformOptions()).SetupWithoutStarting();
+if (args.Contains("--open-by-id-only", StringComparer.Ordinal))
+{
+    OpenContentByIdChecks.RunAsync().GetAwaiter().GetResult();
+    return;
+}
+
+OpenContentByIdChecks.RunAsync().GetAwaiter().GetResult();
 if (args.Contains("--unified-only", StringComparer.Ordinal))
 {
     UnifiedVersionImportChecks.Run();

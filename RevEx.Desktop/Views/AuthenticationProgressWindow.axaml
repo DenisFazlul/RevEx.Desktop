@@ -1,9 +1,10 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:common="using:RevEx.Desktop.Views.Common"
         x:Class="RevEx.Desktop.Views.AuthenticationProgressWindow"
         Title="Вход в RevEx"
         Width="500"
-        Height="250"
+        Height="310"
         CanResize="False"
         WindowStartupLocation="CenterScreen">
     <Grid Margin="16">
@@ -18,11 +19,13 @@
                     <TextBlock Classes="caption" Text="RevEx ожидает подтверждение авторизации" />
                 </StackPanel>
 
-                <TextBlock x:Name="StatusText"
-                           Grid.Row="2" Grid.ColumnSpan="3"
+                <StackPanel Grid.Row="2" Grid.ColumnSpan="3" Spacing="8">
+                    <common:LoadingIndicator HorizontalAlignment="Center" Width="200" Height="64" />
+                    <TextBlock x:Name="StatusText"
                            Classes="caption"
                            Text="Если вкладка была закрыта, откройте страницу входа повторно. Ожидание завершится через 3 минуты."
                            TextWrapping="Wrap" />
+                </StackPanel>
 
                 <StackPanel Grid.Row="4" Grid.ColumnSpan="3"
                             Orientation="Horizontal"

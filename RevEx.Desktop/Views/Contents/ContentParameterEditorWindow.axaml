@@ -1,0 +1,31 @@
+<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:vm="using:RevEx.Desktop.ViewModels.Contents" x:Class="RevEx.Desktop.Views.Contents.ContentParameterEditorWindow" x:DataType="vm:ContentParameterRowViewModel" Title="Параметр" Width="560" MinWidth="440" SizeToContent="Height" WindowStartupLocation="CenterOwner">
+    <ScrollViewer Margin="16" HorizontalScrollBarVisibility="Disabled" MaxHeight="640">
+        <StackPanel Spacing="8" IsEnabled="{Binding IsIdle}">
+            <TextBlock Classes="h2" Text="Параметр" />
+            <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto"
+                  ColumnSpacing="12" RowSpacing="8">
+                <TextBlock Text="Название" VerticalAlignment="Center" />
+                <TextBox Grid.Column="1" Text="{Binding Name}" MaxLength="200"
+                         AutomationProperties.Name="Название" />
+                <TextBlock Grid.Row="1" Text="Тип" VerticalAlignment="Center" />
+                <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Types}"
+                          SelectedIndex="{Binding TypeIndex, Mode=TwoWay}"
+                          HorizontalAlignment="Stretch" AutomationProperties.Name="Тип" />
+                <TextBlock Grid.Row="2" Text="Значение" VerticalAlignment="Center" />
+                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Value}" MaxLength="4000"
+                         ToolTip.Tip="{Binding ValueHint}" AutomationProperties.Name="Значение" />
+                <TextBlock Grid.Row="3" Text="Подсказка" VerticalAlignment="Center" />
+                <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Help}" MaxLength="1000"
+                         AutomationProperties.Name="Подсказка" />
+            </Grid>
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button Classes="primary" Content="Сохранить" Command="{Binding SaveCommand}" />
+                <Button Content="Отмена"
+                        Click="OnCancelClick" />
+                <Button Content="Удалить" Classes="danger" IsVisible="{Binding IsExisting}"
+                        Command="{Binding DeleteCommand}" />
+            </StackPanel>
+            <TextBlock Text="{Binding Message}" TextWrapping="Wrap" Classes="status-message" />
+        </StackPanel>
+    </ScrollViewer>
+</Window>

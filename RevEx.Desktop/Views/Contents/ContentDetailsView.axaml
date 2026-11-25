@@ -15,8 +15,21 @@
         <TabControl Grid.Row="1">
             <TabItem Header="Основное">
                 <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-                    <Grid Margin="0,16,0,0" ColumnDefinitions="2*,12,3*" RowDefinitions="Auto,Auto">
-                        <Border Classes="card section-card" VerticalAlignment="Top">
+                    <Grid Margin="0,16,0,0" ColumnDefinitions="2*,12,3*" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+                        <StackPanel Grid.ColumnSpan="3" Orientation="Horizontal" Spacing="8">
+                            <Button Content="Скопировать ID" Click="OnCopyIdClick"
+                                    ToolTip.Tip="Скопировать ID для открытия через меню «Открыть по ID»" />
+                            <TextBlock x:Name="CopyIdStatus" VerticalAlignment="Center" />
+                            <ToggleButton Classes="subscription"
+                                          IsChecked="{Binding IsSubscribed, Mode=OneWay}"
+                                          Command="{Binding ToggleSubscriptionCommand}"
+                                          IsEnabled="{Binding !IsChangingSubscription}"
+                                          ToolTip.Tip="{Binding SubscriptionTip}">
+                                <TextBlock Text="{Binding SubscriptionTip}" />
+                            </ToggleButton>
+                            <TextBlock Text="{Binding SubscriptionMessage}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <Border Grid.Row="1" Classes="card section-card" Margin="0,12,0,0">
                             <StackPanel Spacing="8">
                                 <Grid ColumnDefinitions="*,Auto">
                                     <TextBlock Classes="h2" Text="Изображение" />
@@ -35,9 +48,7 @@
                                 <common:LoadingIndicator IsVisible="{Binding IsUpdatingPreview}" />
                                 <Border Classes="image-frame" MinHeight="200">
                                     <Grid>
-                                        <TextBlock IsVisible="{Binding HasNoPreview}" Text="Изображение пока не загружено."
-                                                   Foreground="{DynamicResource TextSecondaryBrush}"
-                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        <common:ContentImagePlaceholder IsVisible="{Binding HasNoPreview}" />
                                         <Image Source="{Binding PreviewImage}" Stretch="Uniform"
                                                IsVisible="{Binding HasPreview}" MaxHeight="256" />
                                     </Grid>
@@ -46,123 +57,110 @@
                             </StackPanel>
                         </Border>
 
-                        <StackPanel Grid.Column="2" Spacing="12">
-                            <Border Classes="card section-card">
-                                <StackPanel Spacing="8">
-                                    <TextBlock Classes="h2" Text="Основная информация" />
-                                    <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto,Auto">
-                                        <Grid.Styles>
-                                            <Style Selector="TextBlock">
-                                                <Setter Property="Margin" Value="8,4" />
-                                                <Setter Property="VerticalAlignment" Value="Center" />
-                                                <Setter Property="TextWrapping" Value="Wrap" />
-                                            </Style>
-                                        </Grid.Styles>
-                                        <Border Grid.Row="0" Grid.ColumnSpan="3" Background="{DynamicResource SurfaceMutedBrush}" />
-                                        <Border Grid.Row="2" Grid.ColumnSpan="3" Background="{DynamicResource SurfaceMutedBrush}" />
-                                        <TextBlock Grid.Row="0" Classes="caption" Text="Название" />
-                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Name}" />
-                                        <Button Grid.Row="0" Grid.Column="2" Classes="icon" Click="OnEditNameClick"
-                                                IsVisible="{Binding HasEditPermission}"
-                                                 ToolTip.Tip="Изменить название">
-                                            <Button.IsEnabled>
-                                                <MultiBinding Converter="{x:Static BoolConverters.And}">
-                                                    <Binding Path="CanEdit" />
-                                                    <Binding Path="!IsSavingContent" />
-                                                </MultiBinding>
-                                            </Button.IsEnabled>
-                                            <PathIcon Data="M3,11 L3,14 L6,14 L14,6 L11,3 Z M10,4 L13,7 M3,14 L7,13" />
-                                        </Button>
-                                        <TextBlock Grid.Row="1" Classes="caption" Text="Описание" />
-                                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Description}" />
-                                        <Button Grid.Row="1" Grid.Column="2" Classes="icon" Click="OnEditDescriptionClick"
-                                                IsVisible="{Binding HasEditPermission}"
-                                                 ToolTip.Tip="Изменить описание">
-                                            <Button.IsEnabled>
-                                                <MultiBinding Converter="{x:Static BoolConverters.And}">
-                                                    <Binding Path="CanEdit" />
-                                                    <Binding Path="!IsSavingContent" />
-                                                </MultiBinding>
-                                            </Button.IsEnabled>
-                                            <PathIcon Data="M3,11 L3,14 L6,14 L14,6 L11,3 Z M10,4 L13,7 M3,14 L7,13" />
-                                        </Button>
-                                        <TextBlock Grid.Row="2" Classes="caption" Text="Категория" />
-                                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding CategoryName}" />
-                                        <Button Grid.Row="2" Grid.Column="2" Classes="icon" Click="OnEditCategoryClick"
-                                                IsVisible="{Binding HasEditPermission}"
-                                                 ToolTip.Tip="Изменить категорию">
-                                            <Button.IsEnabled>
-                                                <MultiBinding Converter="{x:Static BoolConverters.And}">
-                                                    <Binding Path="CanEdit" />
-                                                    <Binding Path="!IsSavingContent" />
-                                                </MultiBinding>
-                                            </Button.IsEnabled>
-                                            <PathIcon Data="M3,11 L3,14 L6,14 L14,6 L11,3 Z M10,4 L13,7 M3,14 L7,13" />
-                                        </Button>
-                                    </Grid>
-                                    <common:LoadingIndicator IsVisible="{Binding IsSavingContent}" />
-                                    <TextBlock Text="{Binding ContentMessage}" Classes="status-message" />
-                                </StackPanel>
-                            </Border>
+                        <Border Grid.Row="1" Grid.Column="2" Classes="card section-card" Margin="0,12,0,0">
+                            <StackPanel Spacing="8">
+                                <TextBlock Classes="h2" Text="Основная информация" />
+                                <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto,Auto">
+                                    <Grid.Styles>
+                                        <Style Selector="TextBlock">
+                                            <Setter Property="Margin" Value="8,4" />
+                                            <Setter Property="VerticalAlignment" Value="Center" />
+                                            <Setter Property="TextWrapping" Value="Wrap" />
+                                        </Style>
+                                    </Grid.Styles>
+                                    <Border Grid.Row="0" Grid.ColumnSpan="3" Background="{DynamicResource SurfaceMutedBrush}" />
+                                    <Border Grid.Row="2" Grid.ColumnSpan="3" Background="{DynamicResource SurfaceMutedBrush}" />
+                                    <TextBlock Grid.Row="0" Classes="caption" Text="Название" />
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Name}" />
+                                    <Button Grid.Row="0" Grid.Column="2" Classes="icon" Click="OnEditNameClick"
+                                            IsVisible="{Binding HasEditPermission}"
+                                             ToolTip.Tip="Изменить название">
+                                        <Button.IsEnabled>
+                                            <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                                <Binding Path="CanEdit" />
+                                                <Binding Path="!IsSavingContent" />
+                                            </MultiBinding>
+                                        </Button.IsEnabled>
+                                        <PathIcon Data="M3,11 L3,14 L6,14 L14,6 L11,3 Z M10,4 L13,7 M3,14 L7,13" />
+                                    </Button>
+                                    <TextBlock Grid.Row="1" Classes="caption" Text="Описание" />
+                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Description}" />
+                                    <Button Grid.Row="1" Grid.Column="2" Classes="icon" Click="OnEditDescriptionClick"
+                                            IsVisible="{Binding HasEditPermission}"
+                                             ToolTip.Tip="Изменить описание">
+                                        <Button.IsEnabled>
+                                            <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                                <Binding Path="CanEdit" />
+                                                <Binding Path="!IsSavingContent" />
+                                            </MultiBinding>
+                                        </Button.IsEnabled>
+                                        <PathIcon Data="M3,11 L3,14 L6,14 L14,6 L11,3 Z M10,4 L13,7 M3,14 L7,13" />
+                                    </Button>
+                                    <TextBlock Grid.Row="2" Classes="caption" Text="Категория" />
+                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding CategoryName}" />
+                                    <Button Grid.Row="2" Grid.Column="2" Classes="icon" Click="OnEditCategoryClick"
+                                            IsVisible="{Binding HasEditPermission}"
+                                             ToolTip.Tip="Изменить категорию">
+                                        <Button.IsEnabled>
+                                            <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                                <Binding Path="CanEdit" />
+                                                <Binding Path="!IsSavingContent" />
+                                            </MultiBinding>
+                                        </Button.IsEnabled>
+                                        <PathIcon Data="M3,11 L3,14 L6,14 L14,6 L11,3 Z M10,4 L13,7 M3,14 L7,13" />
+                                    </Button>
+                                </Grid>
+                                <common:LoadingIndicator IsVisible="{Binding IsSavingContent}" />
+                                <TextBlock Text="{Binding ContentMessage}" Classes="status-message" />
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Row="2" Grid.ColumnSpan="3" Margin="0,12,0,0" Classes="card section-card">
+                            <StackPanel Spacing="8">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Classes="h2" Text="Теги" />
+                                    <Button Grid.Column="1" Classes="primary" Content="Добавить тег"
+                                            IsVisible="{Binding HasEditPermission}"
+                                            Click="OnAddTagClick">
+                                        <Button.IsEnabled>
+                                            <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                                <Binding Path="CanEdit" />
+                                                <Binding Path="!IsSavingTags" />
+                                            </MultiBinding>
+                                        </Button.IsEnabled>
+                                    </Button>
+                                </Grid>
+                                <common:LoadingIndicator IsVisible="{Binding IsSavingTags}" />
+                                <TextBlock IsVisible="{Binding HasNoTags}" Text="У контента пока нет тегов."
+                                           Foreground="{DynamicResource TextSecondaryBrush}" />
+                                <ItemsControl ItemsSource="{Binding Tags}" IsVisible="{Binding HasTags}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:ContentTagItemViewModel">
+                                            <Border Classes="tag">
+                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                    <Ellipse Width="10" Height="10" Fill="{Binding ColorBrush}" />
+                                                    <TextBlock Text="{Binding Name, StringFormat='#{0}'}" VerticalAlignment="Center" />
+                                                    <Button Classes="icon-sm" Command="{Binding RemoveCommand}"
+                                                            IsEnabled="{Binding $parent[UserControl].((vm:ContentDetailsViewModel)DataContext).CanEdit}" IsVisible="{Binding $parent[UserControl].((vm:ContentDetailsViewModel)DataContext).HasEditPermission}" ToolTip.Tip="Удалить тег">
+                                                        <PathIcon Data="M2,3 L3,2 L10,9 L9,10 Z M9,2 L10,3 L3,10 L2,9 Z" />
+                                                    </Button>
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <TextBlock Text="{Binding TagMessage}" Classes="status-message" />
 
-                            <Border Classes="card section-card">
-                                <StackPanel Spacing="8">
-                                    <Grid ColumnDefinitions="*,Auto">
-                                        <TextBlock Classes="h2" Text="Теги" />
-                                        <Button Grid.Column="1" Classes="primary" Content="Добавить тег"
-                                                IsVisible="{Binding HasEditPermission}"
-                                                Click="OnAddTagClick">
-                                            <Button.IsEnabled>
-                                                <MultiBinding Converter="{x:Static BoolConverters.And}">
-                                                    <Binding Path="CanEdit" />
-                                                    <Binding Path="!IsSavingTags" />
-                                                </MultiBinding>
-                                            </Button.IsEnabled>
-                                        </Button>
-                                    </Grid>
-                                    <common:LoadingIndicator IsVisible="{Binding IsSavingTags}" />
-                                    <TextBlock IsVisible="{Binding HasNoTags}" Text="У контента пока нет тегов."
-                                               Foreground="{DynamicResource TextSecondaryBrush}" />
-                                    <ItemsControl ItemsSource="{Binding Tags}" IsVisible="{Binding HasTags}">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate x:DataType="vm:ContentTagItemViewModel">
-                                                <Border Classes="tag">
-                                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                                        <Ellipse Width="10" Height="10" Fill="{Binding ColorBrush}" />
-                                                        <TextBlock Text="{Binding Name, StringFormat='#{0}'}" VerticalAlignment="Center" />
-                                                        <Button Classes="icon-sm" Command="{Binding RemoveCommand}"
-                                                                IsEnabled="{Binding $parent[UserControl].((vm:ContentDetailsViewModel)DataContext).CanEdit}" IsVisible="{Binding $parent[UserControl].((vm:ContentDetailsViewModel)DataContext).HasEditPermission}" ToolTip.Tip="Удалить тег">
-                                                            <PathIcon Data="M2,3 L3,2 L10,9 L9,10 Z M9,2 L10,3 L3,10 L2,9 Z" />
-                                                        </Button>
-                                                    </StackPanel>
-                                                </Border>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                    <TextBlock Text="{Binding TagMessage}" Classes="status-message" />
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <ToggleButton IsChecked="{Binding IsSubscribed, Mode=OneWay}"
-                                                      Command="{Binding ToggleSubscriptionCommand}"
-                                                      IsEnabled="{Binding !IsChangingSubscription}"
-                                                      ToolTip.Tip="{Binding SubscriptionTip}">
-                                            <PathIcon Width="20" Height="14"
-                                                      Data="M0,7 Q10,-5 20,7 Q10,19 0,7 Z M13,7 A3,3 0 1 1 7,7 A3,3 0 1 1 13,7" />
-                                        </ToggleButton>
-                                        <TextBlock Text="{Binding SubscriptionMessage}" VerticalAlignment="Center" />
-                                    </StackPanel>
-                                </StackPanel>
-                            </Border>
-                            <TextBlock Text="{Binding ErrorMessage}" TextWrapping="Wrap"
-                                       Foreground="{DynamicResource TextSecondaryBrush}" />
-                        </StackPanel>
-                        <Border Grid.Row="1" Grid.ColumnSpan="3" Margin="0,12,0,0" Classes="card section-card">
+                            </StackPanel>
+                        </Border>
+                        <TextBlock Grid.Row="4" Grid.ColumnSpan="3" Text="{Binding ErrorMessage}" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <Border Grid.Row="3" Grid.ColumnSpan="3" Margin="0,12,0,0" Classes="card section-card">
                             <StackPanel Spacing="8">
                                 <Grid ColumnDefinitions="*,Auto">
                                     <TextBlock Classes="h2" Text="Параметры" />
-                                    <Button Grid.Column="1" Content="Добавить параметр" Command="{Binding AddParameterCommand}"
+                                    <Button Grid.Column="1" Content="Добавить параметр" Click="OnAddParameterClick"
                                             IsVisible="{Binding HasEditPermission}">
                                         <Button.IsEnabled>
                                             <MultiBinding Converter="{x:Static BoolConverters.And}">
@@ -172,62 +170,25 @@
                                         </Button.IsEnabled>
                                     </Button>
                                 </Grid>
-                                <Grid ColumnDefinitions="2*,*,2*,2*,112" ColumnSpacing="8">
+                                <Grid ColumnDefinitions="2*,*,2*,112" ColumnSpacing="8">
                                     <TextBlock Classes="caption" Text="Название" />
                                     <TextBlock Grid.Column="1" Classes="caption" Text="Тип" />
                                     <TextBlock Grid.Column="2" Classes="caption" Text="Значение" />
-                                    <TextBlock Grid.Column="3" Classes="caption" Text="Подсказка" />
                                 </Grid>
                                 <ItemsControl ItemsSource="{Binding Parameters}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate x:DataType="parameter:ContentParameterDto">
-                                            <Grid ColumnDefinitions="2*,*,2*,2*,112" ColumnSpacing="8" Margin="0,4">
+                                            <Grid ColumnDefinitions="2*,*,2*,112" ColumnSpacing="8" Margin="0,4" Background="Transparent" ToolTip.Tip="{Binding Help}">
                                                 <TextBlock Text="{Binding Name}" TextWrapping="Wrap" />
                                                 <TextBlock Grid.Column="1" Text="{Binding Kind, Converter={x:Static vm:ContentParameterRowViewModel.KindLabelConverter}}" />
-                                                <TextBlock Grid.Column="2" Text="{Binding Value}" TextWrapping="Wrap"
-                                                           ToolTip.Tip="{Binding Help}" />
-                                                <TextBlock Grid.Column="3" Text="{Binding Help}" TextWrapping="Wrap" />
-                                                <Button Grid.Column="4" Content="Изменить"
+                                                <TextBlock Grid.Column="2" Text="{Binding Value}" TextWrapping="Wrap" />
+                                                <Button Grid.Column="3" Content="Изменить"
                                                         IsEnabled="{Binding $parent[UserControl].((vm:ContentDetailsViewModel)DataContext).CanEdit}" IsVisible="{Binding $parent[UserControl].((vm:ContentDetailsViewModel)DataContext).HasEditPermission}"
-                                                        Command="{Binding $parent[UserControl].((vm:ContentDetailsViewModel)DataContext).EditParameterCommand}"
-                                                        CommandParameter="{Binding}" />
+                                                        Click="OnEditParameterClick" />
                                             </Grid>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
-                                <ContentControl Content="{Binding ParameterEditor}" IsVisible="{Binding !!ParameterEditor}" IsEnabled="{Binding CanEdit}">
-                                    <ContentControl.ContentTemplate>
-                                        <DataTemplate x:DataType="vm:ContentParameterRowViewModel">
-                                            <StackPanel Spacing="8" Margin="0,12,0,0" IsEnabled="{Binding IsIdle}">
-                                                <TextBlock Classes="h2" Text="Параметр" />
-                                                <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto"
-                                                      ColumnSpacing="12" RowSpacing="8">
-                                                    <TextBlock Text="Название" VerticalAlignment="Center" />
-                                                    <TextBox Grid.Column="1" Text="{Binding Name}" MaxLength="200"
-                                                             AutomationProperties.Name="Название" />
-                                                    <TextBlock Grid.Row="1" Text="Тип" VerticalAlignment="Center" />
-                                                    <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Types}"
-                                                              SelectedIndex="{Binding TypeIndex, Mode=TwoWay}"
-                                                              HorizontalAlignment="Stretch" AutomationProperties.Name="Тип" />
-                                                    <TextBlock Grid.Row="2" Text="Значение" VerticalAlignment="Center" />
-                                                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Value}" MaxLength="4000"
-                                                             ToolTip.Tip="{Binding ValueHint}" AutomationProperties.Name="Значение" />
-                                                    <TextBlock Grid.Row="3" Text="Подсказка" VerticalAlignment="Center" />
-                                                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Help}" MaxLength="1000"
-                                                             AutomationProperties.Name="Подсказка" />
-                                                </Grid>
-                                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                                    <Button Content="Сохранить" Command="{Binding SaveCommand}" />
-                                                    <Button Content="Отмена"
-                                                            Command="{Binding $parent[UserControl].((vm:ContentDetailsViewModel)DataContext).CancelParameterCommand}" />
-                                                    <Button Content="Удалить" Classes="danger" IsVisible="{Binding IsExisting}"
-                                                            Command="{Binding DeleteCommand}" />
-                                                </StackPanel>
-                                                <TextBlock Text="{Binding Message}" TextWrapping="Wrap" Classes="status-message" />
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </ContentControl.ContentTemplate>
-                                </ContentControl>
                                 <TextBlock Text="{Binding ParameterMessage}" TextWrapping="Wrap" Classes="status-message" />
                             </StackPanel>
                         </Border>

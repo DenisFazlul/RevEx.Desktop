@@ -2,7 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:converters="using:Avalonia.Data.Converters">
     <!-- Compact controls with quiet surfaces and strong, predictable states. -->
-    <Style Selector="Button">
+    <Style Selector="Button, ToggleButton.subscription">
         <Setter Property="MinHeight" Value="32" />
         <Setter Property="Padding" Value="12,4" />
         <Setter Property="CornerRadius" Value="6" />
@@ -12,12 +12,28 @@
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
         <Setter Property="FontWeight" Value="Normal" />
     </Style>
-    <Style Selector="Button:pointerover">
+    <Style Selector="Button:pointerover, ToggleButton.subscription:pointerover">
         <Setter Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource BorderStrongBrush}" />
     </Style>
-    <Style Selector="Button:disabled">
+    <Style Selector="Button:disabled, ToggleButton.subscription:disabled">
         <Setter Property="Opacity" Value="0.45" />
+    </Style>
+
+    <Style Selector="ToggleButton.subscription:checked">
+        <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AccentForegroundBrush}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="ToggleButton.subscription:checked /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AccentForegroundBrush}" />
+    </Style>
+    <Style Selector="ToggleButton.subscription:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource AccentHoverBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentHoverBrush}" />
     </Style>
 
     <Style Selector="Button.primary">

@@ -6,6 +6,8 @@ using RevEx.Desktop.Navigation;
 using RevEx.Desktop.ViewModels.Catalog;
 using RevEx.Desktop.ViewModels.MainMenu;
 using RevEx.Desktop.ViewModels.Tabs;
+using RevEx.Desktop.Core.Interfaces;
+using RevEx.Desktop.ViewModels.Contents;
 
 namespace RevEx.Desktop.ViewModels;
 
@@ -14,6 +16,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
 {
     private readonly IWorkspaceTabFactory _tabFactory;
     private readonly WorkspaceTabContext _tabContext;
+    private readonly IRevExApiService _apiService;
 
     [ObservableProperty]
     private WorkspaceTabViewModel? _selectedTab;
@@ -29,9 +32,11 @@ public partial class MainViewModel : ViewModelBase, IDisposable
 
     public MainViewModel(
         IWorkspaceTabFactory tabFactory,
-        IMainMenuProvider mainMenuProvider)
+        IMainMenuProvider mainMenuProvider,
+        IRevExApiService apiService)
     {
         _tabFactory = tabFactory;
+        _apiService = apiService;
         _tabContext = new WorkspaceTabContext(OpenTab, CloseTab);
 
         MainMenu = mainMenuProvider.Create(OpenTab);
@@ -59,6 +64,23 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         }
 
         tab.Dispose();
+    }
+
+    public OpenContentByIdViewModel CreateOpenContentByIdDialog()
+    {
+        return new OpenContentByIdViewModel(_apiService.Contents, content =>
+        {
+            var existing = Tabs.FirstOrDefault(tab =>
+                tab is ContentDetailsViewModel && Equals(tab.Key, content.Id));
+            if (existing is not null)
+            {
+                SelectedTab = existing;
+                return;
+            }
+
+            var item = new ContentItemViewModel(content);
+            OpenTab(new WorkspaceTabRequest(typeof(ContentDetailsViewModel), content.Id, item));
+        });
     }
 
     private void OpenTab(WorkspaceTabRequest request)

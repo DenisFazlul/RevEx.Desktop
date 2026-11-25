@@ -1,6 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:RevEx.Desktop.Updates.ViewModels"
+        xmlns:controls="using:RevEx.Desktop.Updates.Controls"
         x:Class="RevEx.Desktop.Updates.Views.StartupUpdateWindow"
         x:DataType="vm:StartupUpdateViewModel"
         Title="Запуск RevEx" Width="620" SizeToContent="Height" CanResize="False"
@@ -8,6 +9,7 @@
     <Border Margin="24" Classes="card section-card">
         <StackPanel Spacing="14">
             <TextBlock Classes="h2" Text="Подключение и обновление RevEx"/>
+            <controls:PawLoadingIndicator IsVisible="{Binding IsBusy}" HorizontalAlignment="Center" Width="240" Height="78" />
             <TextBlock Text="{Binding CurrentVersion, StringFormat='Текущая версия: {0}'}"/>
             <TextBlock Text="{Binding RecommendedVersion, StringFormat='Рекомендуемая версия: {0}'}" IsVisible="{Binding HasUpdate}"/>
             <TextBlock Text="{Binding Status}" TextWrapping="Wrap"/>

@@ -1,5 +1,6 @@
 using RevEx.Desktop.ViewModels.Common;
 using Avalonia.Controls;
+using Avalonia.Input.Platform;
 using Avalonia.Platform.Storage;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,6 +23,63 @@ public partial class ContentDetailsView : UserControl
     public ContentDetailsView()
     {
         InitializeComponent();
+    }
+
+    private async void OnCopyIdClick(object? sender, Avalonia.Interactivity.RoutedEventArgs eventArgs)
+    {
+        if (DataContext is not ContentDetailsViewModel viewModel)
+        {
+            return;
+        }
+
+        var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
+        if (clipboard is null)
+        {
+            CopyIdStatus.Text = "Буфер обмена недоступен.";
+            return;
+        }
+
+        try
+        {
+            await clipboard.SetTextAsync(viewModel.Id.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            CopyIdStatus.Text = "ID скопирован.";
+        }
+        catch (System.Exception exception) when (exception is System.InvalidOperationException or
+                                                   System.IO.IOException or System.UnauthorizedAccessException)
+        {
+            CopyIdStatus.Text = "Не удалось скопировать ID.";
+        }
+    }
+
+    private async void OnAddParameterClick(object? sender, Avalonia.Interactivity.RoutedEventArgs eventArgs)
+    {
+        if (!this.TryGetContext<ContentDetailsViewModel>(out var owner, out var viewModel))
+        {
+            return;
+        }
+
+        viewModel.AddParameterCommand.Execute(null);
+        if (viewModel.ParameterEditor is { } editor)
+        {
+            var window = new ContentParameterEditorWindow(viewModel, editor);
+            await window.ShowDialog(owner);
+        }
+    }
+
+    private async void OnEditParameterClick(object? sender, Avalonia.Interactivity.RoutedEventArgs eventArgs)
+    {
+        if (sender is not Control { DataContext: RevEx.Domain.Contracts.Content.ContentParameterDto parameter } ||
+            !this.TryGetContext<ContentDetailsViewModel>(out var owner, out var viewModel))
+        {
+            return;
+        }
+
+        viewModel.EditParameterCommand.Execute(parameter);
+        if (viewModel.ParameterEditor is { } editor)
+        {
+            var window = new ContentParameterEditorWindow(viewModel, editor);
+            await window.ShowDialog(owner);
+        }
     }
 
     private async void OnAddTagClick(object? sender, Avalonia.Interactivity.RoutedEventArgs eventArgs)

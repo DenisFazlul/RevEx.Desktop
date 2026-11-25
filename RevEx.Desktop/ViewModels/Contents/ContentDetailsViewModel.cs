@@ -96,11 +96,11 @@ public partial class ContentDetailsViewModel : Tabs.WorkspaceTabViewModel
         }
 
         IsChangingSubscription = true;
+        SubscriptionMessage = null;
         try
         {
             await _apiService.ContentHistory.SetSubscriptionAsync(Id, !IsSubscribed);
             IsSubscribed = !IsSubscribed;
-            SubscriptionMessage = IsSubscribed ? "Вы подписаны на изменения." : "Подписка отменена.";
         }
         catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
         {
