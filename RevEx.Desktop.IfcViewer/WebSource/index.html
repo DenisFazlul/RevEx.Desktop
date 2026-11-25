@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RevEx IFC Viewer</title>
+    <link rel="stylesheet" href="/viewer.css" />
+</head>
+<body>
+    <main id="viewer"></main>
+    <section id="status" role="status">
+        <div class="spinner"></div>
+        <div>
+            <strong id="status-title">Подготовка просмотрщика…</strong>
+            <span id="status-details"></span>
+        </div>
+    </section>
+    <button id="fit-model" type="button" disabled>Показать целиком</button>
+    <script type="module" src="/viewer.js"></script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RevEx.Desktop.ViewModels.Contents"
+             x:Class="RevEx.Desktop.Views.Contents.OtherFileMetadataView"
+             x:DataType="vm:OtherFileMetadataViewModel"
+             x:CompileBindings="True">
+    <StackPanel Spacing="8">
+        <TextBlock Classes="caption" Text="У файла нет метаданных."
+                   IsVisible="{Binding !HasParameters}" />
+        <StackPanel Spacing="4" IsVisible="{Binding HasParameters}">
+            <Grid ColumnDefinitions="2*,12,3*">
+                <TextBlock Classes="label" Text="Параметр" />
+                <TextBlock Grid.Column="2" Classes="label" Text="Значение" />
+            </Grid>
+            <ItemsControl ItemsSource="{Binding Parameters}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:OtherFileMetadataParameterViewModel">
+                        <Border Classes="value-box" Margin="0,0,0,4" Padding="8,6">
+                            <Grid ColumnDefinitions="2*,12,3*">
+                                <TextBlock Text="{Binding Name}" TextWrapping="Wrap" />
+                                <TextBlock Grid.Column="2" Text="{Binding Value}" TextWrapping="Wrap" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </StackPanel>
+</UserControl>

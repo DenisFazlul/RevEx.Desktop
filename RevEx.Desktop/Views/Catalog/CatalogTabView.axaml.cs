@@ -14,16 +14,22 @@ public partial class CatalogTabView : UserControl
         Avalonia.Interactivity.RoutedEventArgs eventArgs)
     {
         if (TopLevel.GetTopLevel(this) is not Window owner)
+        {
             return;
+        }
 
         if (DataContext is CatalogTabViewModel catalog)
+        {
             await new CatalogSettingsWindow(catalog).ShowDialog<bool>(owner);
+        }
     }
 
     private void OnContentDoubleTapped(object? sender, TappedEventArgs eventArgs)
     {
         if (DataContext is CatalogTabViewModel catalog &&
             sender is Control { DataContext: ContentItemViewModel content })
+        {
             catalog.OpenContent(content);
+        }
     }
 }

@@ -1,8 +1,7 @@
-using System;
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avalonia.Markup.Xaml;
+using RevEx.Desktop.ViewModels;
+using RevEx.Desktop.Views.Contents;
 
 namespace RevEx.Desktop.Views.MainMenu;
 
@@ -13,11 +12,14 @@ public partial class MainMenuView : UserControl
         InitializeComponent();
     }
 
-    
-
-    private void Test_OnClick(object? sender, RoutedEventArgs e)
+    private async void OnOpenByIdClick(object? sender, RoutedEventArgs eventArgs)
     {
-         var context=DataContext;
-         Console.Write("test");
+        if (TopLevel.GetTopLevel(this) is not Window { DataContext: MainViewModel main } owner)
+        {
+            return;
+        }
+
+        var window = new OpenContentByIdWindow(main.CreateOpenContentByIdDialog());
+        await window.ShowDialog(owner);
     }
 }

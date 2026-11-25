@@ -1,13 +1,23 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="using:RevEx.Desktop"
+             xmlns:converters="using:RevEx.Desktop.Converters"
              x:Class="RevEx.Desktop.App"
              RequestedThemeVariant="Light">
+    <Application.Resources>
+        <converters:PublishStatusConverter x:Key="PublishStatusConverter" />
+    </Application.Resources>
     <Application.DataTemplates>
         <local:ViewLocator />
     </Application.DataTemplates>
     <Application.Styles>
-        <FluentTheme />
+        <FluentTheme>
+            <FluentTheme.Palettes>
+                <ColorPaletteResources x:Key="Light" Accent="#171717" />
+                <ColorPaletteResources x:Key="Dark" Accent="#ECECEC" />
+            </FluentTheme.Palettes>
+        </FluentTheme>
+        <StyleInclude Source="avares://Avalonia.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
         <StyleInclude Source="/Styles/RevExStyles.axaml" />
     </Application.Styles>
 </Application>

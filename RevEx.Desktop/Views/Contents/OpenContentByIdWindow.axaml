@@ -1,0 +1,32 @@
+<common:DialogWindow xmlns="https://github.com/avaloniaui"
+                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                     xmlns:common="using:RevEx.Desktop.Views.Common"
+                     xmlns:vm="using:RevEx.Desktop.ViewModels.Contents"
+                     x:Class="RevEx.Desktop.Views.Contents.OpenContentByIdWindow"
+                     x:DataType="vm:OpenContentByIdViewModel"
+                     Title="Открыть по ID" Width="540" Height="460"
+                     MinWidth="420" MinHeight="380" WindowStartupLocation="CenterOwner"
+                     Background="{DynamicResource CanvasBrush}">
+    <Grid Margin="16" RowDefinitions="Auto,12,*,12,Auto">
+        <HeaderedContentControl Theme="{StaticResource DialogHeaderTheme}"
+                                Header="Открыть по ID"
+                                Content="Введите ID контентов через пробел, запятую, точку с запятой или с новой строки." />
+        <Grid Grid.Row="2" RowDefinitions="Auto,*,Auto,Auto" IsEnabled="{Binding !IsBusy}">
+            <TextBlock Text="ID контентов" Margin="0,0,0,6" />
+            <TextBox Grid.Row="1" x:Name="IdentifiersBox" Text="{Binding Identifiers}"
+                     AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"
+                     AutomationProperties.Name="ID контентов" PlaceholderText="Например: 123, 456, 789" />
+            <TextBlock Grid.Row="2" Text="{Binding Message}" Classes="status-message" />
+            <ScrollViewer Grid.Row="3" MaxHeight="110">
+                <TextBlock Text="{Binding ErrorMessage}" Classes="validation-message" TextWrapping="Wrap" />
+            </ScrollViewer>
+        </Grid>
+        <Grid Grid.Row="4" ColumnDefinitions="*,Auto,10,Auto">
+            <common:LoadingIndicator IsVisible="{Binding IsBusy}" />
+            <Button Grid.Column="1" Content="Отмена" Classes="secondary"
+                    IsEnabled="{Binding !IsBusy}" Command="{Binding CancelCommand}" />
+            <Button Grid.Column="3" Content="Открыть" Classes="primary"
+                    IsEnabled="{Binding !IsBusy}" Command="{Binding OpenCommand}" />
+        </Grid>
+    </Grid>
+</common:DialogWindow>

@@ -9,6 +9,7 @@ using RevEx.Domain.Contracts.Connectors;
 
 namespace RevEx.Desktop.ViewModels.Connectors;
 
+/// <summary>Модель строки коннектора. Проверяет доступность приложения и показывает результат подключения.</summary>
 public partial class ConnectorItemViewModel(
     ConnectorDescriptor connector,
     IConnectorClient connectorClient,
@@ -46,7 +47,8 @@ public partial class ConnectorItemViewModel(
             IsAvailable = false;
             Status = "Проверка отменена";
         }
-        catch (HttpRequestException)
+        catch (Exception exception) when (exception is HttpRequestException or System.IO.IOException or
+            System.Net.Sockets.SocketException or InvalidOperationException or ObjectDisposedException)
         {
             IsAvailable = false;
             Status = "Недоступен";

@@ -1,3 +1,4 @@
+using RevEx.Connector.Protocol;
 using System;
 using System.Net.Http;
 using Microsoft.Extensions.Configuration;
@@ -11,10 +12,15 @@ using RevEx.Desktop.ViewModels;
 using RevEx.Desktop.Views;
 using RevEx.Desktop.Views.MainMenu;
 using RevEx.Connector.Contracts;
-using RevEx.Desktop.Connectors;
+using RevEx.Connector.Client;
+using RevEx.Connector.Protocol.Implementations.Tcp;
+using RevEx.Connector.Protocol.Implementations.LocalDirectory;
+using RevEx.Connector.Client.Implementations.Tcp;
+using RevEx.Connector.Client.Implementations.LocalDirectory;
 using RevEx.Configuration;
 using RevEx.LoadingQueue;
 using RevEx.Desktop.Updates;
+using RevEx.Desktop.Services.VersionImport;
 
 namespace RevEx.Desktop.DI;
 
@@ -39,14 +45,19 @@ public static class ServiceExtensions
         services.AddTransient<IContentVersionRepository, ContentVersionRepository>();
         services.AddTransient<IContentFileRepository, ContentFileRepository>();
         services.AddTransient<IContentHistoryRepository, ContentHistoryRepository>();
+        services.AddTransient<IVersionImportRepository, VersionImportRepository>();
         services.AddSingleton<IConnectorRegistry, ConnectorRegistry>();
-        services.AddSingleton<IFileLoadingQueue, FileLoadingQueue>();
-        services.AddSingleton(provider => new DesktopConnectorServer(
-            provider.GetRequiredService<IConnectorRegistry>(),
-            provider.GetRequiredService<IFileLoadingQueue>(),
-            new Uri(appSettings.ConnectorRegistrationAddress)));
-        services.AddHttpClient<IConnectorClient, ConnectorClient>(httpClient =>
-            httpClient.Timeout = TimeSpan.FromMinutes(2));
+        services.AddSingleton<IConnectorTaskQueue, ConnectorTaskQueue>();
+        services.AddSingleton<IConnectorDiscovery, FileConnectorDiscovery>();
+        services.AddSingleton<IConnectorTransport, TcpConnectorTransport>();
+        services.AddSingleton<IConnectorClient, TcpConnectorClient>();
+        services.AddSingleton<IConnectorRuntime, DirectoryConnectorRuntime>();
+        services.AddSingleton(new DesktopControlOptions());
+        services.AddSingleton<DesktopControlBridge>();
+        services.AddSingleton<RfaFamilyImportService>();
+        services.AddSingleton<DesktopFileConnector>();
+        services.AddSingleton<VersionFileConnectorCatalog>();
+        services.AddSingleton<VersionImportService>();
 
         services.AddUIServices();
         return services;
@@ -66,17 +77,6 @@ public static class ServiceExtensions
                 "Настройка AppSettings:ApiPath должна содержать абсолютный HTTP(S)-адрес.");
         }
 
-        if (!Uri.TryCreate(
-                settings.ConnectorRegistrationAddress,
-                UriKind.Absolute,
-                out var connectorRegistrationUri) ||
-            connectorRegistrationUri.Scheme != Uri.UriSchemeHttp ||
-            !connectorRegistrationUri.IsLoopback)
-        {
-            throw new InvalidOperationException(
-                "AppSettings:ConnectorRegistrationAddress должен содержать loopback HTTP-адрес.");
-        }
-
         ValidateAuthenticationSettings(settings.Authentication);
 
         return settings;
@@ -85,12 +85,16 @@ public static class ServiceExtensions
     private static void ValidateAuthenticationSettings(AuthenticationSettings settings)
     {
         if (string.IsNullOrWhiteSpace(settings.Provider))
+        {
             throw new InvalidOperationException("AppSettings:Authentication:Provider is required.");
+        }
 
         if (settings.Provider.Equals(
                 AuthenticationProviderNames.ActiveDirectory,
                 StringComparison.OrdinalIgnoreCase))
+        {
             return;
+        }
 
         if (!settings.Provider.Equals(
                 AuthenticationProviderNames.Keycloak,
@@ -103,7 +107,10 @@ public static class ServiceExtensions
         }
 
         if (!settings.Providers.TryGetValue(AuthenticationProviderNames.Keycloak, out var provider))
+        {
             throw new InvalidOperationException("Keycloak authentication is not configured.");
+        }
+
         if (!Uri.TryCreate(provider.Authority, UriKind.Absolute, out var authorityUri) ||
             (provider.RequireHttpsMetadata && authorityUri.Scheme != Uri.UriSchemeHttps))
         {
@@ -111,9 +118,15 @@ public static class ServiceExtensions
                 $"AppSettings:Authentication:Providers:{settings.Provider}:Authority is invalid.");
         }
         if (string.IsNullOrWhiteSpace(provider.ClientId))
+        {
             throw new InvalidOperationException("Authentication provider ClientId is required.");
+        }
+
         if (string.IsNullOrWhiteSpace(provider.Scope))
+        {
             throw new InvalidOperationException("Authentication provider Scope is required.");
+        }
+
         if (!Uri.TryCreate(settings.RedirectUri, UriKind.Absolute, out var redirectUri) ||
             redirectUri.Host != "127.0.0.1")
         {
@@ -139,7 +152,6 @@ public static class ServiceExtensions
 
     private static IServiceCollection AddUIServices(this IServiceCollection services)
     {
-        services.AddSingleton<IApplicationShutdownService, ApplicationShutdownService>();
         services.AddSingleton<IRevExUserSettingsStore, RevExUserSettingsStore>();
         services.AddSingleton<IMainMenuProvider, MainMenuProvider>();
         services.AddTransient<IWorkspaceTabFactory, WorkspaceTabFactory>();

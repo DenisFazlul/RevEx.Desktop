@@ -1,37 +1,75 @@
-<Window xmlns="https://github.com/avaloniaui"
+<common:DialogWindow xmlns="https://github.com/avaloniaui"
+        xmlns:common="using:RevEx.Desktop.Views.Common"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:domain="using:RevEx.Domain.Contracts.Tag"
+        xmlns:catalog="using:RevEx.Desktop.ViewModels.Catalog"
+        xmlns:models="using:RevEx.Desktop.ViewModels.Common"
         xmlns:vm="using:RevEx.Desktop.ViewModels.Tags"
         x:Class="RevEx.Desktop.Views.Tags.TagSelectionWindow"
         x:DataType="vm:TagSelectionWindowViewModel"
-        Title="Добавить тег" Width="440" Height="500"
-        MinWidth="360" MinHeight="360" WindowStartupLocation="CenterOwner">
-    <Grid Margin="24" RowDefinitions="Auto,16,*,16,Auto">
-        <StackPanel Spacing="5">
-            <TextBlock Classes="h2" Text="Доступные теги" />
-            <TextBlock Classes="caption" Text="Выберите один тег для добавления к контенту" />
-        </StackPanel>
-        <Border Grid.Row="2" Classes="value-box">
-            <Grid>
-                <TextBlock IsVisible="{Binding !HasTags}" Text="Все доступные теги уже добавлены."
-                           TextWrapping="Wrap" HorizontalAlignment="Center" VerticalAlignment="Center"
-                           Foreground="{StaticResource TextSecondaryBrush}" />
-                <ListBox Classes="clean-list category-list" ItemsSource="{Binding Tags}" SelectedItem="{Binding SelectedTag}"
-                         IsVisible="{Binding HasTags}" DoubleTapped="OnTagDoubleTapped">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate x:DataType="domain:TagDto">
-                            <Grid Margin="10,8" ColumnDefinitions="*,Auto">
-                                <TextBlock Text="{Binding Name, StringFormat='#{0}'}" FontWeight="Medium" />
-                                <TextBlock Grid.Column="1" Text="{Binding TagGroupName}" Classes="caption" />
-                            </Grid>
+        Title="Добавить теги" Width="480" Height="400"
+        MinWidth="360" MinHeight="300" WindowStartupLocation="CenterOwner">
+    <Window.Styles>
+        <Style Selector="Expander.tag-group">
+            <Setter Property="Background" Value="{DynamicResource CanvasBrush}" />
+        </Style>
+        <Style Selector="Expander.tag-group /template/ ToggleButton">
+            <Setter Property="Background" Value="{DynamicResource CanvasBrush}" />
+        </Style>
+    </Window.Styles>
+    <Window.Resources>
+        <DataTemplate x:Key="FilterItem" x:DataType="models:FilterItemViewModel">
+            <CheckBox IsChecked="{Binding IsSelected}">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <Ellipse Width="10" Height="10" Fill="{Binding ColorBrush}"
+                             IsVisible="{Binding ColorBrush, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                    <TextBlock Text="{Binding Name}" />
+                </StackPanel>
+            </CheckBox>
+        </DataTemplate>
+    </Window.Resources>
+    <Grid Margin="12" RowDefinitions="Auto,12,*,12,Auto">
+        <TextBox PlaceholderText="Поиск по тегам" AutomationProperties.Name="Поиск по тегам"
+                 IsEnabled="{Binding HasTags}" Text="{Binding TagSearchText}" />
+        <Grid Grid.Row="2">
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                <ItemsControl ItemsSource="{Binding VisibleTagGroups}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="catalog:CatalogFilterGroupViewModel">
+                            <Expander Classes="tag-group" Padding="8,4" Margin="0,0,0,4"
+                                      IsExpanded="{Binding IsSearchActive, Mode=OneWay}"
+                                      HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                                <Expander.Header>
+                                    <DockPanel LastChildFill="True">
+                                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="4">
+                                        <Button Classes="secondary" MinHeight="32" Padding="8,4" FontSize="12"
+                                                Content="Выбрать все" Command="{Binding SelectAllCommand}" />
+                                        <Button Classes="secondary" MinHeight="32" Padding="8,4" FontSize="12"
+                                                Content="Снять все" Command="{Binding ClearCommand}" />
+                                        </StackPanel>
+                                        <TextBlock Margin="0,0,4,0" VerticalAlignment="Center"
+                                                   TextWrapping="Wrap" Text="{Binding DisplayName}" />
+                                    </DockPanel>
+                                </Expander.Header>
+                                <ItemsControl ItemsSource="{Binding VisibleItems}" ItemTemplate="{StaticResource FilterItem}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel Orientation="Horizontal" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                </ItemsControl>
+                            </Expander>
                         </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-            </Grid>
-        </Border>
-        <Grid Grid.Row="4" ColumnDefinitions="*,12,*">
-            <Button Content="Отмена" Click="OnCancelClick" />
-            <Button Grid.Column="2" Classes="primary" Content="Добавить" Click="OnAddClick" />
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+            <TextBlock IsVisible="{Binding !HasTags}" Text="Нет доступных тегов."
+                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <TextBlock IsVisible="{Binding HasNoMatches}" Text="Теги не найдены."
+                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Grid>
+        <Grid Grid.Row="4" ColumnDefinitions="*,8,*">
+            <Button Content="Отмена" Command="{Binding CancelCommand}" />
+            <Button Grid.Column="2" Classes="primary" Content="Добавить" Command="{Binding AcceptCommand}" />
         </Grid>
     </Grid>
-</Window>
+</common:DialogWindow>

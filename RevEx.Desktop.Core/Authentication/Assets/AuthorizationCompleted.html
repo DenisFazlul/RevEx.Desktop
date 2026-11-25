@@ -8,8 +8,8 @@
         :root {
             color-scheme: dark;
             font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            background: #0b1020;
-            color: #f8fafc;
+            background: #1a1918;
+            color: #faf6ef;
         }
 
         * { box-sizing: border-box; }
@@ -21,32 +21,51 @@
             place-items: center;
             padding: 24px;
             background:
-                radial-gradient(circle at 15% 15%, rgba(99, 102, 241, .28), transparent 35%),
-                radial-gradient(circle at 85% 80%, rgba(14, 165, 233, .18), transparent 32%),
-                #0b1020;
+                radial-gradient(circle at 15% 15%, rgba(255, 171, 53, .28), transparent 35%),
+                radial-gradient(circle at 85% 80%, rgba(117, 69, 29, .18), transparent 32%),
+                #1a1918;
         }
 
         .card {
-            width: min(100%, 480px);
-            padding: 40px;
-            border: 1px solid rgba(148, 163, 184, .18);
+            width: min(100%, 840px);
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            overflow: hidden;
+            border: 1px solid rgba(185, 178, 169, .18);
             border-radius: 24px;
-            background: rgba(15, 23, 42, .82);
+            background: rgba(36, 35, 33, .94);
             box-shadow: 0 28px 80px rgba(0, 0, 0, .38);
-            text-align: center;
             backdrop-filter: blur(18px);
         }
 
+        .illustration {
+            display: grid;
+            place-items: center;
+            padding: 24px;
+            background: radial-gradient(ellipse, rgba(255, 171, 53, .22), transparent 75%), #1a1918;
+        }
+
+        .content {
+            align-self: center;
+            padding: 40px;
+        }
+
+        .mascot {
+            display: block;
+            width: min(100%, 320px);
+            height: auto;
+        }
+
         .status {
-            width: 72px;
-            height: 72px;
-            margin: 0 auto 24px;
+            width: 32px;
+            height: 32px;
+            margin: 0 0 16px;
             display: grid;
             place-items: center;
             border-radius: 50%;
-            background: linear-gradient(135deg, #22c55e, #14b8a6);
-            box-shadow: 0 12px 32px rgba(34, 197, 94, .28);
-            font-size: 36px;
+            background: #166534;
+            box-shadow: 0 12px 32px rgba(22, 101, 52, .28);
+            font-size: 18px;
             font-weight: 700;
         }
 
@@ -58,7 +77,7 @@
 
         p {
             margin: 0 0 28px;
-            color: #a8b3c7;
+            color: #b9b2a9;
             font-size: 16px;
             line-height: 1.6;
         }
@@ -68,34 +87,45 @@
             padding: 14px 22px;
             border: 0;
             border-radius: 12px;
-            background: linear-gradient(135deg, #6366f1, #4f46e5);
-            color: white;
+            background: #ffab35;
+            color: #242321;
             font: inherit;
             font-weight: 650;
             cursor: pointer;
-            box-shadow: 0 10px 24px rgba(79, 70, 229, .3);
+            box-shadow: 0 10px 24px rgba(255, 171, 53, .3);
             transition: transform .15s ease, filter .15s ease;
         }
 
         button:hover { filter: brightness(1.1); transform: translateY(-1px); }
         button:active { transform: translateY(0); }
-        button:focus-visible { outline: 3px solid rgba(129, 140, 248, .55); outline-offset: 3px; }
+        button:focus-visible { outline: 3px solid rgba(255, 171, 53, .55); outline-offset: 3px; }
 
         .hint {
             min-height: 20px;
             margin-top: 16px;
-            color: #64748b;
+            color: #b9b2a9;
             font-size: 13px;
+        }
+        @media (max-width: 640px) {
+            body { padding: 16px; }
+            .card { grid-template-columns: minmax(0, 1fr); }
+            .mascot { width: 160px; }
+            .content { padding: 28px 22px; }
         }
     </style>
 </head>
 <body>
 <main class="card">
-    <div class="status" aria-hidden="true">✓</div>
-    <h1>Авторизация завершена</h1>
-    <p>Вы успешно вошли в RevEx. Вернитесь в приложение после закрытия этой вкладки.</p>
-    <button id="close-button" type="button" onclick="closePage()">Закрыть вкладку</button>
-    <div class="hint" id="hint" aria-live="polite"></div>
+    <div class="illustration">
+        <img class="mascot" src="data:image/png;base64,{{TYUBIK_PNG}}" width="178" height="151" alt="">
+    </div>
+    <div class="content">
+        <div class="status" aria-hidden="true">✓</div>
+        <h1>Авторизация завершена</h1>
+        <p>Вы успешно вошли в RevEx. Вернитесь в приложение после закрытия этой вкладки.</p>
+        <button id="close-button" type="button" onclick="closePage()">Закрыть вкладку</button>
+        <div class="hint" id="hint" aria-live="polite"></div>
+    </div>
 </main>
 <script>
     function closePage() {

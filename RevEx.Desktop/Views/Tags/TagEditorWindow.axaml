@@ -1,19 +1,21 @@
-<Window xmlns="https://github.com/avaloniaui"
+<common:DialogWindow xmlns="https://github.com/avaloniaui"
+        xmlns:common="using:RevEx.Desktop.Views.Common"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:RevEx.Desktop.ViewModels.Tags"
+        x:DataType="vm:TagEditorViewModel"
         x:Class="RevEx.Desktop.Views.Tags.TagEditorWindow"
-        Title="Тег" Width="480" Height="350"
+        Title="Тег" Width="480" Height="410"
         MinWidth="420" MinHeight="320" WindowStartupLocation="CenterOwner"
         CanResize="False">
-    <Grid Margin="24" RowDefinitions="Auto,18,*,Auto">
+    <Grid Margin="16" RowDefinitions="Auto,12,*,Auto">
         <StackPanel Spacing="4">
             <TextBlock Classes="h2" Text="{Binding DialogTitle}" />
-            <TextBlock Classes="caption" Text="Укажите имя тега и группу, к которой он относится" />
+            <TextBlock Classes="caption" Text="Укажите название, группу и цвет тега" />
         </StackPanel>
-        <StackPanel Grid.Row="2" Spacing="9">
+        <StackPanel Grid.Row="2" Spacing="8">
             <TextBlock Classes="label" Text="Название тега" />
-            <TextBox x:Name="NameBox" Text="{Binding EntityName}" MaxLength="100"
-                     Watermark="Например, Revit" />
+            <TextBox x:Name="NameBox" Text="{Binding Text}" MaxLength="100"
+                     PlaceholderText="Например, Revit" />
             <TextBlock Classes="label" Text="Группа" Margin="0,5,0,0" />
             <ComboBox x:Name="GroupBox" ItemsSource="{Binding Groups}" SelectedItem="{Binding SelectedGroup}">
                 <ComboBox.ItemTemplate>
@@ -22,13 +24,21 @@
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
-            <TextBlock x:Name="ValidationMessage" Foreground="{StaticResource TextSecondaryBrush}" />
+            <TextBlock Classes="label" Text="Цвет" />
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <ColorPicker Color="{Binding PickerColor, Mode=TwoWay}" IsAlphaEnabled="False"
+                             IsAlphaVisible="False" AutomationProperties.Name="Выбрать цвет тега" />
+                <TextBox Text="{Binding Color}" MaxLength="7" Width="120" PlaceholderText="#RRGGBB" />
+                <Border Width="24" Height="24" CornerRadius="4" Background="{Binding ColorPreview}"
+                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" />
+            </StackPanel>
+            <TextBlock Text="{Binding ValidationMessage}" Foreground="{DynamicResource TextSecondaryBrush}" />
         </StackPanel>
         <Grid Grid.Row="3" ColumnDefinitions="Auto,*,Auto,10,Auto">
             <Button Classes="danger" Content="Удалить" IsVisible="{Binding IsEditing}"
-                    Click="OnDeleteClick" />
-            <Button Grid.Column="2" Content="Отмена" Click="OnCancelClick" />
-            <Button Grid.Column="4" Classes="primary" Content="Сохранить" Click="OnSaveClick" />
+                    Command="{Binding DeleteCommand}" />
+            <Button Grid.Column="2" Content="Отмена" Command="{Binding CancelCommand}" />
+            <Button Grid.Column="4" Classes="primary" Content="Сохранить" Command="{Binding SaveCommand}" />
         </Grid>
     </Grid>
-</Window>
+</common:DialogWindow>

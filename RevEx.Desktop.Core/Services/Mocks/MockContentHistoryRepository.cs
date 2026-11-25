@@ -6,6 +6,15 @@ namespace RevEx.Desktop.Core.Services;
 
 internal sealed class MockContentHistoryRepository : IContentHistoryRepository
 {
+    private readonly HashSet<int> _subscriptions = [];
+    public Task<bool> IsSubscribedAsync(int contentId, CancellationToken cancellationToken = default) =>
+        Task.FromResult(_subscriptions.Contains(contentId));
+    public Task SetSubscriptionAsync(int contentId, bool enabled, CancellationToken cancellationToken = default)
+    {
+        if (enabled) _subscriptions.Add(contentId); else _subscriptions.Remove(contentId);
+        return Task.CompletedTask;
+    }
+
     public Task<IReadOnlyCollection<ContentHistoryEventDto>> GetAllAsync(
         int contentId,
         CancellationToken cancellationToken = default) =>

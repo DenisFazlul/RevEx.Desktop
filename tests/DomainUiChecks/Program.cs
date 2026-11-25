@@ -5,6 +5,7 @@ using Avalonia.Threading;
 using RevEx.Desktop;
 using RevEx.Desktop.ViewModels.Contents;
 using RevEx.Desktop.Views;
+using RevEx.Desktop.Views.Common;
 using RevEx.Desktop.Views.Categories;
 using RevEx.Desktop.Views.Connectors;
 using RevEx.Desktop.Views.Contents;
@@ -15,6 +16,27 @@ using RevEx.Domain.Contracts.ContentHistory;
 using RevEx.Domain.Contracts.Tag;
 
 AppBuilder.Configure<App>().UseHeadless(new AvaloniaHeadlessPlatformOptions()).SetupWithoutStarting();
+if (args.Contains("--open-by-id-only", StringComparer.Ordinal))
+{
+    OpenContentByIdChecks.RunAsync().GetAwaiter().GetResult();
+    return;
+}
+
+OpenContentByIdChecks.RunAsync().GetAwaiter().GetResult();
+if (args.Contains("--unified-only", StringComparer.Ordinal))
+{
+    UnifiedVersionImportChecks.Run();
+    return;
+}
+
+ConnectorChecks.Run();
+DesktopControlChecks.Run();
+UnifiedVersionImportChecks.Run();
+RfaImportChecks.Run();
+VersionPublicationChecks.Run();
+OtherFileMetadataChecks.Run();
+DialogChecks.Run();
+RevitFamilyMetadataChecks.Run();
 var now=DateTimeOffset.Parse("2026-10-29T10:00:00+03:00");
 var history=new ContentHistoryEventDto(1,1,now,"Changed","author");
 var historyViewModel=new ContentHistoryEventViewModel(history);
@@ -24,6 +46,14 @@ Window[] windows = [new MainWindow(),
     new TagSelectionWindow([new TagDto(1,"Tag",1,"Group",now,now)]),
     new ConnectorSelectionWindow([new ConnectorDescriptor(Guid.NewGuid(),"Test",ConnectorProduct.Mock,"1",new Uri("http://127.0.0.1:1"),1,null)]),
     new ContentHistoryDetailsWindow(history),
+    new RfaFamilyImportWindow(),
+    new VersionImportWindow(),
+    new Window { Content = new OtherFileMetadataView() },
+    new TagEditorWindow(),
+    new TagGroupEditorWindow(),
+    new DeleteConfirmationWindow("Confirm"),
+    new TextInputWindow(),
+    new Window { Content = new ContentCreationTabView() },
     new Window { Content=new ContentDetailsView() }];
 foreach(var window in windows) { window.Show(); Dispatcher.UIThread.RunJobs(); window.Close(); }
 Console.WriteLine("PASS: Desktop initialization, resources, shared DTO templates and local history time (headless).");

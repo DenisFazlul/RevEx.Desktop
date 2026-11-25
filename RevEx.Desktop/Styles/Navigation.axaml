@@ -1,33 +1,33 @@
 <Styles xmlns="https://github.com/avaloniaui">
     <!-- Application shell: ChatGPT-like sidebar where open workspace tabs stay first-class. -->
     <Style Selector="Border.app-toolbar">
-        <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
         <Setter Property="BorderThickness" Value="0,0,0,1" />
     </Style>
     <Style Selector="Border.tab-strip">
-        <Setter Property="Background" Value="{StaticResource SidebarBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+        <Setter Property="Background" Value="{DynamicResource SidebarBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
         <Setter Property="BorderThickness" Value="0,0,0,1" />
     </Style>
     <Style Selector="Border.workspace-sidebar">
-        <Setter Property="Background" Value="{StaticResource SidebarBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+        <Setter Property="Background" Value="{DynamicResource SidebarBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
         <Setter Property="BorderThickness" Value="0,0,1,0" />
     </Style>
     <Style Selector="Border.workspace-header">
-        <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
         <Setter Property="BorderThickness" Value="0,0,0,1" />
     </Style>
     <Style Selector="Border.brand-mark">
         <Setter Property="Width" Value="30" />
         <Setter Property="Height" Value="30" />
         <Setter Property="CornerRadius" Value="8" />
-        <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+        <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
     </Style>
     <Style Selector="Border.brand-mark TextBlock">
-        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Foreground" Value="{DynamicResource AccentForegroundBrush}" />
         <Setter Property="FontSize" Value="15" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="HorizontalAlignment" Value="Center" />
@@ -35,78 +35,70 @@
     </Style>
 
     <Style Selector="TabControl.workspace-tabs">
-        <Setter Property="Background" Value="{StaticResource CanvasBrush}" />
+        <Setter Property="Background" Value="{DynamicResource CanvasBrush}" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Padding" Value="0" />
     </Style>
     <Style Selector="TabControl.workspace-tabs TabItem">
-        <Setter Property="MinHeight" Value="36" />
+        <Setter Property="MinHeight" Value="32" />
         <Setter Property="Padding" Value="12,0" />
         <Setter Property="Margin" Value="2,4" />
-        <Setter Property="CornerRadius" Value="9" />
+        <Setter Property="CornerRadius" Value="6" />
         <Setter Property="Background" Value="Transparent" />
-        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
         <Setter Property="FontSize" Value="13" />
     </Style>
     <Style Selector="TabControl.workspace-tabs TabItem:pointerover">
-        <Setter Property="Background" Value="{StaticResource SurfaceHoverBrush}" />
-        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
     </Style>
     <Style Selector="TabControl.workspace-tabs TabItem:selected">
-        <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
-        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
         <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
     <Style Selector="Button.workspace-tab-button">
-        <Setter Property="MinHeight" Value="42" />
-        <Setter Property="Padding" Value="7,2" />
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="Padding" Value="8,0" />
         <Setter Property="Margin" Value="0,1" />
-        <Setter Property="CornerRadius" Value="9" />
+        <Setter Property="CornerRadius" Value="6" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
     </Style>
     <Style Selector="Button.workspace-tab-button.folder">
         <Setter Property="Margin" Value="0,5,0,1" />
         <Setter Property="FontWeight" Value="SemiBold" />
-        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
     </Style>
     <Style Selector="Button.workspace-tab-button.child">
         <Setter Property="Margin" Value="18,1,0,1" />
         <Setter Property="FontSize" Value="13" />
     </Style>
     <Style Selector="Button.workspace-tab-button:pointerover">
-        <Setter Property="Background" Value="{StaticResource SurfaceHoverBrush}" />
-        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
     </Style>
     <Style Selector="Button.workspace-tab-button.selected">
-        <Setter Property="Background" Value="{StaticResource SurfaceSelectedBrush}" />
-        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceSelectedBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
         <Setter Property="FontWeight" Value="Medium" />
     </Style>
     <Style Selector="Border.group-divider">
         <Setter Property="Height" Value="1" />
-        <Setter Property="Background" Value="{StaticResource BorderBrush}" />
+        <Setter Property="Background" Value="{DynamicResource BorderBrush}" />
     </Style>
     <Style Selector="Border.shortcut-key">
         <Setter Property="Padding" Value="6,3" />
         <Setter Property="CornerRadius" Value="6" />
-        <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
     </Style>
     <Style Selector="Border.shortcut-key TextBlock">
         <Setter Property="FontSize" Value="10" />
-        <Setter Property="Foreground" Value="{StaticResource TextTertiaryBrush}" />
-    </Style>
-    <Style Selector="Border.sidebar-footer">
-        <Setter Property="Padding" Value="9" />
-        <Setter Property="CornerRadius" Value="11" />
-        <Setter Property="Background" Value="Transparent" />
-    </Style>
-    <Style Selector="Border.sidebar-footer:pointerover">
-        <Setter Property="Background" Value="{StaticResource SurfaceHoverBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextTertiaryBrush}" />
     </Style>
     <Style Selector="Button.tab-close">
         <Setter Property="Width" Value="24" />
@@ -116,11 +108,11 @@
         <Setter Property="CornerRadius" Value="6" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
     </Style>
     <Style Selector="Button.tab-close:pointerover">
-        <Setter Property="Background" Value="{StaticResource SurfaceSelectedBrush}" />
-        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceSelectedBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
     </Style>
     <Style Selector="Button.sidebar-toggle">
         <Setter Property="Width" Value="32" />
@@ -130,48 +122,48 @@
         <Setter Property="CornerRadius" Value="8" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
     </Style>
     <Style Selector="Button.sidebar-toggle:pointerover">
-        <Setter Property="Background" Value="{StaticResource SurfaceHoverBrush}" />
-        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
     </Style>
     <Style Selector="Button.sidebar-menu-button">
-        <Setter Property="MinHeight" Value="44" />
-        <Setter Property="Padding" Value="7" />
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="Padding" Value="8,0" />
         <Setter Property="Margin" Value="0,1" />
-        <Setter Property="CornerRadius" Value="9" />
+        <Setter Property="CornerRadius" Value="6" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
     </Style>
     <Style Selector="Button.sidebar-menu-button:pointerover">
-        <Setter Property="Background" Value="{StaticResource SurfaceHoverBrush}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
     </Style>
     <Style Selector="Button.sidebar-menu-button.danger-menu">
-        <Setter Property="Foreground" Value="{StaticResource DangerBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource DangerBrush}" />
     </Style>
     <Style Selector="Button.top-tab-button">
         <Setter Property="MinWidth" Value="118" />
         <Setter Property="MaxWidth" Value="230" />
-        <Setter Property="Height" Value="40" />
-        <Setter Property="MinHeight" Value="40" />
-        <Setter Property="Padding" Value="13,0" />
-        <Setter Property="CornerRadius" Value="9" />
+        <Setter Property="Height" Value="32" />
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="Padding" Value="12,0" />
+        <Setter Property="CornerRadius" Value="6" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
         <Setter Property="FontSize" Value="13" />
     </Style>
     <Style Selector="Button.top-tab-button:pointerover">
-        <Setter Property="Background" Value="{StaticResource SurfaceHoverBrush}" />
-        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceHoverBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
     </Style>
     <Style Selector="Button.top-tab-button.selected">
-        <Setter Property="Background" Value="{StaticResource SurfaceSelectedBrush}" />
-        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceSelectedBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
         <Setter Property="FontWeight" Value="Medium" />
     </Style>
 </Styles>

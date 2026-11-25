@@ -1,0 +1,22 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="RevEx.Desktop.IfcViewer.IfcViewerWindow"
+        Width="1180"
+        Height="760"
+        MinWidth="720"
+        MinHeight="480"
+        WindowStartupLocation="CenterOwner">
+    <Grid RowDefinitions="Auto,*">
+        <Border Padding="16,12" Background="#171B22">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Spacing="2">
+                    <TextBlock Text="Просмотр IFC" FontSize="18" FontWeight="SemiBold" Foreground="White" />
+                    <TextBlock x:Name="FileNameText" Foreground="#AEB7C5" TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+                <TextBlock Grid.Column="1" x:Name="StatusText" Foreground="#AEB7C5"
+                           VerticalAlignment="Center" Text="Подготовка просмотрщика…" />
+            </Grid>
+        </Border>
+        <NativeWebView Grid.Row="1" x:Name="Viewer" />
+    </Grid>
+</Window>

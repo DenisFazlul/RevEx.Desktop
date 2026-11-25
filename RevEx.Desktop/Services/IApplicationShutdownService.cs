@@ -1,6 +1,8 @@
+using System.Threading.Tasks;
+
 namespace RevEx.Desktop.Services;
 
 public interface IApplicationShutdownService
 {
-    void Shutdown();
+    Task SignOutAsync();
 }

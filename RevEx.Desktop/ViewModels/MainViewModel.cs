@@ -6,13 +6,17 @@ using RevEx.Desktop.Navigation;
 using RevEx.Desktop.ViewModels.Catalog;
 using RevEx.Desktop.ViewModels.MainMenu;
 using RevEx.Desktop.ViewModels.Tabs;
+using RevEx.Desktop.Core.Interfaces;
+using RevEx.Desktop.ViewModels.Contents;
 
 namespace RevEx.Desktop.ViewModels;
 
-public partial class MainViewModel : ViewModelBase
+/// <summary>Модель главного окна. Управляет меню, открытием, выбором и закрытием рабочих вкладок.</summary>
+public partial class MainViewModel : ViewModelBase, IDisposable
 {
     private readonly IWorkspaceTabFactory _tabFactory;
     private readonly WorkspaceTabContext _tabContext;
+    private readonly IRevExApiService _apiService;
 
     [ObservableProperty]
     private WorkspaceTabViewModel? _selectedTab;
@@ -21,13 +25,18 @@ public partial class MainViewModel : ViewModelBase
     private bool _hasTabs;
 
     public ObservableCollection<WorkspaceTabViewModel> Tabs { get; } = [];
-    public MainMenuViewModel MainMenu { get; }
+    public MainMenuViewModel MainMenu
+    {
+        get;
+    }
 
     public MainViewModel(
         IWorkspaceTabFactory tabFactory,
-        IMainMenuProvider mainMenuProvider)
+        IMainMenuProvider mainMenuProvider,
+        IRevExApiService apiService)
     {
         _tabFactory = tabFactory;
+        _apiService = apiService;
         _tabContext = new WorkspaceTabContext(OpenTab, CloseTab);
 
         MainMenu = mainMenuProvider.Create(OpenTab);
@@ -37,16 +46,41 @@ public partial class MainViewModel : ViewModelBase
     public void CloseTab(WorkspaceTabViewModel tab)
     {
         if (!tab.CanClose)
+        {
             return;
+        }
 
         var tabIndex = Tabs.IndexOf(tab);
         if (tabIndex < 0)
+        {
             return;
+        }
 
         Tabs.RemoveAt(tabIndex);
         HasTabs = Tabs.Count > 0;
         if (ReferenceEquals(SelectedTab, tab))
+        {
             SelectedTab = Tabs.Count == 0 ? null : Tabs[Math.Min(tabIndex, Tabs.Count - 1)];
+        }
+
+        tab.Dispose();
+    }
+
+    public OpenContentByIdViewModel CreateOpenContentByIdDialog()
+    {
+        return new OpenContentByIdViewModel(_apiService.Contents, content =>
+        {
+            var existing = Tabs.FirstOrDefault(tab =>
+                tab is ContentDetailsViewModel && Equals(tab.Key, content.Id));
+            if (existing is not null)
+            {
+                SelectedTab = existing;
+                return;
+            }
+
+            var item = new ContentItemViewModel(content);
+            OpenTab(new WorkspaceTabRequest(typeof(ContentDetailsViewModel), content.Id, item));
+        });
     }
 
     private void OpenTab(WorkspaceTabRequest request)
@@ -67,9 +101,25 @@ public partial class MainViewModel : ViewModelBase
     partial void OnSelectedTabChanged(WorkspaceTabViewModel? value)
     {
         foreach (var tab in Tabs)
+        {
             tab.IsSelected = ReferenceEquals(tab, value);
+        }
 
         if (value is not null)
-            _ = value.ActivateAsync();
+        {
+            _ = value.ActivateSafelyAsync();
+        }
+    }
+
+    public void Dispose()
+    {
+        foreach (var tab in Tabs)
+        {
+            tab.Dispose();
+        }
+
+        Tabs.Clear();
+        SelectedTab = null;
+        HasTabs = false;
     }
 }

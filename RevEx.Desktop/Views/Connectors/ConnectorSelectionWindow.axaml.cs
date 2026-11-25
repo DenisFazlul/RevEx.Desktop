@@ -1,32 +1,19 @@
 using System.Collections.Generic;
-using System.Linq;
-using Avalonia.Controls;
 using RevEx.Domain.Contracts.Connectors;
+using RevEx.Desktop.ViewModels.Connectors;
+using RevEx.Desktop.Views.Common;
 
 namespace RevEx.Desktop.Views.Connectors;
 
-public partial class ConnectorSelectionWindow : Window
+public partial class ConnectorSelectionWindow : DialogWindow
 {
-    public IReadOnlyCollection<ConnectorDescriptor> Connectors { get; }
-    public ConnectorDescriptor? SelectedConnector { get; set; }
-    public bool HasConnectors => Connectors.Count > 0;
-    public bool HasNoConnectors => !HasConnectors;
-
-    public ConnectorSelectionWindow() : this([]) { }
+    public ConnectorSelectionWindow() : this([])
+    {
+    }
 
     public ConnectorSelectionWindow(IEnumerable<ConnectorDescriptor> connectors)
     {
-        Connectors = connectors.OrderBy(item => item.Name).ToArray();
-        SelectedConnector = Connectors.FirstOrDefault();
         InitializeComponent();
-        DataContext = this;
+        DataContext = new ConnectorSelectionViewModel(connectors);
     }
-
-    private void OnSelectClick(object? sender, Avalonia.Interactivity.RoutedEventArgs eventArgs)
-    {
-        if (ConnectorBox.SelectedItem is ConnectorDescriptor connector)
-            Close(connector);
-    }
-
-    private void OnCancelClick(object? sender, Avalonia.Interactivity.RoutedEventArgs eventArgs) => Close(null);
 }

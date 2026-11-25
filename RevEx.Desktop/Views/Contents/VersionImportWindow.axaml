@@ -1,0 +1,81 @@
+<common:DialogWindow xmlns="https://github.com/avaloniaui"
+        xmlns:common="using:RevEx.Desktop.Views.Common"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RevEx.Desktop.ViewModels.Contents"
+        xmlns:revit="using:RevEx.Desktop.Views.Revit"
+        x:Class="RevEx.Desktop.Views.Contents.VersionImportWindow"
+        x:DataType="vm:VersionImportViewModel"
+        Title="Добавить версию" Width="820" Height="720"
+        MinWidth="620" MinHeight="520" WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource CanvasBrush}">
+    <Grid Margin="16" RowDefinitions="Auto,12,*,12,Auto">
+        <StackPanel Spacing="4">
+            <TextBlock Classes="h2" Text="Добавить версию" />
+            <TextBlock Classes="caption"
+                       Text="Выберите платформу, коннектор и файлы. Коннектор прочитает файлы и вернёт метаданные для проверки."
+                       TextWrapping="Wrap" />
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Spacing="12">
+                <StackPanel Spacing="12" IsVisible="{Binding IsSelectionStep}">
+                    <Grid ColumnDefinitions="*,12,*" RowDefinitions="Auto,8,Auto">
+                        <TextBlock Classes="label" Text="Платформа" />
+                        <ComboBox Grid.Row="2" ItemsSource="{Binding Platforms}"
+                                  SelectedItem="{Binding SelectedPlatform}"
+                                  DisplayMemberBinding="{Binding Name}" />
+                        <TextBlock Grid.Column="2" Classes="label" Text="Коннектор" />
+                        <ComboBox Grid.Row="2" Grid.Column="2" ItemsSource="{Binding Connectors}"
+                                  SelectedItem="{Binding SelectedConnector}"
+                                  DisplayMemberBinding="{Binding Name}" />
+                    </Grid>
+                    <Grid ColumnDefinitions="*,12,Auto">
+                        <TextBlock Text="{Binding SelectedFileNames}" TextWrapping="Wrap"
+                                   VerticalAlignment="Center" />
+                        <Button Grid.Column="2" Content="Выбрать файлы" Click="OnChooseFilesClick"
+                                IsEnabled="{Binding CanChooseFiles}" />
+                    </Grid>
+                </StackPanel>
+
+                <StackPanel Spacing="12" IsVisible="{Binding IsReviewStep}">
+                    <Grid ColumnDefinitions="*,12,*" RowDefinitions="Auto,8,Auto">
+                        <TextBlock Classes="label" Text="Название версии" />
+                        <TextBox Grid.Row="2" Text="{Binding VersionName}" MaxLength="200" />
+                        <TextBlock Grid.Column="2" Classes="label" Text="Версия приложения" />
+                        <TextBox Grid.Row="2" Grid.Column="2" Text="{Binding ApplicationVersion}" MaxLength="100" />
+                    </Grid>
+                    <Expander Header="Метаданные Revit" IsExpanded="True"
+                              IsVisible="{Binding HasRevitMetadata}">
+                        <revit:RevitFamilyReadResultView DataContext="{Binding RevitMetadata}" />
+                    </Expander>
+                    <ItemsControl ItemsSource="{Binding MetadataFiles}"
+                                  IsVisible="{Binding HasGenericMetadata}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:VersionImportFileViewModel">
+                                <Expander Header="{Binding Name}" IsExpanded="True" Margin="0,0,0,8">
+                                    <TextBox Text="{Binding Metadata}" IsReadOnly="True"
+                                             AcceptsReturn="True" TextWrapping="NoWrap"
+                                             MinHeight="120" FontFamily="Consolas" />
+                                </Expander>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+
+                <common:OperationFeedbackView />
+            </StackPanel>
+        </ScrollViewer>
+
+        <Grid Grid.Row="4" ColumnDefinitions="Auto,*,Auto">
+            <Button Content="Назад" Command="{Binding BackCommand}"
+                    IsVisible="{Binding IsReviewStep}" IsEnabled="{Binding !IsBusy}" />
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="12">
+                <Button Content="Отмена" Command="{Binding CancelCommand}" IsEnabled="{Binding !IsBusy}" />
+                <Button Classes="primary" Content="Далее" Command="{Binding ReadFilesCommand}"
+                        IsVisible="{Binding IsSelectionStep}" IsEnabled="{Binding CanReadFiles}" />
+                <Button Classes="primary" Content="Добавить версию" Command="{Binding SaveAndCloseCommand}"
+                        IsVisible="{Binding IsReviewStep}" IsEnabled="{Binding CanSave}" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</common:DialogWindow>

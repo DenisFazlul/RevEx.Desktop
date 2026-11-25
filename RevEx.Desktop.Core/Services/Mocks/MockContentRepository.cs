@@ -1,5 +1,6 @@
 using RevEx.Domain.Contracts.Content;
 using RevEx.Domain.Contracts.ContentFile;
+using RevEx.Domain.Identifiers;
 using RevEx.Desktop.Core.Interfaces;
 using static RevEx.Desktop.Core.Services.MockApiData;
 
@@ -7,6 +8,57 @@ namespace RevEx.Desktop.Core.Services;
 
 internal sealed class MockContentRepository : IContentRepository
 {
+    private readonly Dictionary<int, List<ContentParameterDto>> _parameters = [];
+    private int _nextParameterId;
+
+    public Task<IReadOnlyCollection<ContentParameterDto>> GetParametersAsync(int contentId, CancellationToken token = default)
+    {
+        token.ThrowIfCancellationRequested();
+        IReadOnlyCollection<ContentParameterDto> result = GetParameters(contentId).ToArray();
+        return Task.FromResult(result);
+    }
+
+    public Task<ContentParameterDto> CreateParameterAsync(int contentId, ContentParameterInput input, CancellationToken token = default)
+    {
+        token.ThrowIfCancellationRequested();
+        var parameter = new ContentParameterDto(++_nextParameterId, input.Name, input.Kind, input.Value, input.Help);
+        GetParameters(contentId).Add(parameter);
+        return Task.FromResult(parameter);
+    }
+
+    public Task UpdateParameterAsync(int contentId, int id, ContentParameterInput input, CancellationToken token = default)
+    {
+        token.ThrowIfCancellationRequested();
+        var parameters = GetParameters(contentId);
+        var index = parameters.FindIndex(parameter => parameter.Id == id);
+        parameters[index] = new ContentParameterDto(id, input.Name, input.Kind, input.Value, input.Help);
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteParameterAsync(int contentId, int id, CancellationToken token = default)
+    {
+        token.ThrowIfCancellationRequested();
+        GetParameters(contentId).RemoveAll(parameter => parameter.Id == id);
+        return Task.CompletedTask;
+    }
+
+    private List<ContentParameterDto> GetParameters(int contentId)
+    {
+        if (!_parameters.TryGetValue(contentId, out var parameters))
+        {
+            parameters = [];
+            _parameters.Add(contentId, parameters);
+        }
+
+        return parameters;
+    }
+
+    public Task<Guid> GenerateUuid7Async(CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult(Uuid7.Create());
+    }
+
     public Task<IReadOnlyCollection<ContentDto>> GetAllAsync(
         ContentQueryDto query,
         CancellationToken cancellationToken = default)
@@ -15,6 +67,11 @@ internal sealed class MockContentRepository : IContentRepository
 
         var categoryIds = query.CategoryIds.ToHashSet();
         var result = Contents.AsEnumerable();
+
+        if (query.Cid is Guid cid)
+        {
+            result = result.Where(content => content.Cid == cid);
+        }
 
         if (categoryIds.Count > 0)
         {
@@ -37,16 +94,43 @@ internal sealed class MockContentRepository : IContentRepository
         return Task.FromResult<IReadOnlyCollection<ContentDto>>(result.ToArray());
     }
 
+    public Task SetFrozenAsync(int id, bool isFrozen, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var index = Contents.FindIndex(item => item.Id == id);
+        if (index >= 0)
+        {
+            Contents[index] = Contents[index] with { IsFrozen = isFrozen };
+        }
+
+        return Task.CompletedTask;
+    }
+
     public Task<ContentDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default) =>
         FromItem(Contents.FirstOrDefault(item => item.Id == id), cancellationToken);
+
+    public Task<ContentDto?> GetByCidAsync(Guid cid, CancellationToken cancellationToken = default) =>
+        FromItem(Contents.FirstOrDefault(item => item.Cid == cid), cancellationToken);
 
     public Task<ContentDto> CreateAsync(
         CreateContentDto request,
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        var cid = request.Cid ?? Uuid7.Create();
+        if (!Uuid7.IsValid(cid))
+        {
+            throw new InvalidOperationException("CID должен быть UUID v7.");
+        }
+
+        if (Contents.Any(item => item.Cid == request.Cid))
+        {
+            throw new InvalidOperationException($"Контент с CID {request.Cid:D} уже существует.");
+        }
+
         var content = new ContentDto(
             Contents.Count == 0 ? 1 : Contents.Max(item => item.Id) + 1,
+            cid,
             request.Name,
             request.Description,
             request.CategoryId,

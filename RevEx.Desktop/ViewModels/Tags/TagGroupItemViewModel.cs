@@ -1,42 +1,32 @@
 using System.Collections.ObjectModel;
-using System;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using RevEx.Domain.Contracts.Tag;
 
 namespace RevEx.Desktop.ViewModels.Tags;
 
+/// <summary>Модель строки группы тегов. Хранит название и теги, автоматически обновляет счётчик.</summary>
 public partial class TagGroupItemViewModel : ViewModelBase
 {
-    private readonly Action<TagGroupItemViewModel> _edit;
-    private readonly Action<TagGroupItemViewModel, TagItemViewModel?> _selectTag;
+    [ObservableProperty]
+    private string _name;
 
-    public int Id { get; }
+    public TagGroupItemViewModel(TagGroupDto dto)
+    {
+        Id = dto.Id;
+        _name = dto.Name;
+        Tags.CollectionChanged += (_, _) => NotifyTagCountChanged();
+    }
+
+    public int Id
+    {
+        get;
+    }
     public ObservableCollection<TagItemViewModel> Tags { get; } = [];
     public int TagCount => Tags.Count;
     public bool HasTags => Tags.Count > 0;
     public bool HasNoTags => !HasTags;
 
-    [ObservableProperty] private string _name;
-    [ObservableProperty] private TagItemViewModel? _selectedTag;
-
-    public TagGroupItemViewModel(
-        TagGroupDto dto,
-        Action<TagGroupItemViewModel> edit,
-        Action<TagGroupItemViewModel, TagItemViewModel?> selectTag)
-    {
-        Id = dto.Id;
-        _name = dto.Name;
-        _edit = edit;
-        _selectTag = selectTag;
-    }
-
-    [RelayCommand]
-    private void Edit() => _edit(this);
-
-    partial void OnSelectedTagChanged(TagItemViewModel? value) => _selectTag(this, value);
-
-    public void NotifyTagCountChanged()
+    private void NotifyTagCountChanged()
     {
         OnPropertyChanged(nameof(TagCount));
         OnPropertyChanged(nameof(HasTags));

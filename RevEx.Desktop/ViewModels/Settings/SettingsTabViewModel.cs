@@ -5,11 +5,12 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using RevEx.Connector.Contracts;
 using RevEx.Desktop.Core.Interfaces;
-using RevEx.Desktop.Connectors;
+using RevEx.Connector.Client;
 using RevEx.Desktop.Services;
 using RevEx.Configuration;
 using RevEx.Desktop.ViewModels.Connectors;
@@ -17,6 +18,7 @@ using RevEx.Desktop.ViewModels.Tabs;
 
 namespace RevEx.Desktop.ViewModels.Settings;
 
+/// <summary>Модель настроек. Сохраняет адрес API и показывает состояние локальных коннекторов.</summary>
 public partial class SettingsTabViewModel : WorkspaceTabViewModel
 {
     private readonly IAppSettings _settings;
@@ -28,9 +30,6 @@ public partial class SettingsTabViewModel : WorkspaceTabViewModel
     private string _apiServerAddress;
 
     [ObservableProperty]
-    private string _connectorRegistrationAddress;
-
-    [ObservableProperty]
     private string? _settingsMessage;
 
     [ObservableProperty]
@@ -38,6 +37,14 @@ public partial class SettingsTabViewModel : WorkspaceTabViewModel
 
     [ObservableProperty]
     private bool _isLoadingConnectors;
+
+    [ObservableProperty]
+    private string? _selectedTheme;
+
+    [ObservableProperty]
+    private string? _themeErrorMessage;
+
+    public string[] ThemeOptions { get; } = [DesktopThemePreference.Light, DesktopThemePreference.Dark, DesktopThemePreference.LightTube, DesktopThemePreference.DarkTube];
 
     public ObservableCollection<ConnectorItemViewModel> Connectors { get; } = [];
     public bool HasConnectors => Connectors.Count > 0;
@@ -57,7 +64,26 @@ public partial class SettingsTabViewModel : WorkspaceTabViewModel
         _connectorClient = connectorClient;
         _userSettingsStore = userSettingsStore;
         _apiServerAddress = settings.ApiPath;
-        _connectorRegistrationAddress = settings.ConnectorRegistrationAddress;
+        _selectedTheme = DesktopThemePreference.GetName(Application.Current?.RequestedThemeVariant);
+    }
+
+    partial void OnSelectedThemeChanged(string? value)
+    {
+        if (value is null || Application.Current is not { } application)
+        {
+            return;
+        }
+
+        DesktopThemePreference.Apply(application, value);
+        ThemeErrorMessage = null;
+        try
+        {
+            DesktopThemePreference.Save(value);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            ThemeErrorMessage = $"Не удалось сохранить тему: {exception.Message}";
+        }
     }
 
     [RelayCommand]
@@ -66,34 +92,20 @@ public partial class SettingsTabViewModel : WorkspaceTabViewModel
         SettingsMessage = null;
         SettingsErrorMessage = null;
 
-        if (!TryNormalizeAddress(ApiServerAddress, requireLoopback: false, out var apiAddress))
+        if (!TryNormalizeAddress(ApiServerAddress, out var apiAddress))
         {
             SettingsErrorMessage = "Укажите корректный HTTP(S)-адрес API-сервера.";
             return;
         }
-
-        if (!TryNormalizeAddress(
-                ConnectorRegistrationAddress,
-                requireLoopback: true,
-                out var connectorAddress))
-        {
-            SettingsErrorMessage =
-                "Адрес регистрации Connector должен быть loopback HTTP-адресом.";
-            return;
-        }
-
         try
         {
             _userSettingsStore.Save(new RevExUserSettings
             {
-                ApiPath = apiAddress,
-                ConnectorRegistrationAddress = connectorAddress
+                ApiPath = apiAddress
             });
             ApiServerAddress = apiAddress;
-            ConnectorRegistrationAddress = connectorAddress;
             _settings.ApiPath = apiAddress;
-            _settings.ConnectorRegistrationAddress = connectorAddress;
-            SettingsMessage = $"Настройки сохранены в {_userSettingsStore.FilePath}. Они применятся после перезапуска Desktop и коннектеров.";
+            SettingsMessage = $"Настройки сохранены в {_userSettingsStore.FilePath}. Они применятся после перезапуска Desktop.";
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or JsonException)
         {
@@ -135,7 +147,10 @@ public partial class SettingsTabViewModel : WorkspaceTabViewModel
         _connectorRegistry.Remove(instanceId);
         var item = Connectors.FirstOrDefault(connector => connector.InstanceId == instanceId);
         if (item is not null)
+        {
             Connectors.Remove(item);
+        }
+
         NotifyConnectorStateChanged();
     }
 
@@ -147,13 +162,11 @@ public partial class SettingsTabViewModel : WorkspaceTabViewModel
 
     private static bool TryNormalizeAddress(
         string value,
-        bool requireLoopback,
         out string normalizedAddress)
     {
         normalizedAddress = string.Empty;
         if (!Uri.TryCreate(value.Trim(), UriKind.Absolute, out var address) ||
-            (address.Scheme != Uri.UriSchemeHttp && address.Scheme != Uri.UriSchemeHttps) ||
-            (requireLoopback && (address.Scheme != Uri.UriSchemeHttp || !address.IsLoopback)))
+            (address.Scheme != Uri.UriSchemeHttp && address.Scheme != Uri.UriSchemeHttps))
         {
             return false;
         }

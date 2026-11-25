@@ -1,0 +1,16 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RevEx.Desktop.ViewModels.Catalog"
+             xmlns:categories="using:RevEx.Desktop.Views.Categories"
+             xmlns:tags="using:RevEx.Desktop.Views.Tags"
+             x:Class="RevEx.Desktop.Views.Catalog.ClassificationAdminTabView"
+             x:DataType="vm:ClassificationAdminTabViewModel">
+    <TabControl Margin="12">
+        <TabItem Header="Категории">
+            <categories:CategoryAdminTabView DataContext="{Binding Categories}" />
+        </TabItem>
+        <TabItem Header="Теги">
+            <tags:TagAdminTabView DataContext="{Binding Tags}" />
+        </TabItem>
+    </TabControl>
+</UserControl>

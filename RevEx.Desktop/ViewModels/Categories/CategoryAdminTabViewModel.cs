@@ -1,103 +1,72 @@
-using System;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Net.Http;
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.ComponentModel;
-using RevEx.Domain.Contracts.Category;
 using RevEx.Desktop.Core.Interfaces;
+using RevEx.Desktop.ViewModels.Common;
 using RevEx.Desktop.ViewModels.Tabs;
+using RevEx.Domain.Contracts.Category;
 
 namespace RevEx.Desktop.ViewModels.Categories;
 
-public partial class CategoryAdminTabViewModel(IRevExApiService apiService)
+/// <summary>Модель справочника категорий. Загружает список и выполняет создание, переименование и удаление.</summary>
+public class CategoryAdminTabViewModel(IRevExApiService apiService)
     : WorkspaceTabViewModel("Категории", true, "categories")
 {
-    [ObservableProperty] private bool _isLoading;
-    [ObservableProperty] private bool _isSaving;
-    [ObservableProperty] private string? _message;
-    [ObservableProperty] private string? _errorMessage;
-
     public ObservableCollection<CategoryItemViewModel> Categories { get; } = [];
     public bool HasCategories => Categories.Count > 0;
     public bool HasNoCategories => !HasCategories && !IsLoading;
 
     public override async Task ActivateAsync()
     {
-        try
+        await RunLoadAsync(async () =>
         {
-            IsLoading = true;
-            ErrorMessage = null;
             var categories = await apiService.Categories.GetAllAsync();
-            Categories.Clear();
-            foreach (var category in categories.OrderBy(item => item.Name))
-                Categories.Add(new CategoryItemViewModel(category));
+            Categories.ReplaceWith(categories.OrderBy(category => category.Name).Select(category => new CategoryItemViewModel(category)));
             NotifyStateChanged();
-        }
-        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
-        {
-            ErrorMessage = $"Не удалось загрузить категории: {exception.Message}";
-        }
-        finally
-        {
-            IsLoading = false;
-            NotifyStateChanged();
-        }
+        }, "Не удалось загрузить категории");
     }
 
-    public Task<bool> CreateAsync(string name) => RunAsync(async () =>
+    public Task<bool> CreateAsync(string name)
     {
-        var created = await apiService.Categories.CreateAsync(new CreateCategoryDto { Name = name.Trim() });
-        Categories.Add(new CategoryItemViewModel(created));
-        SortCategories();
-        Message = "Категория создана.";
-    });
+        return RunSaveAsync(async () =>
+        {
+            var created = await apiService.Categories.CreateAsync(new CreateCategoryDto { Name = name.Trim() });
+            Categories.Add(new CategoryItemViewModel(created));
+            SortCategories();
+            Message = "Категория создана.";
+        }, "Не удалось изменить категории");
+    }
 
-    public Task<bool> RenameAsync(CategoryItemViewModel category, string name) => RunAsync(async () =>
+    public Task<bool> RenameAsync(CategoryItemViewModel category, string name)
     {
-        await apiService.Categories.UpdateAsync(category.Id, new UpdateCategoryDto { Name = name.Trim() });
-        category.Name = name.Trim();
-        SortCategories();
-        Message = "Категория переименована.";
-    });
+        return RunSaveAsync(async () =>
+        {
+            await apiService.Categories.UpdateAsync(category.Id, new UpdateCategoryDto { Name = name.Trim() });
+            category.Name = name.Trim();
+            SortCategories();
+            Message = "Категория переименована.";
+        }, "Не удалось изменить категории");
+    }
 
-    public Task<bool> DeleteAsync(CategoryItemViewModel category) => RunAsync(async () =>
+    public Task<bool> DeleteAsync(CategoryItemViewModel category)
     {
-        await apiService.Categories.DeleteAsync(category.Id);
-        Categories.Remove(category);
-        Message = "Категория удалена.";
+        return RunSaveAsync(async () =>
+        {
+            await apiService.Categories.DeleteAsync(category.Id);
+            Categories.Remove(category);
+            Message = "Категория удалена.";
+            NotifyStateChanged();
+        }, "Не удалось изменить категории");
+    }
+
+    protected override void OnLoadingStateChanged()
+    {
         NotifyStateChanged();
-    });
-
-    partial void OnIsLoadingChanged(bool value) => NotifyStateChanged();
-
-    private async Task<bool> RunAsync(Func<Task> action)
-    {
-        try
-        {
-            IsSaving = true;
-            ErrorMessage = null;
-            Message = null;
-            await action();
-            return true;
-        }
-        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
-        {
-            ErrorMessage = $"Не удалось изменить категории: {exception.Message}";
-            return false;
-        }
-        finally
-        {
-            IsSaving = false;
-        }
     }
 
     private void SortCategories()
     {
-        var sorted = Categories.OrderBy(item => item.Name).ToArray();
-        Categories.Clear();
-        foreach (var category in sorted)
-            Categories.Add(category);
+        Categories.ReplaceWith(Categories.OrderBy(category => category.Name));
         NotifyStateChanged();
     }
 

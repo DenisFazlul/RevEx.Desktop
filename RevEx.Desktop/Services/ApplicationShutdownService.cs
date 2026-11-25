@@ -1,19 +1,12 @@
-using Avalonia;
-using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Threading;
+using System;
+using System.Threading.Tasks;
 
 namespace RevEx.Desktop.Services;
 
-public sealed class ApplicationShutdownService : IApplicationShutdownService
+internal sealed class ApplicationShutdownService(Func<Task> signOut) : IApplicationShutdownService
 {
-    public void Shutdown()
+    public Task SignOutAsync()
     {
-        Dispatcher.UIThread.Post(
-            () =>
-            {
-                if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-                    desktop.Shutdown();
-            },
-            DispatcherPriority.Background);
+        return signOut();
     }
 }
