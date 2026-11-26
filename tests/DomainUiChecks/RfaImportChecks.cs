@@ -83,7 +83,7 @@ internal static class RfaImportChecks
             using var discovery = new FileConnectorDiscovery(directory);
             var mock = new MockRevExApiService();
             var versions = new RetryVersionRepository(mock.ContentVersions);
-            var api = new RevExApiService(mock.Contents, mock.Categories, mock.Tags, mock.TagGroups,
+            var api = new RevExApiService(mock.Contents, mock.ContentSets, mock.Categories, mock.Tags, mock.TagGroups,
                 mock.ContentStatuses, versions, mock.ContentFiles, mock.ContentHistory,
                 new CompositeVersionImportRepository(mock.Contents, versions, mock.ContentFiles));
             var registry = new ConnectorRegistry();

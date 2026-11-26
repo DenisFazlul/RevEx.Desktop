@@ -25,6 +25,18 @@ public partial class ContentDetailsView : UserControl
         InitializeComponent();
     }
 
+    private async void OnAddToSetClick(object? sender, Avalonia.Interactivity.RoutedEventArgs eventArgs)
+    {
+        if (DataContext is not ContentDetailsViewModel content ||
+            TopLevel.GetTopLevel(this) is not Window { DataContext: RevEx.Desktop.ViewModels.MainViewModel main } owner)
+        {
+            return;
+        }
+
+        var window = new ContentSetsWindow(main.CreateContentSetsDialog(content.Id));
+        await window.ShowDialog(owner);
+    }
+
     private async void OnCopyIdClick(object? sender, Avalonia.Interactivity.RoutedEventArgs eventArgs)
     {
         if (DataContext is not ContentDetailsViewModel viewModel)

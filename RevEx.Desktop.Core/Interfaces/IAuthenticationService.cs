@@ -4,6 +4,8 @@ public interface IAuthenticationService
 {
     IReadOnlySet<string> Roles { get; }
 
+    string? CurrentAuthor { get; }
+
     bool IsInRole(string role);
 
     Task<string> GetAccessTokenAsync(CancellationToken cancellationToken = default);

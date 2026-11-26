@@ -28,6 +28,8 @@ public sealed class OidcAuthenticationService : IAuthenticationService
 
     public IReadOnlySet<string> Roles => _roles;
 
+    public string? CurrentAuthor => AccessTokenAuthor.Read(_accessToken);
+
     public bool IsInRole(string role) => _roles.Contains(role);
 
     public OidcAuthenticationService(

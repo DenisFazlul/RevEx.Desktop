@@ -13,7 +13,7 @@
                    Foreground="{DynamicResource TextSecondaryBrush}" />
         <Grid Grid.Row="3" ColumnDefinitions="*,12,*">
             <Button Content="{Binding CancelButtonText}" Command="{Binding CancelCommand}" />
-            <Button Grid.Column="2" Classes="danger" Content="Удалить"
+            <Button IsDefault="True" Grid.Column="2" Classes="danger" Content="Удалить"
                     IsVisible="{Binding CanDelete}" Command="{Binding DeleteCommand}" />
         </Grid>
     </Grid>

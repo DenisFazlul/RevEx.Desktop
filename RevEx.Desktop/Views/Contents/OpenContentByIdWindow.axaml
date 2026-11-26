@@ -25,7 +25,7 @@
             <common:LoadingIndicator IsVisible="{Binding IsBusy}" />
             <Button Grid.Column="1" Content="Отмена" Classes="secondary"
                     IsEnabled="{Binding !IsBusy}" Command="{Binding CancelCommand}" />
-            <Button Grid.Column="3" Content="Открыть" Classes="primary"
+            <Button IsDefault="True" Grid.Column="3" Content="Открыть" Classes="primary"
                     IsEnabled="{Binding !IsBusy}" Command="{Binding OpenCommand}" />
         </Grid>
     </Grid>

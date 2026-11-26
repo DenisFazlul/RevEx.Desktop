@@ -69,7 +69,7 @@
         </Grid>
         <Grid Grid.Row="4" ColumnDefinitions="*,8,*">
             <Button Content="Отмена" Command="{Binding CancelCommand}" />
-            <Button Grid.Column="2" Classes="primary" Content="Добавить" Command="{Binding AcceptCommand}" />
+            <Button IsDefault="True" Grid.Column="2" Classes="primary" Content="Добавить" Command="{Binding AcceptCommand}" />
         </Grid>
     </Grid>
 </common:DialogWindow>

@@ -17,6 +17,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     private readonly IWorkspaceTabFactory _tabFactory;
     private readonly WorkspaceTabContext _tabContext;
     private readonly IRevExApiService _apiService;
+    private readonly IAuthenticationService _authenticationService;
 
     [ObservableProperty]
     private WorkspaceTabViewModel? _selectedTab;
@@ -33,10 +34,12 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     public MainViewModel(
         IWorkspaceTabFactory tabFactory,
         IMainMenuProvider mainMenuProvider,
-        IRevExApiService apiService)
+        IRevExApiService apiService,
+        IAuthenticationService authenticationService)
     {
         _tabFactory = tabFactory;
         _apiService = apiService;
+        _authenticationService = authenticationService;
         _tabContext = new WorkspaceTabContext(OpenTab, CloseTab);
 
         MainMenu = mainMenuProvider.Create(OpenTab);
@@ -64,6 +67,11 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         }
 
         tab.Dispose();
+    }
+
+    public ContentSetsViewModel CreateContentSetsDialog(int contentId)
+    {
+        return new ContentSetsViewModel(_apiService.ContentSets, contentId, () => _authenticationService.CurrentAuthor);
     }
 
     public OpenContentByIdViewModel CreateOpenContentByIdDialog()

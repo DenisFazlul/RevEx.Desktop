@@ -1,0 +1,18 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sets="using:RevEx.Domain.Contracts.ContentSet"
+             x:Class="RevEx.Desktop.Views.Common.ContentSetRowView"
+             x:DataType="sets:ContentSetDto">
+    <Grid Margin="6,4" RowDefinitions="Auto,Auto" ColumnDefinitions="*,8,Auto">
+        <ToolTip.Tip>
+            <StackPanel Spacing="6" MaxWidth="440">
+                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                <TextBlock Text="{Binding Description}" TextWrapping="Wrap" />
+                <TextBlock Text="{Binding Author, StringFormat='Автор: {0}'}" />
+            </StackPanel>
+        </ToolTip.Tip>
+        <TextBlock Grid.ColumnSpan="3" Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+        <TextBlock Grid.Row="1" Text="{Binding Author}" Classes="caption" TextTrimming="CharacterEllipsis" />
+        <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding Id, StringFormat='#{0}'}" Classes="caption" />
+    </Grid>
+</UserControl>

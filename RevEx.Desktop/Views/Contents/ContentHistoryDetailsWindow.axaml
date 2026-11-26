@@ -27,7 +27,7 @@
             </ScrollViewer>
         </Border>
 
-        <Button Grid.Row="6" HorizontalAlignment="Right" Classes="primary"
+        <Button IsDefault="True" Grid.Row="6" HorizontalAlignment="Right" Classes="primary"
                 Content="Закрыть" Click="OnCloseClick" />
     </Grid>
 </Window>

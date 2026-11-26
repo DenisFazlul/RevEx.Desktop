@@ -38,6 +38,7 @@ public static class ServiceExtensions
         services.AddRevExtApiConnection(appSettings);
         services.AddTransient<IRevExApiService, RevExApiService>();
         services.AddTransient<IContentRepository, ContentRepository>();
+        services.AddTransient<IContentSetRepository, ContentSetRepository>();
         services.AddTransient<ICategoryRepository, CategoryRepository>();
         services.AddTransient<ITagRepository, TagRepository>();
         services.AddTransient<ITagGroupRepository, TagGroupRepository>();

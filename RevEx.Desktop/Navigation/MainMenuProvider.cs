@@ -32,7 +32,8 @@ public sealed class MainMenuProvider : IMainMenuProvider
     {
         var items = new List<WorkspaceTabDescriptor>
         {
-            WorkspaceTabDescriptor.Create<CatalogTabViewModel>("Каталог", "⌕")
+            WorkspaceTabDescriptor.Create<CatalogTabViewModel>("Каталог", "⌕"),
+            WorkspaceTabDescriptor.Create<ContentSetsTabViewModel>("Наборы", "▦")
         };
         if (CanEditContent())
         {

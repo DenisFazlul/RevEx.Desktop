@@ -22,7 +22,7 @@
 
         <Grid Grid.Row="3" ColumnDefinitions="*,Auto,10,Auto">
             <Button Grid.Column="1" Classes="secondary" Content="Отмена" Command="{Binding CancelCommand}" />
-            <Button Grid.Column="3" Classes="primary" Content="Сохранить" Command="{Binding SaveCommand}" />
+            <Button IsDefault="True" Grid.Column="3" Classes="primary" Content="Сохранить" Command="{Binding SaveCommand}" />
         </Grid>
     </Grid>
 </common:DialogWindow>

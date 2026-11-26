@@ -105,7 +105,7 @@
             <Grid ColumnDefinitions="Auto,*,Auto,8,Auto">
                 <Button Classes="secondary" Content="Сбросить" Command="{Binding ResetCommand}" />
                 <Button Grid.Column="2" Classes="secondary" Content="Отмена" Command="{Binding CancelCommand}" />
-                <Button Grid.Column="4" Classes="primary" Content="Применить" Command="{Binding ApplyCommand}" />
+                <Button IsDefault="True" Grid.Column="4" Classes="primary" Content="Применить" Command="{Binding ApplyCommand}" />
             </Grid>
         </Border>
     </Grid>

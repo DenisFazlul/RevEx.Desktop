@@ -1,0 +1,27 @@
+<common:DialogWindow xmlns="https://github.com/avaloniaui"
+                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                     xmlns:common="using:RevEx.Desktop.Views.Common"
+                     xmlns:vm="using:RevEx.Desktop.ViewModels.Contents"
+                     x:Class="RevEx.Desktop.Views.Contents.ContentSetEditorWindow"
+                     x:DataType="vm:ContentSetEditorViewModel"
+                     Title="{Binding Title}" Width="560" Height="440" MinWidth="440" MinHeight="400"
+                     WindowStartupLocation="CenterOwner" Background="{DynamicResource CanvasBrush}">
+    <Grid Margin="16" RowDefinitions="Auto,12,*,Auto,Auto">
+        <TextBlock Text="{Binding Title}" Classes="h2" />
+        <Grid Grid.Row="2" RowDefinitions="Auto,Auto,Auto,*,Auto" IsEnabled="{Binding !IsBusy}">
+            <TextBlock Text="Название *" />
+            <TextBox Grid.Row="1" Text="{Binding Name}" MaxLength="200" Margin="0,4,0,12" AutomationProperties.Name="Название набора" />
+            <TextBlock Grid.Row="2" Text="Описание *" />
+            <TextBox Grid.Row="3" Text="{Binding Description}" MaxLength="10000" AcceptsReturn="True" TextWrapping="Wrap"
+                     VerticalContentAlignment="Top" Margin="0,4,0,8" AutomationProperties.Name="Описание набора" />
+            <TextBlock Grid.Row="4" Text="{Binding Author, StringFormat='Автор: {0}'}" Classes="caption"
+                       IsVisible="{Binding Author, Converter={x:Static ObjectConverters.IsNotNull}}" />
+        </Grid>
+        <TextBlock Grid.Row="3" Text="{Binding Message}" Classes="validation-message" TextWrapping="Wrap" Margin="0,8" />
+        <Grid Grid.Row="4" ColumnDefinitions="*,Auto,8,Auto">
+            <common:LoadingIndicator IsVisible="{Binding IsBusy}" />
+            <Button Grid.Column="1" Content="Отмена" Command="{Binding CancelCommand}" IsEnabled="{Binding !IsBusy}" />
+            <Button IsDefault="True" Grid.Column="3" Content="Сохранить" Classes="primary" Command="{Binding SaveCommand}" IsEnabled="{Binding !IsBusy}" />
+        </Grid>
+    </Grid>
+</common:DialogWindow>

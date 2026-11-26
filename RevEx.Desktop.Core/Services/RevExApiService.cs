@@ -4,6 +4,7 @@ namespace RevEx.Desktop.Core.Services;
 
 public sealed class RevExApiService(
     IContentRepository contents,
+    IContentSetRepository contentSets,
     ICategoryRepository categories,
     ITagRepository tags,
     ITagGroupRepository tagGroups,
@@ -13,6 +14,7 @@ public sealed class RevExApiService(
     IContentHistoryRepository contentHistory,
     IVersionImportRepository rfaImports) : IRevExApiService
 {
+    public IContentSetRepository ContentSets { get; } = contentSets;
     public IContentRepository Contents { get; } = contents;
     public ICategoryRepository Categories { get; } = categories;
     public ITagRepository Tags { get; } = tags;

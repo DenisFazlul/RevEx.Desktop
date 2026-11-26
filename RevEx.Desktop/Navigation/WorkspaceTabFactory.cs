@@ -52,6 +52,10 @@ public sealed class WorkspaceTabFactory : IWorkspaceTabFactory
         _factories = new Dictionary<Type, Func<WorkspaceTabContext, object?, WorkspaceTabViewModel>>
         {
             [typeof(CatalogTabViewModel)] = CreateCatalogTab,
+            [typeof(ContentSetsTabViewModel)] = (context, _) => new ContentSetsTabViewModel(
+                _revExApiService,
+                content => context.OpenTab(new WorkspaceTabRequest(typeof(ContentDetailsViewModel), content.Id, content)),
+                () => _authenticationService.CurrentAuthor),
             [typeof(ClassificationAdminTabViewModel)] = (_, _) => new ClassificationAdminTabViewModel(_revExApiService),
             [typeof(CategoryAdminTabViewModel)] = CreateCategoryAdminTab,
             [typeof(ContentDetailsViewModel)] = CreateContentDetailsTab,

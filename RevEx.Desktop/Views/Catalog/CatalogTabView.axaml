@@ -32,60 +32,7 @@
                      IsVisible="{Binding !IsContentLoading}">
                 <ListBox.ItemTemplate>
                     <DataTemplate x:DataType="contentVm:ContentItemViewModel">
-                        <Border Classes="content-row" DoubleTapped="OnContentDoubleTapped">
-                            <ToolTip.Tip>
-                                <StackPanel Spacing="8" MaxWidth="480">
-                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextWrapping="Wrap" />
-                                    <TextBlock Text="{Binding Description}" TextWrapping="Wrap" />
-                                    <ItemsControl ItemsSource="{Binding AllTags}">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate x:DataType="filter:FilterItemViewModel">
-                                                <TextBlock Text="{Binding Name, StringFormat='#{0}'}" Margin="0,0,8,4" TextWrapping="Wrap" />
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </StackPanel>
-                            </ToolTip.Tip>
-                            <Grid ColumnDefinitions="64,12,*">
-                                <Border Width="64" Height="56" CornerRadius="8" ClipToBounds="True"
-                                        Background="{DynamicResource SurfaceMutedBrush}">
-                                    <Grid>
-                                        <common:ContentImagePlaceholder IsVisible="{Binding !HasPreview}" />
-                                        <Image Source="{Binding PreviewImage}" Stretch="UniformToFill"
-                                               IsVisible="{Binding HasPreview}" />
-                                    </Grid>
-                                </Border>
-                                <StackPanel Grid.Column="2" Spacing="4" VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="15" />
-                                    <WrapPanel Orientation="Horizontal">
-                                        <ItemsControl ItemsSource="{Binding VisibleTags}">
-                                            <ItemsControl.ItemsPanel>
-                                                <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
-                                            </ItemsControl.ItemsPanel>
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate x:DataType="filter:FilterItemViewModel">
-                                                    <Border Classes="value-box" Padding="8,0" Margin="0,0,6,0">
-                                                        <StackPanel Orientation="Horizontal" Spacing="6">
-                                                            <Ellipse Width="10" Height="10" Fill="{Binding ColorBrush}" />
-                                                            <TextBlock Text="{Binding Name, StringFormat='#{0}'}" Classes="caption"
-                                                                   Foreground="{DynamicResource AccentBrush}" />
-                                                        </StackPanel>
-                                                    </Border>
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
-                                        <Border Classes="value-box" Padding="8,0"
-                                                IsVisible="{Binding HasAdditionalTags}">
-                                            <TextBlock Text="{Binding AdditionalTagsText}" Classes="caption"
-                                                       Foreground="{DynamicResource AccentBrush}" />
-                                        </Border>
-                                    </WrapPanel>
-                                </StackPanel>
-                            </Grid>
-                        </Border>
+                        <common:ContentRowView DoubleTapped="OnContentDoubleTapped" />
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>

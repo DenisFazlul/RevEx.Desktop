@@ -71,9 +71,9 @@
                     IsVisible="{Binding IsReviewStep}" IsEnabled="{Binding !IsBusy}" />
             <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="12">
                 <Button Content="Отмена" Command="{Binding CancelCommand}" IsEnabled="{Binding !IsBusy}" />
-                <Button Classes="primary" Content="Далее" Command="{Binding ReadFilesCommand}"
+                <Button IsDefault="{Binding IsSelectionStep}" Classes="primary" Content="Далее" Command="{Binding ReadFilesCommand}"
                         IsVisible="{Binding IsSelectionStep}" IsEnabled="{Binding CanReadFiles}" />
-                <Button Classes="primary" Content="Добавить версию" Command="{Binding SaveAndCloseCommand}"
+                <Button IsDefault="{Binding IsReviewStep}" Classes="primary" Content="Добавить версию" Command="{Binding SaveAndCloseCommand}"
                         IsVisible="{Binding IsReviewStep}" IsEnabled="{Binding CanSave}" />
             </StackPanel>
         </Grid>

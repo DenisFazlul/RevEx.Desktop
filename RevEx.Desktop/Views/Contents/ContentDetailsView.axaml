@@ -16,19 +16,37 @@
             <TabItem Header="Основное">
                 <ScrollViewer HorizontalScrollBarVisibility="Disabled">
                     <Grid Margin="0,16,0,0" ColumnDefinitions="2*,12,3*" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
-                        <StackPanel Grid.ColumnSpan="3" Orientation="Horizontal" Spacing="8">
-                            <Button Content="Скопировать ID" Click="OnCopyIdClick"
-                                    ToolTip.Tip="Скопировать ID для открытия через меню «Открыть по ID»" />
-                            <TextBlock x:Name="CopyIdStatus" VerticalAlignment="Center" />
-                            <ToggleButton Classes="subscription"
-                                          IsChecked="{Binding IsSubscribed, Mode=OneWay}"
-                                          Command="{Binding ToggleSubscriptionCommand}"
-                                          IsEnabled="{Binding !IsChangingSubscription}"
-                                          ToolTip.Tip="{Binding SubscriptionTip}">
-                                <TextBlock Text="{Binding SubscriptionTip}" />
-                            </ToggleButton>
-                            <TextBlock Text="{Binding SubscriptionMessage}" VerticalAlignment="Center" />
-                        </StackPanel>
+                        <Grid Grid.ColumnSpan="3" ColumnDefinitions="*,Auto,8,Auto" RowDefinitions="Auto,Auto">
+                            <TextBlock x:Name="ContentTitle" Classes="h2" Text="{Binding Name}" TextWrapping="Wrap" VerticalAlignment="Center" />
+                                    <Button Grid.Column="1" Classes="icon" Click="OnEditNameClick"
+                                            IsVisible="{Binding HasEditPermission}"
+                                             ToolTip.Tip="Изменить название">
+                                        <Button.IsEnabled>
+                                            <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                                <Binding Path="CanEdit" />
+                                                <Binding Path="!IsSavingContent" />
+                                            </MultiBinding>
+                                        </Button.IsEnabled>
+                                        <PathIcon Data="M3,11 L3,14 L6,14 L14,6 L11,3 Z M10,4 L13,7 M3,14 L7,13" />
+                                    </Button>
+                            <StackPanel Grid.Row="1" Grid.ColumnSpan="4" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <TextBlock x:Name="CopyIdStatus" VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding SubscriptionMessage}" VerticalAlignment="Center" TextWrapping="Wrap" />
+                            </StackPanel>
+                            <Button Grid.Column="3" Classes="icon" ToolTip.Tip="Действия с контентом"
+                                    AutomationProperties.Name="Действия с контентом">
+                                <PathIcon Width="18" Height="18"
+                                          Data="M2,3 L18,3 L18,5 L2,5 Z M2,9 L18,9 L18,11 L2,11 Z M2,15 L18,15 L18,17 L2,17 Z" />
+                                <Button.Flyout>
+                                    <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                        <MenuItem Header="Добавить в набор" Click="OnAddToSetClick" />
+                                        <MenuItem Header="Скопировать ID" Click="OnCopyIdClick" />
+                                        <MenuItem Header="{Binding SubscriptionTip}" Command="{Binding ToggleSubscriptionCommand}"
+                                                  IsEnabled="{Binding !IsChangingSubscription}" />
+                                    </MenuFlyout>
+                                </Button.Flyout>
+                            </Button>
+                        </Grid>
                         <Border Grid.Row="1" Classes="card section-card" Margin="0,12,0,0">
                             <StackPanel Spacing="8">
                                 <Grid ColumnDefinitions="*,Auto">
@@ -60,7 +78,7 @@
                         <Border Grid.Row="1" Grid.Column="2" Classes="card section-card" Margin="0,12,0,0">
                             <StackPanel Spacing="8">
                                 <TextBlock Classes="h2" Text="Основная информация" />
-                                <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto,Auto">
+                                <Grid x:Name="ContentInformationGrid" ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto">
                                     <Grid.Styles>
                                         <Style Selector="TextBlock">
                                             <Setter Property="Margin" Value="8,4" />
@@ -69,23 +87,10 @@
                                         </Style>
                                     </Grid.Styles>
                                     <Border Grid.Row="0" Grid.ColumnSpan="3" Background="{DynamicResource SurfaceMutedBrush}" />
-                                    <Border Grid.Row="2" Grid.ColumnSpan="3" Background="{DynamicResource SurfaceMutedBrush}" />
-                                    <TextBlock Grid.Row="0" Classes="caption" Text="Название" />
-                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Name}" />
-                                    <Button Grid.Row="0" Grid.Column="2" Classes="icon" Click="OnEditNameClick"
-                                            IsVisible="{Binding HasEditPermission}"
-                                             ToolTip.Tip="Изменить название">
-                                        <Button.IsEnabled>
-                                            <MultiBinding Converter="{x:Static BoolConverters.And}">
-                                                <Binding Path="CanEdit" />
-                                                <Binding Path="!IsSavingContent" />
-                                            </MultiBinding>
-                                        </Button.IsEnabled>
-                                        <PathIcon Data="M3,11 L3,14 L6,14 L14,6 L11,3 Z M10,4 L13,7 M3,14 L7,13" />
-                                    </Button>
-                                    <TextBlock Grid.Row="1" Classes="caption" Text="Описание" />
-                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Description}" />
-                                    <Button Grid.Row="1" Grid.Column="2" Classes="icon" Click="OnEditDescriptionClick"
+                                    <Border Grid.Row="1" Grid.ColumnSpan="3" Background="{DynamicResource SurfaceMutedBrush}" />
+                                    <TextBlock Grid.Row="0" Classes="caption" Text="Описание" />
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Description}" />
+                                    <Button Grid.Row="0" Grid.Column="2" Classes="icon" Click="OnEditDescriptionClick"
                                             IsVisible="{Binding HasEditPermission}"
                                              ToolTip.Tip="Изменить описание">
                                         <Button.IsEnabled>
@@ -96,9 +101,9 @@
                                         </Button.IsEnabled>
                                         <PathIcon Data="M3,11 L3,14 L6,14 L14,6 L11,3 Z M10,4 L13,7 M3,14 L7,13" />
                                     </Button>
-                                    <TextBlock Grid.Row="2" Classes="caption" Text="Категория" />
-                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding CategoryName}" />
-                                    <Button Grid.Row="2" Grid.Column="2" Classes="icon" Click="OnEditCategoryClick"
+                                    <TextBlock Grid.Row="1" Classes="caption" Text="Категория" />
+                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding CategoryName}" />
+                                    <Button Grid.Row="1" Grid.Column="2" Classes="icon" Click="OnEditCategoryClick"
                                             IsVisible="{Binding HasEditPermission}"
                                              ToolTip.Tip="Изменить категорию">
                                         <Button.IsEnabled>

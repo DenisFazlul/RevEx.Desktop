@@ -22,7 +22,7 @@
             <Button Classes="danger" Content="Удалить" IsVisible="{Binding IsEditing}"
                     Command="{Binding DeleteCommand}" />
             <Button Grid.Column="2" Content="Отмена" Command="{Binding CancelCommand}" />
-            <Button Grid.Column="4" Classes="primary" Content="Сохранить" Command="{Binding SaveCommand}" />
+            <Button IsDefault="True" Grid.Column="4" Classes="primary" Content="Сохранить" Command="{Binding SaveCommand}" />
         </Grid>
     </Grid>
 </common:DialogWindow>

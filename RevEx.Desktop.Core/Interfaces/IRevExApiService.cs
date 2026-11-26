@@ -3,6 +3,7 @@ namespace RevEx.Desktop.Core.Interfaces;
 public interface IRevExApiService
 {
     IContentRepository Contents { get; }
+    IContentSetRepository ContentSets { get; }
     ICategoryRepository Categories { get; }
     ITagRepository Tags { get; }
     ITagGroupRepository TagGroups { get; }

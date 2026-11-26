@@ -68,7 +68,7 @@
         </ScrollViewer>
         <StackPanel Grid.Row="4" Orientation="Horizontal" Spacing="12" HorizontalAlignment="Right">
             <Button Content="Отмена" Command="{Binding CancelCommand}" IsEnabled="{Binding !IsBusy}" />
-            <Button Classes="primary" Content="Сохранить новую версию" Command="{Binding SaveAndCloseCommand}"
+            <Button IsDefault="True" Classes="primary" Content="Сохранить новую версию" Command="{Binding SaveAndCloseCommand}"
                     IsEnabled="{Binding CanSave}" />
         </StackPanel>
     </Grid>

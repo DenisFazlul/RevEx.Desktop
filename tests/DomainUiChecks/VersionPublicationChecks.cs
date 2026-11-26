@@ -27,7 +27,7 @@ internal static class VersionPublicationChecks
     {
         var mock = new MockRevExApiService();
         var repository = new StatusRepository(mock.ContentVersions);
-        var api = new RevExApiService(mock.Contents, mock.Categories, mock.Tags, mock.TagGroups,
+        var api = new RevExApiService(mock.Contents, mock.ContentSets, mock.Categories, mock.Tags, mock.TagGroups,
             mock.ContentStatuses, repository, mock.ContentFiles, mock.ContentHistory,
             new CompositeVersionImportRepository(mock.Contents, repository, mock.ContentFiles));
         var category = (await api.Categories.GetAllAsync()).First();

@@ -23,6 +23,7 @@ if (args.Contains("--open-by-id-only", StringComparer.Ordinal))
 }
 
 OpenContentByIdChecks.RunAsync().GetAwaiter().GetResult();
+ContentSetChecks.RunAsync().GetAwaiter().GetResult();
 if (args.Contains("--unified-only", StringComparer.Ordinal))
 {
     UnifiedVersionImportChecks.Run();
@@ -36,6 +37,7 @@ RfaImportChecks.Run();
 VersionPublicationChecks.Run();
 OtherFileMetadataChecks.Run();
 DialogChecks.Run();
+FormKeyboardChecks.Run();
 RevitFamilyMetadataChecks.Run();
 var now=DateTimeOffset.Parse("2026-10-29T10:00:00+03:00");
 var history=new ContentHistoryEventDto(1,1,now,"Changed","author");
